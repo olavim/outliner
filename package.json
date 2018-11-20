@@ -9,7 +9,8 @@
 		"build": "NODE_ENV=production yarn clean && yarn build:client && yarn build:server",
 		"build:client": "webpack --mode production --config ./build/webpack.prod.babel.js",
 		"build:server": "babel --source-maps -d dist src --ignore src/client",
-		"dev": "better-npm-run dev"
+		"dev": "better-npm-run dev",
+		"heroku-postbuild": "yarn build"
 	},
 	"betterScripts": {
 		"dev": {
