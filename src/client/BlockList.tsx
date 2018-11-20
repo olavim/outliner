@@ -121,15 +121,24 @@ class BlockList extends React.Component<Props, State> {
 		this.setState({focusedBlock: id});
 	}
 
+	public handleMoveBlock = (dragIndex: any, hoverIndex: any) => {
+		const blocks = this.props.blocks.slice();
+		const dragBlock = blocks[dragIndex];
+		blocks.splice(dragIndex, 1);
+		blocks.splice(hoverIndex, 0, dragBlock);
+		this.props.onChange(blocks);
+	}
+
 	public render() {
 		const {classes} = this.props;
 		return (
 			<div className={classes.wrapper}>
 				<div className={classes.root}>
-					{this.props.blocks.map(block => {
+					{this.props.blocks.map((block, index) => {
 						return (
 							<Block
 								key={block.id}
+								index={index}
 								block={block}
 								onChange={this.handleChangeBlock}
 								presetColors={this.getPresetColors()}
@@ -138,6 +147,7 @@ class BlockList extends React.Component<Props, State> {
 								onDelete={this.handleDelete}
 								showActions={this.state.focusedBlock === block.id}
 								onClick={this.handleFocusBlock(block.id)}
+								moveBlock={this.handleMoveBlock}
 							/>
 						);
 					})}

@@ -9,6 +9,7 @@
 # production
 /build
 /dist
+/.awcache
 
 # misc
 .DS_Store

@@ -757,6 +757,12 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-dnd@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.npmjs.org/@types/react-dnd/-/react-dnd-3.0.2.tgz#939e5a8ca5b83f847c3f64dabbe2f49a9fefb192"
+  dependencies:
+    react-dnd "*"
+
 "@types/react-dom@^16.0.9":
   version "16.0.9"
   resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-16.0.9.tgz#73ceb7abe6703822eab6600e65c5c52efd07fb91"
@@ -7315,7 +7321,7 @@ react-dnd-html5-backend@^6.0.0:
     dnd-core "^6.0.0"
     lodash "^4.17.11"
 
-react-dnd@^6.0.0:
+react-dnd@*, react-dnd@^6.0.0:
   version "6.0.0"
   resolved "https://registry.npmjs.org/react-dnd/-/react-dnd-6.0.0.tgz#0780eafaa47293bf12dc8f79cf1e48ede8ba72f1"
   dependencies:

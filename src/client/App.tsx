@@ -55,35 +55,7 @@ interface State {
 
 class App extends React.Component<WithStyles<typeof styles>, State> {
 	public state: State = {
-		blocks: [
-			{
-				id: 1,
-				title: 'Sequence',
-				body: '',
-				showTitle: true,
-				showBody: false,
-				color: '#ffcc88',
-				indent: 0
-			},
-			{
-				id: 2,
-				title: 'Kohtaus 1',
-				body: 'Lauri ajaa tuhatta ja sataa',
-				showTitle: true,
-				showBody: true,
-				color: '#00ddff',
-				indent: 0
-			},
-			{
-				id: 3,
-				title: '',
-				body: 'Pelkkää tekstiä',
-				showTitle: false,
-				showBody: true,
-				color: '#00ddff',
-				indent: 1
-			}
-		]
+		blocks: []
 	};
 
 	public handleBlocksChange = (blocks: BlockData[]) => {
