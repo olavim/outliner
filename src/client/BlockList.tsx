@@ -1,10 +1,151 @@
 import * as React from 'react';
+import {createStyles, WithStyles, withStyles} from '@material-ui/core';
 import TextareaAutosize from 'react-autosize-textarea';
 import {CSSTransition} from 'react-transition-group';
 import IndentDec from '@material-ui/icons/KeyboardArrowLeft';
 import IndentInc from '@material-ui/icons/KeyboardArrowRight';
 import {SketchPicker, ColorResult} from 'react-color';
-import './BlockList.css';
+
+const styles = createStyles({
+	wrapper: {
+		minHeight: 'calc(100% - 4rem)',
+		borderLeft: '1px solid rgba(0,0,0,0.1)',
+		borderRight: '1px solid rgba(0,0,0,0.1)'
+	},
+	root: {
+		position: 'relative',
+		width: '60rem',
+		padding: '1rem',
+		display: 'table',
+		boxSizing: 'border-box'
+	},
+	listActions: {
+		textAlign: 'right'
+	},
+	color: {
+		position: 'absolute',
+		bottom: '-0.6rem',
+		transform: 'translateY(100%)',
+		zIndex: 200
+	},
+	block: {
+		position: 'relative',
+		marginBottom: '0.6rem',
+		display: 'flex',
+		flexDirection: 'column',
+		'& button': {
+			display: 'flex',
+			alignItems: 'center',
+			border: 'none',
+			backgroundColor: 'transparent',
+			fontSize: '1.1rem',
+			fontWeight: 500
+		},
+		'& button:not(:disabled)': {
+			cursor: 'pointer'
+		},
+		'& button:not(:disabled):hover': {
+			opacity: 0.6
+		}
+	},
+	content: {
+		position: 'relative',
+		flex: 1,
+		display: 'flex',
+		flexDirection: 'column',
+		border: '1px solid #0000007a',
+		borderRadius: '0.4rem',
+		overflow: 'hidden'
+	},
+	title: {
+		display: 'flex',
+		textAlign: 'left',
+		padding: 0,
+		'& textarea': {
+			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
+			fontSize: '11px',
+			resize: 'none',
+			flex: 1,
+			border: 'none',
+			backgroundColor: 'transparent',
+			padding: '0.6rem',
+			boxSizing: 'border-box',
+			fontWeight: 500
+		}
+	},
+	text: {
+		display: 'flex',
+		textAlign: 'left',
+		padding: 0,
+		'& textarea': {
+			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
+			fontSize: '11px',
+			resize: 'none',
+			flex: 1,
+			border: 'none',
+			backgroundColor: 'transparent',
+			padding: '0.6rem',
+			boxSizing: 'border-box'
+		}
+	},
+	actionsLeft: {
+		position: 'absolute',
+		top: 0,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		width: '3rem',
+		height: '100%',
+		left: '-4.8rem'
+	},
+	actionsRight: {
+		position: 'absolute',
+		top: 0,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		width: '3rem',
+		height: '100%',
+		right: '-4.8rem'
+	},
+	blockActions: {
+		display: 'flex',
+		overflow: 'hidden',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		backgroundColor: '#ffffff',
+		padding: '0 0.6rem',
+		height: 0,
+		zIndex: 100,
+		boxSizing: 'border-box',
+		transition: 'all 0.3s'
+	},
+	blockActionsEnter: {
+		padding: '0 0.6rem',
+		height: 0
+	},
+	blockActionsActive: {
+		padding: '0.6rem 0.6rem',
+		height: '3rem'
+	},
+	blockActionsEnterDone: {
+		padding: '0.6rem 0.6rem',
+		height: '3rem'
+	},
+	blockActionsExit: {
+		padding: '0.6rem 0.6rem',
+		height: '3rem'
+	},
+	blockActionsExitActive: {
+		padding: '0 0.6rem',
+		height: 0
+	},
+	'@media only print': {
+		listActions: {
+			display: 'none'
+		}
+	}
+})
 
 export interface BlockData {
 	id: any;
@@ -16,7 +157,7 @@ export interface BlockData {
 	indent: number;
 }
 
-interface Props {
+interface Props extends WithStyles<typeof styles> {
 	blocks: BlockData[];
 	onChange: (blocks: BlockData[]) => any;
 }
@@ -195,25 +336,26 @@ class BlockList extends React.Component<Props, State> {
 	}
 
 	public render() {
+		const {classes} = this.props;
 		return (
-			<div className="BlockList-wrapper">
-				<div className="BlockList">
+			<div className={classes.wrapper}>
+				<div className={classes.root}>
 					{this.props.blocks.map(block => {
 						return (
 							<div
 								key={block.id}
-								className="Block"
+								className={classes.block}
 								style={{paddingLeft: `${block.indent * 4}rem`}}
 							>
-								<div className="Block-actions-left">
+								<div className={classes.actionsLeft}>
 									<button onClick={this.handleDecreaseIndent(block.id)}>
 										<IndentDec/>
 									</button>
 								</div>
-								<div className="Block-content">
+								<div className={classes.content}>
 									{block.showTitle && (
 										<div
-											className="Block-title"
+											className={classes.title}
 											style={{backgroundColor: block.color}}
 										>
 											<TextareaAutosize
@@ -230,7 +372,7 @@ class BlockList extends React.Component<Props, State> {
 									)}
 									{block.showBody && (
 										<div
-											className="Block-text"
+											className={classes.text}
 											style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
 										>
 											<TextareaAutosize
@@ -248,10 +390,16 @@ class BlockList extends React.Component<Props, State> {
 									<CSSTransition
 										in={this.state.showActions === block.id}
 										key={block.id}
-										classNames="Block-actions"
+										classNames={{
+											enter: classes.blockActionsEnter,
+											enterActive: classes.blockActionsActive,
+											enterDone: classes.blockActionsEnterDone,
+											exit: classes.blockActionsExit,
+											exitActive: classes.blockActionsExitActive
+										}}
 										timeout={0}
 									>
-										<div className="Block-actions" onClick={this.handleClickBlock}>
+										<div className={classes.blockActions} onClick={this.handleClickBlock}>
 											<button onClick={this.handleAddBefore(block.id)}>{'Add Before'}</button>
 											<button onClick={this.handleOpenColorPicker(block.id)}>{'Color'}</button>
 											<button
@@ -271,13 +419,13 @@ class BlockList extends React.Component<Props, State> {
 										</div>
 									</CSSTransition>
 								</div>
-								<div className="Block-actions-right">
+								<div className={classes.actionsRight}>
 									<button onClick={this.handleIncreaseIndent(block.id)}>
 										<IndentInc/>
 									</button>
 								</div>
 								<div
-									className="BlockList-color"
+									className={classes.color}
 									style={{display: this.state.colorPickerBlock === block.id ? 'block' : 'none'}}
 									onClick={this.handleClickColorPicker}
 								>
@@ -291,8 +439,8 @@ class BlockList extends React.Component<Props, State> {
 							</div>
 						);
 					})}
-					<div className="BlockList-actions">
-						<button className="outline BlockList-add" onClick={this.handleAddEnd}>
+					<div className={classes.listActions}>
+						<button className="outline" onClick={this.handleAddEnd}>
 							Add Block
 						</button>
 					</div>
@@ -302,4 +450,4 @@ class BlockList extends React.Component<Props, State> {
 	}
 }
 
-export default BlockList;
+export default withStyles(styles)(BlockList);

@@ -2,29 +2,69 @@
 	"name": "outliner",
 	"version": "0.1.0",
 	"private": true,
+	"main": "dist/index.js",
+	"scripts": {
+		"start": "nodemon --watch dist dist/index.js",
+		"clean": "rimraf dist",
+		"build": "NODE_ENV=production yarn clean && yarn build:client && yarn build:server",
+		"build:client": "webpack --mode production --config ./build/webpack.prod.babel.js",
+		"build:server": "babel --source-maps -d dist src --ignore src/client",
+		"dev": "better-npm-run dev"
+	},
+	"betterScripts": {
+		"dev": {
+			"command": "webpack --mode development --config ./build/webpack.vendor.babel.js && webpack-dev-server --mode development --config ./build/webpack.dev.babel.js",
+			"env": {
+				"NODE_ENV": "development",
+				"HOT": "true",
+				"DEBUG": "admin-ui:*"
+			}
+		}
+	},
 	"dependencies": {
 		"@material-ui/core": "^3.5.1",
 		"@material-ui/icons": "^3.0.1",
+		"classnames": "^2.2.6",
 		"react": "^16.6.3",
 		"react-autosize-textarea": "^5.0.0",
 		"react-color": "^2.14.1",
 		"react-dom": "^16.6.3",
+		"react-hot-loader": "^3.0.0",
 		"react-scripts-ts": "3.1.0",
-		"react-transition-group": "^2.5.0"
-	},
-	"scripts": {
-		"start": "react-scripts-ts start",
-		"build": "react-scripts-ts build",
-		"test": "react-scripts-ts test --env=jsdom",
-		"eject": "react-scripts-ts eject"
+		"react-transition-group": "^2.5.0",
+		"shortid": "^2.2.14"
 	},
 	"devDependencies": {
+		"@babel/cli": "^7.0.0",
+		"@babel/core": "^7.0.0",
+		"@babel/plugin-proposal-class-properties": "^7.1.0",
+		"@babel/plugin-proposal-export-default-from": "^7.0.0",
+		"@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+		"@babel/plugin-syntax-dynamic-import": "^7.0.0",
+		"@babel/plugin-transform-react-jsx-source": "^7.0.0",
+		"@babel/polyfill": "^7.0.0",
+		"@babel/preset-env": "^7.0.0",
+		"@babel/preset-react": "^7.0.0",
+		"@babel/preset-stage-1": "^7.0.0",
+		"@babel/register": "^7.0.0",
+		"@types/classnames": "^2.2.6",
 		"@types/jest": "^23.3.9",
 		"@types/node": "^10.12.9",
 		"@types/react": "^16.7.6",
 		"@types/react-color": "^2.13.6",
 		"@types/react-dom": "^16.0.9",
 		"@types/react-transition-group": "^2.0.14",
-		"typescript": "^3.1.6"
+		"add-asset-html-webpack-plugin": "^2.0.0",
+		"awesome-typescript-loader": "^5.0.0-1",
+		"babel-loader": "8.0.0-beta.2",
+		"better-npm-run": "0.0.9",
+		"fork-ts-checker-webpack-plugin": "^0.4.0",
+		"html-webpack-plugin": "^3.0.0",
+		"typescript": "^3.1.6",
+		"webpack": "^4.0.0",
+		"webpack-bundle-analyzer": "^2.11.1",
+		"webpack-cli": "^3.0.0",
+		"webpack-dev-server": "^3.0.0",
+		"webpack-merge": "^4.1.1"
 	}
 }
