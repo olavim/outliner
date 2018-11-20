@@ -1,5 +1,5 @@
-const path = require('path');
-const express = require('express');
+import path from 'path';
+import express from 'express';
 
 export default () => {
 	const app = express();
@@ -10,7 +10,7 @@ export default () => {
 		res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
 		res.header('Pragma', 'no-cache');
 		res.header('Expires', '0');
-		res.sendFile(path.resolve(distFolder, 'index.html'));
+		res.sendFile(path.resolve(distFolder, 'client/index.html'));
 	});
 
 	return app;
