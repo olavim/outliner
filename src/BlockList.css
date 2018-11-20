@@ -1,0 +1,141 @@
+.BlockList-wrapper {
+	min-height: 100%;
+	border-left: 1px solid rgba(0,0,0,0.1);
+	border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.BlockList {
+	position: relative;
+	width: 60rem;
+	padding: 1rem;
+	display: table;
+	box-sizing: border-box;
+}
+
+.BlockList-actions {
+	text-align: right;
+}
+
+.BlockList-color {
+	position: absolute;
+	bottom: -0.6rem;
+	transform: translateY(100%);
+	z-index: 200;
+}
+
+.Block {
+	position: relative;
+	margin-bottom: 0.6rem;
+	display: flex;
+	flex-direction: column;
+}
+
+.Block button {
+	display: flex;
+	align-items: center;
+	border: none;
+	background-color: transparent;
+	font-size: 1.1rem;
+	font-weight: 500;
+}
+
+.Block button:not(:disabled) {
+	cursor: pointer;
+}
+
+.Block button:not(:disabled):hover {
+	opacity: 0.6;
+}
+
+.Block-content {
+	position: relative;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid #0000007a;
+	border-radius: 0.4rem;
+	overflow: hidden;
+}
+
+.Block-title, .Block-text {
+	display: flex;
+	text-align: left;
+	padding: 0;
+}
+
+.Block-title textarea, .Block-text textarea {
+	font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+	font-size: 11px;
+	resize: none;
+	flex: 1;
+	border: none;
+	background-color: transparent;
+	padding: 0.6rem;
+	box-sizing: border-box;
+}
+
+.Block-title textarea {
+	font-weight: 500;
+}
+
+.Block-actions-left, .Block-actions-right {
+	position: absolute;
+	top: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 3rem;
+	height: 100%;
+}
+
+.Block-actions-left {
+	left: -4.8rem;
+}
+
+.Block-actions-right {
+	right: -4.8rem;
+}
+
+.Block-actions {
+	display: flex;
+	overflow: hidden;
+	justify-content: space-between;
+	align-items: center;
+	background-color: #ffffff;
+	padding: 0 0.6rem;
+	height: 0;
+	z-index: 100;
+	box-sizing: border-box;
+	transition: all 0.3s;
+}
+
+.Block-actions-enter {
+	padding: 0 0.6rem;
+	height: 0;
+}
+
+.Block-actions-active {
+	padding: 0.6rem 0.6rem;
+	height: 3rem;
+}
+
+.Block-actions-enter-done {
+	padding: 0.6rem 0.6rem;
+	height: 3rem;
+}
+
+.Block-actions-exit {
+	padding: 0.6rem 0.6rem;
+	height: 3rem;
+}
+
+.Block-actions-exit-active {
+	padding: 0 0.6rem;
+	height: 0;
+}
+
+@media only print {
+	.Block-actions {
+		display: none;
+	}
+}
