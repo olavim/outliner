@@ -103,6 +103,12 @@ class BlockList extends React.Component<Props, State> {
 		const index = blocks.findIndex(b => b.id === id);
 		if (index !== -1) {
 			blocks.splice(index, 1);
+			setTimeout(() => {
+				if (blocks.length > 0) {
+					const newIndex = index <= blocks.length - 1 ? index : blocks.length - 1;
+					this.setState({focusedBlock: blocks[newIndex].id});
+				}
+			}, 50);
 			this.props.onChange(blocks);
 		}
 	};

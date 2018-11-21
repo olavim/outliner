@@ -17,7 +17,10 @@ const styles = createStyles({
 		padding: '0.6rem 2rem',
 		justifyContent: 'flex-start',
 		alignItems: 'center',
-		borderBottom: '1px solid rgba(0,0,0,0.1)'
+		borderBottom: '1px solid rgba(0,0,0,0.1)',
+		'@media only print': {
+			display: 'none'
+		}
 	}	,
 	content: {
 		display: 'flex',

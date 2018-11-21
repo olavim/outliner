@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {findDOMNode} from 'react-dom';
+import cls from 'classnames';
 import {WithStyles, createStyles, withStyles} from '@material-ui/core';
 import TextareaAutosize from 'react-autosize-textarea';
 import {CSSTransition} from 'react-transition-group';
@@ -25,14 +26,12 @@ const styles = createStyles({
 		transform: 'translateY(100%)',
 		zIndex: 200
 	},
+	actionsVisible: {},
 	block: {
 		position: 'relative',
 		marginBottom: '0.6rem',
 		display: 'flex',
 		flexDirection: 'column',
-		'&:first-child': {
-			marginTop: '2rem'
-		},
 		'& button': {
 			display: 'flex',
 			alignItems: 'center',
@@ -121,6 +120,9 @@ const styles = createStyles({
 		cursor: 'grab',
 		'&:active': {
 			cursor: 'move'
+		},
+		'@media only print': {
+			display: 'none'
 		}
 	},
 	blockHandleIcon: {
@@ -140,7 +142,10 @@ const styles = createStyles({
 		zIndex: 100,
 		boxSizing: 'border-box',
 		transition: 'all 0.3s',
-		marginRight: '2rem'
+		marginRight: '2rem',
+		'@media only print': {
+			display: 'none'
+		}
 	},
 	blockActionsEnter: {
 		padding: '0 0.6rem',
@@ -178,7 +183,14 @@ const styles = createStyles({
 		alignItems: 'center',
 		borderRadius: '0.4rem 0.4rem 0 0',
 		fontWeight: 500,
-		fontSize: '1.5rem'
+		fontSize: '1.5rem',
+		'$block:first-child &': {
+			top: 0,
+			borderRadius: '0 0 0.4rem 0.4rem'
+		},
+		'@media only print': {
+			display: 'none'
+		}
 	},
 	actionBottom: {
 		cursor: 'pointer',
@@ -196,7 +208,14 @@ const styles = createStyles({
 		alignItems: 'center',
 		borderRadius: '0 0 0.4rem 0.4rem',
 		fontWeight: 500,
-		fontSize: '1.5rem'
+		fontSize: '1.5rem',
+		'$block:nth-last-child(2) &': {
+			bottom: 0,
+			borderRadius: '0.4rem 0.4rem 0 0'
+		},
+		'@media only print': {
+			display: 'none'
+		}
 	}
 });
 
@@ -373,6 +392,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 			presetColors,
 			classes,
 			onClick,
+			showActions,
 			connectDragSource,
 			connectDropTarget,
 			connectDragPreview,
@@ -389,8 +409,11 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 		let elem = (
 			<div
 				key={block.id}
-				className={classes.block}
-				style={{paddingLeft: `${block.indent * 4}rem`, opacity: isDragging ? 0 : 1}}
+				className={cls(classes.block, {[classes.actionsVisible]: showActions})}
+				style={{
+					paddingLeft: `${block.indent * 4}rem`,
+					opacity: isDragging ? 0 : 1
+				}}
 				onClick={onClick}
 			>
 				<div className={classes.actionsLeft}>
@@ -398,7 +421,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 						<IndentDecIcon/>
 					</button>
 				</div>
-				{this.props.showActions && (
+				{showActions && (
 					<div className={classes.actionTop} onClick={this.handleAddBefore}>
 						+
 					</div>
@@ -437,7 +460,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 						</div>
 					)}
 					<CSSTransition
-						in={this.props.showActions}
+						in={showActions}
 						key={block.id}
 						classNames={{
 							enter: classes.blockActionsEnter,
@@ -467,7 +490,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 				</div>
 				<div
 					className={classes.color}
-					style={{display: this.state.showColorPicker && this.props.showActions ? 'block' : 'none'}}
+					style={{display: this.state.showColorPicker && showActions ? 'block' : 'none'}}
 				>
 					<SketchPicker
 						disableAlpha
@@ -476,7 +499,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 						presetColors={presetColors}
 					/>
 				</div>
-				{this.props.showActions && (
+				{showActions && (
 					<div className={classes.actionBottom} onClick={this.handleAddAfter}>
 						+
 					</div>
