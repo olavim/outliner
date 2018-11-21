@@ -201,7 +201,7 @@ const styles = createStyles({
 		fontWeight: 500,
 		fontSize: '1.5rem',
 		'$block:first-child &': {
-			top: 0,
+			top: '0.6rem',
 			borderRadius: '0 0 0.4rem 0.4rem'
 		},
 		'.print &': {
@@ -229,7 +229,7 @@ const styles = createStyles({
 		fontWeight: 500,
 		fontSize: '1.5rem',
 		'$block:nth-last-child(2) &': {
-			bottom: 0,
+			bottom: '0.6rem',
 			borderRadius: '0.4rem 0.4rem 0 0'
 		},
 		'.print &': {
@@ -418,7 +418,8 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 			connectDragSource,
 			connectDropTarget,
 			connectDragPreview,
-			isDragging
+			isDragging,
+			index
 		} = this.props;
 
 		const actions = [
@@ -427,6 +428,8 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 			{label: block.showBody ? 'Remove Body' : 'Add Body', fn: this.handleToggleBody},
 			{label: 'Delete', fn: this.handleDelete}
 		];
+
+		const tabIndex = index * 2 + 1;
 
 		let elem = (
 			<div
@@ -455,6 +458,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 							style={{backgroundColor: block.color}}
 						>
 							<TextareaAutosize
+								tabIndex={tabIndex}
 								ref={this.titleRef}
 								value={block.title}
 								onChange={this.getInputHandler('title')}
@@ -471,6 +475,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 							style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
 						>
 							<TextareaAutosize
+								tabIndex={tabIndex + (block.showTitle ? 1 : 0)}
 								ref={this.bodyRef}
 								value={block.body}
 								onChange={this.getInputHandler('body')}
