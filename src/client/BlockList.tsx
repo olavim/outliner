@@ -5,7 +5,6 @@ import Block from './Block';
 const styles = createStyles({
 	wrapper: {
 		minHeight: 'calc(100% - 4rem)',
-		height: 'fit-content',
 		maxWidth: '60rem',
 		width: 'calc(100% - 10rem)',
 		borderLeft: '1px solid rgba(0,0,0,0.1)',

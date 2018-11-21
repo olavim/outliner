@@ -28,6 +28,7 @@ const styles = createStyles({
 		justifyContent: 'center',
 		flex: 1,
 		overflowY: 'auto',
+		alignItems: 'baseline',
 		'@media only print': {
 			overflowY: 'visible'
 		}
@@ -96,7 +97,6 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		if (elem) {
 			elem.classList.add('print');
 			const opts = {
-				margin: 5,
 				filename: 'outline.pdf',
 				pagebreak: {avoid: 'div'}
 			};
