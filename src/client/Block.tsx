@@ -26,8 +26,8 @@ const styles = createStyles({
 		transform: 'translateY(100%)',
 		zIndex: 200
 	},
-	actionsVisible: {},
-	block: {
+	focus: {},
+	root: {
 		position: 'relative',
 		paddingTop: '0.6rem',
 		display: 'flex',
@@ -117,7 +117,7 @@ const styles = createStyles({
 		height: '100%',
 		right: '-4.8rem'
 	},
-	blockHandle: {
+	handle: {
 		backgroundColor: '#888',
 		position: 'absolute',
 		top: 0,
@@ -138,13 +138,13 @@ const styles = createStyles({
 			display: 'none'
 		}
 	},
-	blockHandleIcon: {
+	handleIcon: {
 		width: '1.2rem',
 		height: '1.2rem',
 		color: '#000',
 		opacity: 0.4
 	},
-	blockActions: {
+	actions: {
 		display: 'flex',
 		overflow: 'hidden',
 		justifyContent: 'space-between',
@@ -163,23 +163,23 @@ const styles = createStyles({
 			display: 'none'
 		}
 	},
-	blockActionsEnter: {
+	actionsEnter: {
 		padding: '0 0.6rem',
 		height: 0
 	},
-	blockActionsActive: {
+	actionsActive: {
 		padding: '0.6rem 0.6rem',
 		height: '3rem'
 	},
-	blockActionsEnterDone: {
+	actionsEnterDone: {
 		padding: '0.6rem 0.6rem',
 		height: '3rem'
 	},
-	blockActionsExit: {
+	actionsExit: {
 		padding: '0.6rem 0.6rem',
 		height: '3rem'
 	},
-	blockActionsExitActive: {
+	actionsExitActive: {
 		padding: '0 0.6rem',
 		height: 0
 	},
@@ -194,15 +194,18 @@ const styles = createStyles({
 		color: '#ffffff',
 		opacity: 0.6,
 		zIndex: 300,
-		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
 		borderRadius: '0.4rem 0.4rem 0 0',
 		fontWeight: 500,
 		fontSize: '1.5rem',
-		'$block:first-child &': {
+		'$root:first-child &': {
 			top: '0.6rem',
 			borderRadius: '0 0 0.4rem 0.4rem'
+		},
+		display: 'none',
+		'$focus &': {
+			display: 'flex'
 		},
 		'.print &': {
 			display: 'none'
@@ -222,15 +225,18 @@ const styles = createStyles({
 		color: '#ffffff',
 		opacity: 0.6,
 		zIndex: 300,
-		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
 		borderRadius: '0 0 0.4rem 0.4rem',
 		fontWeight: 500,
 		fontSize: '1.5rem',
-		'$block:nth-last-child(2) &': {
+		'$root:nth-last-child(2) &': {
 			bottom: '0.6rem',
 			borderRadius: '0.4rem 0.4rem 0 0'
+		},
+		display: 'none',
+		'$focus &': {
+			display: 'flex'
 		},
 		'.print &': {
 			display: 'none'
@@ -251,7 +257,7 @@ interface OwnProps {
 	onAddAfter: (id: any) => any;
 	onDelete: (id: any) => any;
 	onClick: (evt: React.MouseEvent) => any;
-	showActions: boolean;
+	focus: boolean;
 }
 
 interface BlockSourceCollectedProps {
@@ -414,7 +420,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 			presetColors,
 			classes,
 			onClick,
-			showActions,
+			focus,
 			connectDragSource,
 			connectDropTarget,
 			connectDragPreview,
@@ -434,7 +440,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 		let elem = (
 			<div
 				key={block.id}
-				className={cls(classes.block, {[classes.actionsVisible]: showActions})}
+				className={cls(classes.root, {[classes.focus]: focus})}
 				style={{
 					paddingLeft: `${block.indent * 4}rem`,
 					opacity: isDragging ? 0 : 1
@@ -446,11 +452,8 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 						<IndentDecIcon/>
 					</button>
 				</div>
-				{showActions && (
-					<div className={classes.actionTop} onClick={this.handleAddBefore}>
-						+
-					</div>
-				)}
+				<div className={classes.actionTop} onClick={this.handleAddBefore}>+</div>
+				<div className={classes.actionBottom} onClick={this.handleAddAfter}>+</div>
 				<div className={classes.content}>
 					{block.showTitle && (
 						<div
@@ -487,26 +490,26 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 						</div>
 					)}
 					<CSSTransition
-						in={showActions}
+						in={focus}
 						key={block.id}
 						classNames={{
-							enter: classes.blockActionsEnter,
-							enterActive: classes.blockActionsActive,
-							enterDone: classes.blockActionsEnterDone,
-							exit: classes.blockActionsExit,
-							exitActive: classes.blockActionsExitActive
+							enter: classes.actionsEnter,
+							enterActive: classes.actionsActive,
+							enterDone: classes.actionsEnterDone,
+							exit: classes.actionsExit,
+							exitActive: classes.actionsExitActive
 						}}
 						timeout={0}
 					>
-						<div className={classes.blockActions} onClick={this.handleCloseColorPicker}>
+						<div className={classes.actions} onClick={this.handleCloseColorPicker}>
 							{actions.map(a => (
 								<button key={a.label} onClick={a.fn}>{a.label}</button>
 							))}
 						</div>
 					</CSSTransition>
 					{connectDragSource(
-						<div className={classes.blockHandle}>
-							<MenuIcon className={classes.blockHandleIcon}/>
+						<div className={classes.handle}>
+							<MenuIcon className={classes.handleIcon}/>
 						</div>
 					)}
 				</div>
@@ -517,7 +520,7 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 				</div>
 				<div
 					className={classes.color}
-					style={{display: this.state.showColorPicker && showActions ? 'block' : 'none'}}
+					style={{display: this.state.showColorPicker && focus ? 'block' : 'none'}}
 				>
 					<SketchPicker
 						disableAlpha
@@ -526,11 +529,6 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 						presetColors={presetColors}
 					/>
 				</div>
-				{showActions && (
-					<div className={classes.actionBottom} onClick={this.handleAddAfter}>
-						+
-					</div>
-				)}
 			</div>
 		);
 

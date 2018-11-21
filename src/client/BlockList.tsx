@@ -175,7 +175,7 @@ class BlockList extends React.Component<Props, State> {
 								onAddBefore={this.handleAddBefore}
 								onAddAfter={this.handleAddAfter}
 								onDelete={this.handleDelete}
-								showActions={this.state.focusedBlock === block.id}
+								focus={this.state.focusedBlock === block.id}
 								onClick={this.handleFocusBlock(block.id)}
 								moveBlock={this.handleMoveBlock}
 							/>
