@@ -34,14 +34,18 @@ const styles = createStyles({
 	root: {
 		position: 'absolute',
 		top: 0,
-		opacity: 0.8,
-		border: '1px solid #0000007a',
+		opacity: 0.7,
+		border: '1px solid #000000',
+		overflow: 'hidden',
 		borderRadius: '0.4rem'
 	},
 	title: {
 		minHeight: '1.5rem',
-		padding: '0.6rem',
+		paddingRight: '2rem',
+		overflow: 'hidden',
 		'& pre': {
+			padding: '0.6rem',
+			whiteSpace: 'normal',
 			margin: 0,
 			fontWeight: 500,
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
@@ -50,8 +54,11 @@ const styles = createStyles({
 	},
 	body: {
 		minHeight: '1.5rem',
-		padding: '0.6rem',
+		overflow: 'hidden',
+		paddingRight: '2rem',
 		'& pre': {
+			padding: '0.6rem',
+			whiteSpace: 'normal',
 			margin: 0,
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px'
@@ -92,14 +99,16 @@ const BlockPreview = withStyles(styles)(({item, isDragging, currentOffset, class
 
 	const block = item.block as BlockData;
 	const windowWidth = window.innerWidth;
-	const blockWidth = (windowWidth < 700 ?	(windowWidth - 120) / 10 : 58) - block.indent * 4;
+	let blockWidth = windowWidth < 700 ?	(windowWidth - 120) / 10 : 58;
+	blockWidth = blockWidth - block.indent * 4;
+	blockWidth = Math.round(blockWidth * 10) / 10;
 
 	return (
 		<div
 			className={classes.root}
 			style={{
 				...getItemStyles(currentOffset),
-				width: `${blockWidth}rem`,
+				width: `${blockWidth - 0.1}rem`,
 				left: `-${blockWidth - 2}rem`
 			}}
 		>

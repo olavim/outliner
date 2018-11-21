@@ -29,7 +29,7 @@ const styles = createStyles({
 	actionsVisible: {},
 	block: {
 		position: 'relative',
-		marginBottom: '0.6rem',
+		paddingTop: '0.6rem',
 		display: 'flex',
 		flexDirection: 'column',
 		'& button': {
@@ -59,32 +59,42 @@ const styles = createStyles({
 	title: {
 		display: 'flex',
 		textAlign: 'left',
-		padding: 0,
-		'& textarea': {
+		paddingRight: '2rem',
+		'& textarea, & pre': {
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px',
 			resize: 'none',
 			flex: 1,
 			border: 'none',
-			backgroundColor: 'transparent',
 			padding: '0.6rem',
-			boxSizing: 'border-box',
+			backgroundColor: 'transparent',
 			fontWeight: 500
+		},
+		'.print &': {
+			paddingRight: 0
+		},
+		'@media print': {
+			paddingRight: 0
 		}
 	},
 	text: {
 		display: 'flex',
 		textAlign: 'left',
-		padding: 0,
-		'& textarea': {
+		paddingRight: '2rem',
+		'& textarea, & pre': {
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px',
 			resize: 'none',
 			flex: 1,
 			border: 'none',
-			backgroundColor: 'transparent',
 			padding: '0.6rem',
-			boxSizing: 'border-box'
+			backgroundColor: 'transparent'
+		},
+		'.print &': {
+			paddingRight: 0
+		},
+		'@media print': {
+			paddingRight: 0
 		}
 	},
 	actionsLeft: {
@@ -121,7 +131,10 @@ const styles = createStyles({
 		'&:active': {
 			cursor: 'move'
 		},
-		'@media only print': {
+		'.print &': {
+			display: 'none'
+		},
+		'@media print': {
 			display: 'none'
 		}
 	},
@@ -143,7 +156,10 @@ const styles = createStyles({
 		boxSizing: 'border-box',
 		transition: 'all 0.3s',
 		marginRight: '2rem',
-		'@media only print': {
+		'.print &': {
+			display: 'none'
+		},
+		'@media print': {
 			display: 'none'
 		}
 	},
@@ -170,7 +186,7 @@ const styles = createStyles({
 	actionTop: {
 		cursor: 'pointer',
 		position: 'absolute',
-		top: '-2rem',
+		top: '-1.4rem',
 		alignSelf: 'center',
 		width: '3rem',
 		height: '2rem',
@@ -188,7 +204,10 @@ const styles = createStyles({
 			top: 0,
 			borderRadius: '0 0 0.4rem 0.4rem'
 		},
-		'@media only print': {
+		'.print &': {
+			display: 'none'
+		},
+		'@media print': {
 			display: 'none'
 		}
 	},
@@ -213,7 +232,10 @@ const styles = createStyles({
 			bottom: 0,
 			borderRadius: '0.4rem 0.4rem 0 0'
 		},
-		'@media only print': {
+		'.print &': {
+			display: 'none'
+		},
+		'@media print': {
 			display: 'none'
 		}
 	}
@@ -438,8 +460,8 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 								onChange={this.getInputHandler('title')}
 								onClick={this.handleCloseColorPicker}
 								spellCheck={false}
-								style={{minHeight: '27px'}}
 								autoFocus
+								async
 							/>
 						</div>
 					)}
@@ -454,8 +476,8 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 								onChange={this.getInputHandler('body')}
 								onClick={this.handleCloseColorPicker}
 								spellCheck={false}
-								style={{minHeight: '27px'}}
 								autoFocus
+								async
 							/>
 						</div>
 					)}

@@ -5,27 +5,46 @@ import Block from './Block';
 const styles = createStyles({
 	wrapper: {
 		minHeight: 'calc(100% - 4rem)',
+		height: 'fit-content',
 		maxWidth: '60rem',
 		width: 'calc(100% - 10rem)',
 		borderLeft: '1px solid rgba(0,0,0,0.1)',
-		borderRight: '1px solid rgba(0,0,0,0.1)'
+		borderRight: '1px solid rgba(0,0,0,0.1)',
+		display: 'flex',
+		'.print &': {
+			borderLeft: '1px solid rgba(0,0,0,0)',
+			borderRight: '1px solid rgba(0,0,0,0)'
+		},
+		'@media print': {
+			borderLeft: '1px solid rgba(0,0,0,0)',
+			borderRight: '1px solid rgba(0,0,0,0)'
+		}
 	},
 	root: {
 		width: '100%',
 		position: 'relative',
-		padding: '1rem',
+		padding: '0.4rem 1rem 60vh 1rem',
 		display: 'table',
-		boxSizing: 'border-box'
+		flexDirection: 'column',
+		boxSizing: 'border-box',
+		'.print &': {
+			padding: '0rem 1rem 0rem 1rem'
+		},
+		'@media print': {
+			padding: '0rem 1rem 0rem 1rem'
+		}
 	},
 	listActions: {
-		textAlign: 'right'
-	},
-	'@media only print': {
-		listActions: {
+		marginTop: '0.6rem',
+		textAlign: 'right',
+		'.print &': {
+			display: 'none'
+		},
+		'@media print': {
 			display: 'none'
 		}
 	}
-})
+});
 
 export interface BlockData {
 	id: any;
@@ -67,13 +86,14 @@ class BlockList extends React.Component<Props, State> {
 		const blocks = this.props.blocks.slice();
 		if (index !== -1) {
 			const id = new Date().getTime();
+			const prevColor = blocks.length > 0 ? blocks[blocks.length - 1].color : '#ffcc88';
 			blocks.splice(index, 0, {
 				id,
 				title: '',
 				body: '',
 				showTitle: true,
 				showBody: false,
-				color: this.getPresetColors()[0] || '#ffcc88',
+				color: prevColor,
 				indent: 0
 			});
 			setTimeout(() => {

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {createStyles, WithStyles, withStyles} from '@material-ui/core';
 import cls from 'classnames';
+import html2pdf from 'html2pdf.js';
 import BlockList, {BlockData} from './BlockList';
 
 const styles = createStyles({
@@ -26,7 +27,10 @@ const styles = createStyles({
 		display: 'flex',
 		justifyContent: 'center',
 		flex: 1,
-		overflowY: 'auto'
+		overflowY: 'auto',
+		'@media only print': {
+			overflowY: 'visible'
+		}
 	},
 	uploadWrapper: {
 		marginRight: '1rem',
@@ -87,6 +91,21 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		}
 	}
 
+	public handleExport = () => {
+		const elem = document.getElementById('block-content');
+		if (elem) {
+			elem.classList.add('print');
+			const opts = {
+				margin: 5,
+				filename: 'outline.pdf',
+				pagebreak: {avoid: 'div'}
+			};
+			html2pdf().set(opts).from(elem).save().then(() => {
+				elem.classList.remove('print');
+			});
+		}
+	}
+
 	public render() {
 		const {classes} = this.props;
 		const blockDataString = encodeURIComponent(JSON.stringify(this.state.blocks));
@@ -101,12 +120,15 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 						className="outline"
 						href={`data:text/plain;charset=utf-8,${blockDataString}`}
 						download="outline.otl"
-						style={{minHeight: '2.4rem'}}
+						style={{minHeight: '2.4rem', marginRight: '1rem'}}
 					>
 						save
 					</a>
+					<button className="outline" onClick={this.handleExport} style={{minHeight: '2.6rem'}}>
+						Export PDF
+					</button>
 				</div>
-				<div className={classes.content}>
+				<div className={classes.content} id="block-content">
 					<BlockList blocks={this.state.blocks} onChange={this.handleBlocksChange}/>
 				</div>
 			</div>
