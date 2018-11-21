@@ -61,7 +61,15 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		blocks: []
 	};
 
+	public componentDidMount() {
+		const data = localStorage.getItem('outliner-data');
+		if (data) {
+			this.setState({blocks: JSON.parse(data)});
+		}
+	}
+
 	public handleBlocksChange = (blocks: BlockData[]) => {
+		localStorage.setItem('outliner-data', JSON.stringify(blocks));
 		this.setState({blocks});
 	}
 
@@ -73,8 +81,9 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 			reader.readAsText(file, 'UTF-8');
 			reader.onload = () => {
 				const data = reader.result as string;
+				localStorage.setItem('outliner-data', data);
 				this.setState({blocks: JSON.parse(data)});
-			}
+			};
 		}
 	}
 
