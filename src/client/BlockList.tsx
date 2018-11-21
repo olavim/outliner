@@ -5,12 +5,14 @@ import Block from './Block';
 const styles = createStyles({
 	wrapper: {
 		minHeight: 'calc(100% - 4rem)',
+		maxWidth: '60rem',
+		width: 'calc(100% - 10rem)',
 		borderLeft: '1px solid rgba(0,0,0,0.1)',
 		borderRight: '1px solid rgba(0,0,0,0.1)'
 	},
 	root: {
+		width: '100%',
 		position: 'relative',
-		width: '60rem',
 		padding: '1rem',
 		display: 'table',
 		boxSizing: 'border-box'
@@ -74,6 +76,9 @@ class BlockList extends React.Component<Props, State> {
 				color: this.getPresetColors()[0] || '#ffcc88',
 				indent: 0
 			});
+			setTimeout(() => {
+				this.setState({focusedBlock: id});
+			}, 50);
 			this.props.onChange(blocks);
 		}
 	}

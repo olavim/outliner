@@ -757,6 +757,12 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-dnd-touch-backend@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.npmjs.org/@types/react-dnd-touch-backend/-/react-dnd-touch-backend-0.4.2.tgz#9340b83ac29e06b6ce73d7e0963aaa1a286f90fe"
+  dependencies:
+    dnd-core "^4.0.5"
+
 "@types/react-dnd@^3.0.2":
   version "3.0.2"
   resolved "https://registry.npmjs.org/@types/react-dnd/-/react-dnd-3.0.2.tgz#939e5a8ca5b83f847c3f64dabbe2f49a9fefb192"
@@ -3133,6 +3139,15 @@ dir-glob@^2.0.0:
   dependencies:
     arrify "^1.0.1"
     path-type "^3.0.0"
+
+dnd-core@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.npmjs.org/dnd-core/-/dnd-core-4.0.5.tgz#3b83d138d0d5e265c73ec978dec5e1ed441dc665"
+  dependencies:
+    asap "^2.0.6"
+    invariant "^2.2.4"
+    lodash "^4.17.10"
+    redux "^4.0.0"
 
 dnd-core@^6.0.0:
   version "6.0.0"
@@ -7321,6 +7336,12 @@ react-dnd-html5-backend@^6.0.0:
     dnd-core "^6.0.0"
     lodash "^4.17.11"
 
+react-dnd-touch-backend@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.npmjs.org/react-dnd-touch-backend/-/react-dnd-touch-backend-0.6.0.tgz#84886e95ab59e85103588b6773e3a50ab391821c"
+  dependencies:
+    invariant "^2.2.4"
+
 react-dnd@*, react-dnd@^6.0.0:
   version "6.0.0"
   resolved "https://registry.npmjs.org/react-dnd/-/react-dnd-6.0.0.tgz#0780eafaa47293bf12dc8f79cf1e48ede8ba72f1"
@@ -7562,7 +7583,7 @@ reduce-function-call@^1.0.1:
   dependencies:
     balanced-match "^0.4.2"
 
-redux@^4.0.1:
+redux@^4.0.0, redux@^4.0.1:
   version "4.0.1"
   resolved "https://registry.npmjs.org/redux/-/redux-4.0.1.tgz#436cae6cc40fbe4727689d7c8fae44808f1bfef5"
   dependencies:

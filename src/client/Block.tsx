@@ -30,6 +30,9 @@ const styles = createStyles({
 		marginBottom: '0.6rem',
 		display: 'flex',
 		flexDirection: 'column',
+		'&:first-child': {
+			marginTop: '2rem'
+		},
 		'& button': {
 			display: 'flex',
 			alignItems: 'center',
@@ -136,7 +139,8 @@ const styles = createStyles({
 		height: 0,
 		zIndex: 100,
 		boxSizing: 'border-box',
-		transition: 'all 0.3s'
+		transition: 'all 0.3s',
+		marginRight: '2rem'
 	},
 	blockActionsEnter: {
 		padding: '0 0.6rem',
@@ -157,6 +161,42 @@ const styles = createStyles({
 	blockActionsExitActive: {
 		padding: '0 0.6rem',
 		height: 0
+	},
+	actionTop: {
+		cursor: 'pointer',
+		position: 'absolute',
+		top: '-2rem',
+		alignSelf: 'center',
+		width: '3rem',
+		height: '2rem',
+		backgroundColor: '#000000',
+		color: '#ffffff',
+		opacity: 0.6,
+		zIndex: 300,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		borderRadius: '0.4rem 0.4rem 0 0',
+		fontWeight: 500,
+		fontSize: '1.5rem'
+	},
+	actionBottom: {
+		cursor: 'pointer',
+		position: 'absolute',
+		bottom: '-2rem',
+		alignSelf: 'center',
+		width: '3rem',
+		height: '2rem',
+		backgroundColor: '#000000',
+		color: '#ffffff',
+		opacity: 0.6,
+		zIndex: 300,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		borderRadius: '0 0 0.4rem 0.4rem',
+		fontWeight: 500,
+		fontSize: '1.5rem'
 	}
 });
 
@@ -187,7 +227,8 @@ const cardSource = {
 	beginDrag({block, index}: OwnProps) {
 		return {
 			id: block.id,
-			index
+			index,
+			block
 		};
 	}
 };
@@ -338,7 +379,14 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 			isDragging
 		} = this.props;
 
-		const elem = (
+		const actions = [
+			{label: 'Color', fn: this.handleOpenColorPicker},
+			{label: block.showTitle ? 'Remove Title' : 'Add Title', fn: this.handleToggleTitle},
+			{label: block.showBody ? 'Remove Body' : 'Add Body', fn: this.handleToggleBody},
+			{label: 'Delete', fn: this.handleDelete}
+		];
+
+		let elem = (
 			<div
 				key={block.id}
 				className={classes.block}
@@ -350,78 +398,68 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 						<IndentDecIcon/>
 					</button>
 				</div>
-				{connectDragPreview(
-					<div className={classes.content}>
-						{block.showTitle && (
-							<div
-								className={classes.title}
-								style={{backgroundColor: block.color}}
-							>
-								<TextareaAutosize
-									ref={this.titleRef}
-									value={block.title}
-									onChange={this.getInputHandler('title')}
-									onClick={this.handleCloseColorPicker}
-									spellCheck={false}
-									style={{minHeight: '27px'}}
-									autoFocus
-								/>
-							</div>
-						)}
-						{block.showBody && (
-							<div
-								className={classes.text}
-								style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
-							>
-								<TextareaAutosize
-									ref={this.bodyRef}
-									value={block.body}
-									onChange={this.getInputHandler('body')}
-									onClick={this.handleCloseColorPicker}
-									spellCheck={false}
-									style={{minHeight: '27px'}}
-									autoFocus
-								/>
-							</div>
-						)}
-						<CSSTransition
-							in={this.props.showActions}
-							key={block.id}
-							classNames={{
-								enter: classes.blockActionsEnter,
-								enterActive: classes.blockActionsActive,
-								enterDone: classes.blockActionsEnterDone,
-								exit: classes.blockActionsExit,
-								exitActive: classes.blockActionsExitActive
-							}}
-							timeout={0}
-						>
-							<div className={classes.blockActions} onClick={this.handleCloseColorPicker}>
-								<button onClick={this.handleAddBefore}>{'Add Before'}</button>
-								<button onClick={this.handleOpenColorPicker}>{'Color'}</button>
-								<button
-									onClick={this.handleToggleTitle}
-									disabled={!block.showBody}
-								>
-									{block.showTitle ? 'Remove Title' : 'Add Title'}
-								</button>
-								<button
-									onClick={this.handleToggleBody}
-									disabled={!block.showTitle}
-								>
-									{block.showBody ? 'Remove Body' : 'Add Body'}
-								</button>
-								<button onClick={this.handleDelete}>{'Delete'}</button>
-								<button onClick={this.handleAddAfter}>{'Add After'}</button>
-							</div>
-						</CSSTransition>
-						{connectDragSource(
-							<div className={classes.blockHandle}>
-								<MenuIcon className={classes.blockHandleIcon}/>
-							</div>
-						)}
+				{this.props.showActions && (
+					<div className={classes.actionTop} onClick={this.handleAddBefore}>
+						+
 					</div>
 				)}
+				<div className={classes.content}>
+					{block.showTitle && (
+						<div
+							className={classes.title}
+							style={{backgroundColor: block.color}}
+						>
+							<TextareaAutosize
+								ref={this.titleRef}
+								value={block.title}
+								onChange={this.getInputHandler('title')}
+								onClick={this.handleCloseColorPicker}
+								spellCheck={false}
+								style={{minHeight: '27px'}}
+								autoFocus
+							/>
+						</div>
+					)}
+					{block.showBody && (
+						<div
+							className={classes.text}
+							style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
+						>
+							<TextareaAutosize
+								ref={this.bodyRef}
+								value={block.body}
+								onChange={this.getInputHandler('body')}
+								onClick={this.handleCloseColorPicker}
+								spellCheck={false}
+								style={{minHeight: '27px'}}
+								autoFocus
+							/>
+						</div>
+					)}
+					<CSSTransition
+						in={this.props.showActions}
+						key={block.id}
+						classNames={{
+							enter: classes.blockActionsEnter,
+							enterActive: classes.blockActionsActive,
+							enterDone: classes.blockActionsEnterDone,
+							exit: classes.blockActionsExit,
+							exitActive: classes.blockActionsExitActive
+						}}
+						timeout={0}
+					>
+						<div className={classes.blockActions} onClick={this.handleCloseColorPicker}>
+							{actions.map(a => (
+								<button key={a.label} onClick={a.fn}>{a.label}</button>
+							))}
+						</div>
+					</CSSTransition>
+					{connectDragSource(
+						<div className={classes.blockHandle}>
+							<MenuIcon className={classes.blockHandleIcon}/>
+						</div>
+					)}
+				</div>
 				<div className={classes.actionsRight}>
 					<button onClick={this.handleIncreaseIndent}>
 						<IndentIncIcon/>
@@ -438,10 +476,18 @@ class Block extends React.Component<OwnProps & WithStyles<typeof styles> & Block
 						presetColors={presetColors}
 					/>
 				</div>
+				{this.props.showActions && (
+					<div className={classes.actionBottom} onClick={this.handleAddAfter}>
+						+
+					</div>
+				)}
 			</div>
 		);
 
-		return connectDropTarget(elem);
+		elem = connectDropTarget(elem);
+		elem = connectDragPreview(elem);
+
+		return elem;
 	}
 }
 
