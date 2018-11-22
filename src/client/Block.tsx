@@ -437,8 +437,16 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 
 		const actions = [
 			{label: 'Color', fn: this.handleOpenColorPicker},
-			{label: block.showTitle ? 'Remove Title' : 'Add Title', fn: this.handleToggleTitle},
-			{label: block.showBody ? 'Remove Body' : 'Add Body', fn: this.handleToggleBody},
+			{
+				label: block.showTitle ? 'Remove Title' : 'Add Title',
+				fn: this.handleToggleTitle,
+				disabled: block.showTitle && !block.showBody
+			},
+			{
+				label: block.showBody ? 'Remove Body' : 'Add Body',
+				fn: this.handleToggleBody,
+				disabled: block.showBody && !block.showTitle
+			},
 			{label: 'Delete', fn: this.handleDelete}
 		];
 
@@ -510,7 +518,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 					>
 						<div className={classes.actions} onClick={this.handleCloseColorPicker}>
 							{actions.map(a => (
-								<button key={a.label} onClick={a.fn}>{a.label}</button>
+								<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
 							))}
 						</div>
 					</CSSTransition>
