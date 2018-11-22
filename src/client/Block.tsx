@@ -53,8 +53,12 @@ const styles = createStyles({
 		display: 'flex',
 		flexDirection: 'column',
 		border: '1px solid #0000007a',
+		boxShadow: '0 0 4px 0 #00000033',
 		borderRadius: '0.4rem',
-		overflow: 'hidden'
+		overflow: 'hidden',
+		'$focus &': {
+			boxShadow: '0 0 20px 0 #0043ff6e'
+		}
 	},
 	title: {
 		display: 'flex',
@@ -100,22 +104,44 @@ const styles = createStyles({
 	actionsLeft: {
 		position: 'absolute',
 		top: 0,
+		left: 0,
+		transform: 'translateX(-100%)',
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
-		width: '3rem',
+		width: '5rem',
 		height: '100%',
-		left: '-4.5rem'
+		opacity: 0,
+		'$focus &': {
+			opacity: 0.5
+		},
+		'$root:hover &': {
+			opacity: 0.5
+		},
+		'@media (hover: none)': {
+			opacity: 0.5
+		}
 	},
 	actionsRight: {
 		position: 'absolute',
 		top: 0,
+		right: 0,
+		transform: 'translateX(100%)',
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
-		width: '3rem',
+		width: '5rem',
 		height: '100%',
-		right: '-4.5rem'
+		opacity: 0,
+		'$focus &': {
+			opacity: 0.5
+		},
+		'$root:hover &': {
+			opacity: 0.5
+		},
+		'@media (hover: none)': {
+			opacity: 0.5
+		}
 	},
 	handle: {
 		backgroundColor: '#888',
@@ -128,6 +154,17 @@ const styles = createStyles({
 		alignItems: 'center',
 		justifyContent: 'center',
 		cursor: 'grab',
+		zIndex: 60,
+		opacity: 0,
+		'$focus &': {
+			opacity: 1
+		},
+		'$root:hover &': {
+			opacity: 1
+		},
+		'@media (hover: none)': {
+			opacity: 1
+		},
 		'&:active': {
 			cursor: 'move'
 		},
@@ -144,27 +181,66 @@ const styles = createStyles({
 		color: '#000',
 		opacity: 0.4
 	},
-	actions: {
+	actionsTop: {
 		display: 'flex',
 		overflow: 'hidden',
-		justifyContent: 'space-between',
+		justifyContent: 'space-around',
 		alignItems: 'center',
-		backgroundColor: '#ffffff',
-		padding: '0 0.6rem',
+		backgroundColor: '#666666',
+		padding: '0 2.6rem 0 0.6rem',
+		boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.3)',
 		height: 0,
-		zIndex: 100,
+		zIndex: 50,
 		boxSizing: 'border-box',
 		transition: 'all 0.3s',
-		marginRight: '2rem',
+		'& > button': {
+			color: '#ffffffbb',
+			fontSize: '1rem',
+			fontWeight: 700
+		},
 		'.print &': {
 			display: 'none'
 		},
 		'@media (max-width: 500px)': {
+			zIndex: 70,
+			position: 'fixed',
+			top: '5rem',
+			left: 0,
+			width: '100%',
+			boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.6)',
+			padding: '0 1rem'
+		},
+		'@media print': {
+			display: 'none'
+		}
+	},
+	actionsBottom: {
+		display: 'flex',
+		overflow: 'hidden',
+		justifyContent: 'space-around',
+		alignItems: 'center',
+		backgroundColor: '#666666',
+		padding: '0 2.6rem 0 0.6rem',
+		boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.3)',
+		height: 0,
+		zIndex: 50,
+		boxSizing: 'border-box',
+		transition: 'all 0.3s',
+		'& > button': {
+			color: '#ffffffbb',
+			fontSize: '1rem',
+			fontWeight: 700
+		},
+		'.print &': {
+			display: 'none'
+		},
+		'@media (max-width: 500px)': {
+			zIndex: 70,
 			position: 'fixed',
 			bottom: 0,
 			left: 0,
 			width: '100%',
-			boxShadow: '0 0 0.5rem 0 rgba(0,0,0,0.2)',
+			boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.6)',
 			padding: '0 1rem'
 		},
 		'@media print': {
@@ -172,14 +248,14 @@ const styles = createStyles({
 		}
 	},
 	actionsEnter: {
-		padding: '0 0.6rem',
+		padding: '0 2.6rem 0 0.6rem',
 		height: 0,
 		'@media (max-width: 500px)': {
 			padding: '0 1rem'
 		}
 	},
 	actionsActive: {
-		padding: '0.6rem 0.6rem',
+		padding: '0.6rem 2.6rem 0.6rem 0.6rem',
 		height: '3rem',
 		'@media (max-width: 500px)': {
 			padding: '0.6rem 1rem',
@@ -187,7 +263,7 @@ const styles = createStyles({
 		}
 	},
 	actionsEnterDone: {
-		padding: '0.6rem 0.6rem',
+		padding: '0.6rem 2.6rem 0.6rem 0.6rem',
 		height: '3rem',
 		'@media (max-width: 500px)': {
 			padding: '0.6rem 1rem',
@@ -195,7 +271,7 @@ const styles = createStyles({
 		}
 	},
 	actionsExit: {
-		padding: '0.6rem 0.6rem',
+		padding: '0.6rem 2.6rem 0.6rem 0.6rem',
 		height: '3rem',
 		'@media (max-width: 500px)': {
 			padding: '0.6rem 1rem',
@@ -203,72 +279,10 @@ const styles = createStyles({
 		}
 	},
 	actionsExitActive: {
-		padding: '0 0.6rem',
+		padding: '0 2.6rem 0 0.6rem',
 		height: 0,
 		'@media (max-width: 500px)': {
 			padding: '0 1rem'
-		}
-	},
-	actionTop: {
-		cursor: 'pointer',
-		position: 'absolute',
-		top: '-1.4rem',
-		alignSelf: 'center',
-		width: '3rem',
-		height: '2rem',
-		backgroundColor: '#000000',
-		color: '#ffffff',
-		opacity: 0.6,
-		zIndex: 300,
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderRadius: '0.4rem 0.4rem 0 0',
-		fontWeight: 500,
-		fontSize: '1.5rem',
-		'$root:first-child &': {
-			top: '0.6rem',
-			borderRadius: '0 0 0.4rem 0.4rem'
-		},
-		display: 'none',
-		'$focus &': {
-			display: 'flex'
-		},
-		'.print &': {
-			display: 'none'
-		},
-		'@media print': {
-			display: 'none'
-		}
-	},
-	actionBottom: {
-		cursor: 'pointer',
-		position: 'absolute',
-		bottom: '-2rem',
-		alignSelf: 'center',
-		width: '3rem',
-		height: '2rem',
-		backgroundColor: '#000000',
-		color: '#ffffff',
-		opacity: 0.6,
-		zIndex: 300,
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderRadius: '0 0 0.4rem 0.4rem',
-		fontWeight: 500,
-		fontSize: '1.5rem',
-		'$root:nth-last-child(2) &': {
-			bottom: '0.6rem',
-			borderRadius: '0.4rem 0.4rem 0 0'
-		},
-		display: 'none',
-		'$focus &': {
-			display: 'flex'
-		},
-		'.print &': {
-			display: 'none'
-		},
-		'@media print': {
-			display: 'none'
 		}
 	}
 });
@@ -431,6 +445,16 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 		this.props.onAddAfter(this.props.block.id);
 	}
 
+	public handleMoveUp = (evt: React.MouseEvent) => {
+		evt.stopPropagation();
+		this.props.moveBlock(this.props.index - 1, this.props.index);
+	}
+
+	public handleMoveDown = (evt: React.MouseEvent) => {
+		evt.stopPropagation();
+		this.props.moveBlock(this.props.index + 1, this.props.index);
+	}
+
 	public handleDelete = (evt: React.MouseEvent) => {
 		evt.stopPropagation();
 		this.props.onDelete(this.props.block.id);
@@ -454,7 +478,14 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 			index
 		} = this.props;
 
-		const actions = [
+		const actionsTop = [
+			{label: 'Add Before', fn: this.handleAddBefore},
+			{label: 'Add After', fn: this.handleAddAfter},
+			{label: 'Move Up', fn: this.handleMoveUp},
+			{label: 'Move Down', fn: this.handleMoveDown}
+		];
+
+		const actionsBottom = [
 			{label: 'Color', fn: this.handleOpenColorPicker},
 			{
 				label: block.showTitle ? 'Remove Title' : 'Add Title',
@@ -471,6 +502,14 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 
 		const tabIndex = index * 2 + 1;
 
+		const transitionClassNames = {
+			enter: classes.actionsEnter,
+			enterActive: classes.actionsActive,
+			enterDone: classes.actionsEnterDone,
+			exit: classes.actionsExit,
+			exitActive: classes.actionsExitActive
+		};
+
 		let elem = (
 			<div
 				key={block.id}
@@ -486,9 +525,19 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						<IndentDecIcon/>
 					</button>
 				</div>
-				<div className={classes.actionTop} onClick={this.handleAddBefore}>+</div>
-				<div className={classes.actionBottom} onClick={this.handleAddAfter}>+</div>
 				<div className={classes.content}>
+					<CSSTransition
+						in={focus}
+						key={`${block.id}-top`}
+						classNames={transitionClassNames}
+						timeout={0}
+					>
+						<div className={classes.actionsTop} onClick={this.handleCloseColorPicker}>
+							{actionsTop.map(a => (
+								<button key={a.label} onClick={a.fn}>{a.label}</button>
+							))}
+						</div>
+					</CSSTransition>
 					{block.showTitle && (
 						<div
 							className={classes.title}
@@ -525,18 +574,12 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 					)}
 					<CSSTransition
 						in={focus}
-						key={block.id}
-						classNames={{
-							enter: classes.actionsEnter,
-							enterActive: classes.actionsActive,
-							enterDone: classes.actionsEnterDone,
-							exit: classes.actionsExit,
-							exitActive: classes.actionsExitActive
-						}}
+						key={`${block.id}-bottom`}
+						classNames={transitionClassNames}
 						timeout={0}
 					>
-						<div className={classes.actions} onClick={this.handleCloseColorPicker}>
-							{actions.map(a => (
+						<div className={classes.actionsBottom} onClick={this.handleCloseColorPicker}>
+							{actionsBottom.map(a => (
 								<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
 							))}
 						</div>

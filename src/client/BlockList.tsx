@@ -1,11 +1,13 @@
 import * as React from 'react';
 import {createStyles, WithStyles, withStyles} from '@material-ui/core';
+import cls from 'classnames';
 import * as _memoize from 'memoizee';
 import Block from './Block';
 
 const memoize = (_memoize as any).default;
 
 const styles = createStyles({
+	focus: {},
 	wrapper: {
 		minHeight: 'calc(100% - 4rem)',
 		maxWidth: '60rem',
@@ -36,6 +38,11 @@ const styles = createStyles({
 		},
 		'@media print': {
 			padding: '0rem 1rem 0rem 1rem'
+		},
+		'&$focus': {
+			'@media (max-width: 500px)': {
+				paddingTop: '5rem'
+			}
 		}
 	},
 	listActions: {
@@ -176,11 +183,14 @@ class BlockList extends React.Component<Props, State> {
 	}
 
 	public handleMoveBlock = (dragIndex: any, hoverIndex: any) => {
-		const blocks = this.props.blocks.slice();
-		const dragBlock = blocks[dragIndex];
-		blocks.splice(dragIndex, 1);
-		blocks.splice(hoverIndex, 0, dragBlock);
-		this.props.onChange(blocks);
+		const {blocks, onChange} = this.props;
+		if (dragIndex >= 0 && hoverIndex >= 0 && dragIndex < blocks.length && hoverIndex < blocks.length) {
+			const newBlocks = blocks.slice();
+			const dragBlock = newBlocks[dragIndex];
+			newBlocks.splice(dragIndex, 1);
+			newBlocks.splice(hoverIndex, 0, dragBlock);
+			onChange(newBlocks);
+		}
 	}
 
 	public render() {
@@ -188,7 +198,7 @@ class BlockList extends React.Component<Props, State> {
 		const presetColors = this.getPresetColors();
 		return (
 			<div className={classes.wrapper}>
-				<div className={classes.root}>
+				<div className={cls(classes.root, {[classes.focus]: this.state.focusedBlock !== -1})}>
 					{blocks.map((block, index) =>
 						this.getBlock(block, index, block.id === this.state.focusedBlock, presetColors)
 					)}

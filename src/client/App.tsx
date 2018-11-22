@@ -16,11 +16,12 @@ const styles = createStyles({
 	header: {
 		display: 'flex',
 		backgroundColor: '#ffffff',
-		flex: '0 0 4rem',
-		padding: '0.6rem 2rem',
+		flex: '0 0 5rem',
+		padding: '0 2rem',
 		justifyContent: 'flex-start',
 		alignItems: 'center',
-		borderBottom: '1px solid rgba(0,0,0,0.1)',
+		boxShadow: '0 0 0.6rem 0 #00000066',
+		zIndex: 100,
 		'@media only print': {
 			display: 'none'
 		}
@@ -30,6 +31,7 @@ const styles = createStyles({
 		justifyContent: 'center',
 		flex: 1,
 		overflowY: 'auto',
+		overflowX: 'hidden',
 		alignItems: 'baseline',
 		'&.print': {
 			flex: '0 0 0px'
@@ -76,7 +78,8 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 	public componentDidMount() {
 		const data = localStorage.getItem('outliner-data');
 		if (data) {
-			this.setState({blocks: JSON.parse(data)});
+			const blocks = JSON.parse(data);
+			this.setState({blocks: blocks.filter(Boolean)});
 		}
 	}
 
