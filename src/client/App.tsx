@@ -2,6 +2,7 @@ import * as React from 'react';
 import {createStyles, WithStyles, withStyles} from '@material-ui/core';
 import cls from 'classnames';
 import html2pdf from 'html2pdf.js';
+import githubIcon from './github-32px.png';
 import BlockList, {BlockData} from './BlockList';
 
 const styles = createStyles({
@@ -134,6 +135,13 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 					<button className="outline" onClick={this.handleExport} style={{minHeight: '2.6rem'}}>
 						Export PDF
 					</button>
+					<a
+						href="https://github.com/olavim/outliner"
+						target="outliner-github"
+						style={{marginLeft: 'auto'}}
+					>
+						<img src={githubIcon}/>
+					</a>
 				</div>
 				<div className={classes.content}>
 					<BlockList
