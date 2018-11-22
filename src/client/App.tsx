@@ -9,7 +9,8 @@ const styles = createStyles({
 		display: 'flex',
 		flexDirection: 'column',
 		textAlign: 'center',
-		height: '100%'
+		height: '100%',
+		backgroundColor: '#fafafa'
 	},
 	header: {
 		display: 'flex',
@@ -29,7 +30,10 @@ const styles = createStyles({
 		flex: 1,
 		overflowY: 'auto',
 		alignItems: 'baseline',
-		'@media only print': {
+		'&.print': {
+			flex: '0 0 0px'
+		},
+		'@media print': {
 			overflowY: 'visible'
 		}
 	},
@@ -59,11 +63,13 @@ const styles = createStyles({
 
 interface State {
 	blocks: BlockData[];
+	exporting: boolean;
 }
 
 class App extends React.Component<WithStyles<typeof styles>, State> {
 	public state: State = {
-		blocks: []
+		blocks: [],
+		exporting: true
 	};
 
 	public componentDidMount() {
@@ -93,17 +99,18 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 	}
 
 	public handleExport = () => {
-		const elem = document.getElementById('block-content');
-		if (elem) {
-			elem.classList.add('print');
-			const opts = {
-				filename: 'outline.pdf',
-				pagebreak: {avoid: 'div'}
-			};
-			html2pdf().set(opts).from(elem).save().then(() => {
-				elem.classList.remove('print');
-			});
-		}
+		this.setState({exporting: true}, () => {
+			const elem = document.getElementById('export-content');
+			if (elem) {
+				const opts = {
+					filename: 'outline.pdf',
+					pagebreak: {avoid: 'div'}
+				};
+				html2pdf().set(opts).from(elem).save().then(() => {
+					this.setState({exporting: false});
+				});
+			}
+		});
 	}
 
 	public render() {
@@ -128,8 +135,17 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 						Export PDF
 					</button>
 				</div>
-				<div className={classes.content} id="block-content">
-					<BlockList blocks={this.state.blocks} onChange={this.handleBlocksChange}/>
+				<div className={classes.content}>
+					<BlockList
+						blocks={this.state.blocks}
+						onChange={this.handleBlocksChange}
+					/>
+				</div>
+				<div className={cls(classes.content, 'print')} id="export-content">
+					<BlockList
+						blocks={this.state.blocks}
+						onChange={this.handleBlocksChange}
+					/>
 				</div>
 			</div>
 		);

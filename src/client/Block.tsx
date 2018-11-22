@@ -105,7 +105,7 @@ const styles = createStyles({
 		alignItems: 'center',
 		width: '3rem',
 		height: '100%',
-		left: '-4.8rem'
+		left: '-4.5rem'
 	},
 	actionsRight: {
 		position: 'absolute',
@@ -115,7 +115,7 @@ const styles = createStyles({
 		alignItems: 'center',
 		width: '3rem',
 		height: '100%',
-		right: '-4.8rem'
+		right: '-4.5rem'
 	},
 	handle: {
 		backgroundColor: '#888',
@@ -158,6 +158,13 @@ const styles = createStyles({
 		marginRight: '2rem',
 		'.print &': {
 			display: 'none'
+		},
+		'@media (max-width: 500px)': {
+			position: 'fixed',
+			bottom: 0,
+			left: 0,
+			width: '100%',
+			boxShadow: '0 0 0.5rem 0 rgba(0,0,0,0.2)'
 		},
 		'@media print': {
 			display: 'none'
@@ -331,7 +338,7 @@ const cardTarget = {
 	}
 };
 
-class Block extends React.Component<OwnProps & WithStyles<typeof styles> & BlockSourceCollectedProps & BlockTargetCollectedProps> {
+class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & BlockSourceCollectedProps & BlockTargetCollectedProps> {
 	public titleRef = React.createRef<any>();
 	public bodyRef = React.createRef<any>();
 

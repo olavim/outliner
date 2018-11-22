@@ -1,16 +1,21 @@
 import * as React from 'react';
 import {createStyles, WithStyles, withStyles} from '@material-ui/core';
+import * as _memoize from 'memoizee';
 import Block from './Block';
+
+const memoize = (_memoize as any).default;
 
 const styles = createStyles({
 	wrapper: {
 		minHeight: 'calc(100% - 4rem)',
 		maxWidth: '60rem',
-		width: 'calc(100% - 10rem)',
+		width: 'calc(100% - 8rem)',
 		borderLeft: '1px solid rgba(0,0,0,0.1)',
 		borderRight: '1px solid rgba(0,0,0,0.1)',
 		display: 'flex',
 		'.print &': {
+			width: '60rem',
+			minWidth: '60rem',
 			borderLeft: '1px solid rgba(0,0,0,0)',
 			borderRight: '1px solid rgba(0,0,0,0)'
 		},
@@ -23,7 +28,7 @@ const styles = createStyles({
 		width: '100%',
 		position: 'relative',
 		padding: '0.4rem 1rem 60vh 1rem',
-		display: 'table',
+		display: 'flex',
 		flexDirection: 'column',
 		boxSizing: 'border-box',
 		'.print &': {
@@ -68,6 +73,25 @@ class BlockList extends React.Component<Props, State> {
 	public state = {
 		focusedBlock: -1
 	};
+
+	public getBlock = memoize(
+		(block: BlockData, index: number, focused: boolean, presetColors: string[]) => (
+			<Block
+				key={block.id}
+				index={index}
+				block={block}
+				onChange={this.handleChangeBlock}
+				presetColors={presetColors}
+				onAddBefore={this.handleAddBefore}
+				onAddAfter={this.handleAddAfter}
+				onDelete={this.handleDelete}
+				focus={focused}
+				onClick={this.handleFocusBlock(block.id)}
+				moveBlock={this.handleMoveBlock}
+			/>
+		),
+		{normalizer: (args: any) => JSON.stringify(args)}
+	);
 
 	public componentDidMount() {
 		window.addEventListener('click', this.handleDocumentClick);
@@ -127,7 +151,7 @@ class BlockList extends React.Component<Props, State> {
 					const newIndex = index <= blocks.length - 1 ? index : blocks.length - 1;
 					this.setState({focusedBlock: blocks[newIndex].id});
 				}
-			}, 50);
+			}, 10);
 			this.props.onChange(blocks);
 		}
 	};
@@ -160,27 +184,14 @@ class BlockList extends React.Component<Props, State> {
 	}
 
 	public render() {
-		const {classes} = this.props;
+		const {classes, blocks} = this.props;
+		const presetColors = this.getPresetColors();
 		return (
 			<div className={classes.wrapper}>
 				<div className={classes.root}>
-					{this.props.blocks.map((block, index) => {
-						return (
-							<Block
-								key={block.id}
-								index={index}
-								block={block}
-								onChange={this.handleChangeBlock}
-								presetColors={this.getPresetColors()}
-								onAddBefore={this.handleAddBefore}
-								onAddAfter={this.handleAddAfter}
-								onDelete={this.handleDelete}
-								focus={this.state.focusedBlock === block.id}
-								onClick={this.handleFocusBlock(block.id)}
-								moveBlock={this.handleMoveBlock}
-							/>
-						);
-					})}
+					{blocks.map((block, index) =>
+						this.getBlock(block, index, block.id === this.state.focusedBlock, presetColors)
+					)}
 					<div className={classes.listActions}>
 						<button className="outline" onClick={this.handleAddEnd}>
 							Add Block
