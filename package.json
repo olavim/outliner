@@ -3,6 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"main": "dist/index.js",
+	"license": "See LICENSE",
 	"scripts": {
 		"start": "nodemon --watch dist dist/index.js",
 		"clean": "rimraf dist",
