@@ -70,6 +70,7 @@ export interface BlockData {
 interface Props extends WithStyles<typeof styles> {
 	blocks: BlockData[];
 	onChange: (blocks: BlockData[]) => any;
+	export?: boolean;
 }
 
 interface State {
@@ -82,19 +83,20 @@ class BlockList extends React.Component<Props, State> {
 	};
 
 	public getBlock = memoize(
-		(block: BlockData, index: number, focused: boolean, presetColors: string[]) => (
+		(block: BlockData, index: number, focused: boolean, exp?: boolean) => (
 			<Block
 				key={block.id}
 				index={index}
 				block={block}
 				onChange={this.handleChangeBlock}
-				presetColors={presetColors}
+				presetColors={this.getPresetColors()}
 				onAddBefore={this.handleAddBefore}
 				onAddAfter={this.handleAddAfter}
 				onDelete={this.handleDelete}
 				focus={focused}
 				onClick={this.handleFocusBlock(block.id)}
 				moveBlock={this.handleMoveBlock}
+				export={exp}
 			/>
 		),
 		{normalizer: (args: any) => JSON.stringify(args)}
@@ -195,12 +197,11 @@ class BlockList extends React.Component<Props, State> {
 
 	public render() {
 		const {classes, blocks} = this.props;
-		const presetColors = this.getPresetColors();
 		return (
 			<div className={classes.wrapper}>
 				<div className={cls(classes.root, {[classes.focus]: this.state.focusedBlock !== -1})}>
 					{blocks.map((block, index) =>
-						this.getBlock(block, index, block.id === this.state.focusedBlock, presetColors)
+						this.getBlock(block, index, block.id === this.state.focusedBlock, this.props.export)
 					)}
 					<div className={classes.listActions}>
 						<button className="outline" onClick={this.handleAddEnd}>

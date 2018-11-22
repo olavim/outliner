@@ -156,6 +156,7 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 					<BlockList
 						blocks={this.state.blocks}
 						onChange={this.handleBlocksChange}
+						export
 					/>
 				</div>
 			</div>

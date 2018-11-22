@@ -231,6 +231,9 @@ const styles = createStyles({
 			fontSize: '1rem',
 			fontWeight: 700
 		},
+		'& > button:disabled': {
+			color: '#ffffff77'
+		},
 		'.print &': {
 			display: 'none'
 		},
@@ -255,24 +258,24 @@ const styles = createStyles({
 		}
 	},
 	actionsActive: {
-		padding: '0.6rem 2.6rem 0.6rem 0.6rem',
-		height: '3rem',
+		padding: '0 2.6rem 0 0.6rem',
+		height: '2.2rem',
 		'@media (max-width: 500px)': {
 			padding: '0.6rem 1rem',
 			height: '5rem'
 		}
 	},
 	actionsEnterDone: {
-		padding: '0.6rem 2.6rem 0.6rem 0.6rem',
-		height: '3rem',
+		padding: '0 2.6rem 0 0.6rem',
+		height: '2.2rem',
 		'@media (max-width: 500px)': {
 			padding: '0.6rem 1rem',
 			height: '5rem'
 		}
 	},
 	actionsExit: {
-		padding: '0.6rem 2.6rem 0.6rem 0.6rem',
-		height: '3rem',
+		padding: '0 2.6rem 0 0.6rem',
+		height: '2.2rem',
 		'@media (max-width: 500px)': {
 			padding: '0.6rem 1rem',
 			height: '5rem'
@@ -298,6 +301,7 @@ interface OwnProps {
 	onDelete: (id: any) => any;
 	onClick: (evt: React.MouseEvent) => any;
 	focus: boolean;
+	export?: boolean;
 }
 
 interface BlockSourceCollectedProps {
@@ -475,7 +479,8 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 			connectDropTarget,
 			connectDragPreview,
 			isDragging,
-			index
+			index,
+			export: exp
 		} = this.props;
 
 		const actionsTop = [
@@ -544,7 +549,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 							style={{backgroundColor: block.color}}
 						>
 							<TextareaAutosize
-								tabIndex={tabIndex}
+								tabIndex={exp ? -1 : tabIndex}
 								ref={this.titleRef}
 								value={block.title}
 								onChange={this.getInputHandler('title')}
@@ -561,7 +566,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 							style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
 						>
 							<TextareaAutosize
-								tabIndex={tabIndex + (block.showTitle ? 1 : 0)}
+								tabIndex={exp ? -1 : tabIndex + (block.showTitle ? 1 : 0)}
 								ref={this.bodyRef}
 								value={block.body}
 								onChange={this.getInputHandler('body')}
