@@ -164,7 +164,8 @@ const styles = createStyles({
 			bottom: 0,
 			left: 0,
 			width: '100%',
-			boxShadow: '0 0 0.5rem 0 rgba(0,0,0,0.2)'
+			boxShadow: '0 0 0.5rem 0 rgba(0,0,0,0.2)',
+			padding: '0 1rem'
 		},
 		'@media print': {
 			display: 'none'
@@ -172,23 +173,41 @@ const styles = createStyles({
 	},
 	actionsEnter: {
 		padding: '0 0.6rem',
-		height: 0
+		height: 0,
+		'@media (max-width: 500px)': {
+			padding: '0 1rem'
+		}
 	},
 	actionsActive: {
 		padding: '0.6rem 0.6rem',
-		height: '3rem'
+		height: '3rem',
+		'@media (max-width: 500px)': {
+			padding: '0.6rem 1rem',
+			height: '5rem'
+		}
 	},
 	actionsEnterDone: {
 		padding: '0.6rem 0.6rem',
-		height: '3rem'
+		height: '3rem',
+		'@media (max-width: 500px)': {
+			padding: '0.6rem 1rem',
+			height: '5rem'
+		}
 	},
 	actionsExit: {
 		padding: '0.6rem 0.6rem',
-		height: '3rem'
+		height: '3rem',
+		'@media (max-width: 500px)': {
+			padding: '0.6rem 1rem',
+			height: '5rem'
+		}
 	},
 	actionsExitActive: {
 		padding: '0 0.6rem',
-		height: 0
+		height: 0,
+		'@media (max-width: 500px)': {
+			padding: '0 1rem'
+		}
 	},
 	actionTop: {
 		cursor: 'pointer',
