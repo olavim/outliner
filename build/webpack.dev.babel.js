@@ -1,10 +1,10 @@
-import merge from 'webpack-merge';
-import webpack from 'webpack';
-import AddAssetHtmlPlugin from 'add-asset-html-webpack-plugin';
-import common from './webpack.common';
-import {paths} from './utils';
+const merge = require('webpack-merge');
+const webpack = require('webpack');
+const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
+const common = require('./webpack.common');
+const {paths} = require('./utils');
 
-export default merge(common, {
+module.exports = merge(common, {
 	output: {
 		filename: 'bundle.js'
 	},

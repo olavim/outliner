@@ -1,14 +1,14 @@
 {
 	"presets": [
-		[
-			"@babel/preset-env",
+		["@babel/preset-env",
 			{
-			"targets": {
-				"browsers": [
-					"last 5 versions"
-				],
-				"node": "6"
-			}
+				"modules": false,
+				"targets": {
+					"browsers": [
+						"last 5 versions"
+					],
+					"node": "6"
+				}
 			}
 		],
 		"@babel/preset-react"

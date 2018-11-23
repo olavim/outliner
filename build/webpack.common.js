@@ -1,8 +1,8 @@
-import webpack from 'webpack';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import HtmlPlugin from 'html-webpack-plugin';
-import ServiceWorkerWebpackPlugin from 'serviceworker-webpack-plugin';
-import {paths} from './utils';
+const webpack = require('webpack');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const HtmlPlugin = require('html-webpack-plugin');
+const ServiceWorkerWebpackPlugin = require('serviceworker-webpack-plugin');
+const {paths} = require('./utils');
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -47,12 +47,9 @@ webpackConfig.module.rules = [
 			{loader: 'awesome-typescript-loader', options: {transpileOnly: true, useCache: true}}
 		]
 	},
-	{
-		test: /\.mjs$/,
-		include: /node_modules/,
-		type: 'javascript/auto'
-	},
+	{test: /\.js$/, include: paths.src(), loader: 'babel-loader', options: {cacheDirectory: true}},
+	{test: /\.mjs$/, include: /node_modules/, type: 'javascript/auto'},
 	{test: /\.(svg|png|ttf|otf)$/, loader: 'url-loader'}
 ];
 
-export default webpackConfig;
+module.exports = webpackConfig;
