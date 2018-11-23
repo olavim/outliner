@@ -1,14 +1,14 @@
-import path from 'path';
+const path = require('path');
 
 const base = (...args) => Reflect.apply(path.resolve, null, [path.resolve(__dirname, '..'), ...args]);
 
-export const paths = {
+const paths = {
 	base,
 	src: base.bind(null, 'src'),
 	dist: base.bind(null, 'dist')
 };
 
-export const getExternal = entries => (ctx, req, cb) => {
+const getExternal = entries => (ctx, req, cb) => {
 	if (!/node_modules/.test(ctx) && req[0] !== '.') {
 		// Assumes you have defined an "entries" variable
 		let notAnEntry = path => {
@@ -25,3 +25,5 @@ export const getExternal = entries => (ctx, req, cb) => {
 
 	cb();
 };
+
+module.exports = {paths, getExternal};

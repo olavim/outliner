@@ -1,5 +1,5 @@
-import webpack from 'webpack';
-import {paths} from './utils';
+const webpack = require('webpack');
+const {paths} = require('./utils');
 
 module.exports = {
 	entry: {

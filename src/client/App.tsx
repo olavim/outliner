@@ -98,7 +98,6 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 				onUpdateReady: () => {
 					this.pushLog('onUpdateReady');
 				},
-
 				onUpdating: () => {
 					this.pushLog('onUpdating');
 				},
