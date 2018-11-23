@@ -395,6 +395,17 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 		showColorPicker: false
 	};
 
+	public componentDidUpdate(prevProps: OwnProps) {
+		if (prevProps.block.indent !== this.props.block.indent) {
+			if (this.titleRef.current) {
+				this.titleRef.current.dispatchEvent('autosize:update');
+			}
+			if (this.bodyRef.current) {
+				this.bodyRef.current.dispatchEvent('autosize:update');
+			}
+		}
+	}
+
 	public handleDecreaseIndent = () => {
 		const {onChange, block} = this.props;
 		onChange(block.id, 'indent', Math.max(0, block.indent - 1));
