@@ -167,9 +167,10 @@ class BlockList extends React.Component<Props, State> {
 
 	public handleChangeBlock = (id: any, prop: keyof BlockData, value: any) => {
 		const blocks = this.props.blocks.slice();
-		const block = blocks.find(b => b.id === id);
-		if (block) {
-			block[prop] = value;
+		const index = blocks.findIndex(b => b.id === id);
+		if (index !== -1) {
+			const newBlock = Object.assign({}, blocks[index], {[prop]: value});
+			blocks[index] = newBlock;
 			this.props.onChange(blocks);
 		}
 	}

@@ -580,6 +580,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 								onClick={this.handleCloseColorPicker}
 								spellCheck={false}
 								autoFocus
+								async
 							/>
 						</div>
 					)}
@@ -597,6 +598,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 								onClick={this.handleCloseColorPicker}
 								spellCheck={false}
 								autoFocus
+								async
 							/>
 						</div>
 					)}
