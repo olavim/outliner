@@ -1,7 +1,10 @@
 import * as React from 'react';
-import {createStyles, WithStyles, withStyles} from '@material-ui/core';
+import {createStyles, WithStyles, withStyles, CircularProgress} from '@material-ui/core';
 import cls from 'classnames';
 import html2pdf from 'html2pdf.js';
+import runtime from 'serviceworker-webpack-plugin/lib/runtime';
+import registerEvents from 'serviceworker-webpack-plugin/lib/browser/registerEvents';
+import WebFont from 'webfontloader';
 import githubIcon from './github-32px.png';
 import BlockList, {BlockData} from './BlockList';
 
@@ -65,22 +68,69 @@ const styles = createStyles({
 });
 
 interface State {
+	logs: string[];
+	fontsLoaded: boolean;
 	blocks: BlockData[];
 	exporting: boolean;
 }
 
 class App extends React.Component<WithStyles<typeof styles>, State> {
 	public state: State = {
+		logs: [],
+		fontsLoaded: false,
 		blocks: [],
 		exporting: true
 	};
 
 	public componentDidMount() {
+		if (
+			'serviceWorker' in navigator &&
+			window.location.protocol === 'https:'
+			// Sw is disabled in localhost because of hmr
+			// (window.location.protocol === 'https:' || window.location.hostname === 'localhost')
+		) {
+			const registration = runtime.register();
+
+			registerEvents(registration, {
+				onInstalled: () => {
+					this.pushLog('onInstalled');
+				},
+				onUpdateReady: () => {
+					this.pushLog('onUpdateReady');
+				},
+
+				onUpdating: () => {
+					this.pushLog('onUpdating');
+				},
+				onUpdateFailed: () => {
+					this.pushLog('onUpdateFailed');
+				},
+				onUpdated: () => {
+					this.pushLog('onUpdated');
+				}
+			});
+		} else {
+			this.pushLog('serviceWorker not available');
+		}
+
+		WebFont.load({
+			google: {
+				families: ['Montserrat:500,700', 'Roboto Mono:400,500']
+			},
+			active: () => {
+				this.setState({fontsLoaded: true});
+			}
+		});
+
 		const data = localStorage.getItem('outliner-data');
 		if (data) {
 			const blocks = JSON.parse(data);
 			this.setState({blocks: blocks.filter(Boolean)});
 		}
+	}
+
+	public pushLog = (log: string) => {
+		this.setState({logs: [...this.state.logs, log]});
 	}
 
 	public handleBlocksChange = (blocks: BlockData[]) => {
@@ -119,6 +169,15 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 
 	public render() {
 		const {classes} = this.props;
+
+		if (!this.state.fontsLoaded) {
+			return (
+				<div style={{width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+					<CircularProgress/>
+				</div>
+			);
+		}
+
 		const blockDataString = encodeURIComponent(JSON.stringify(this.state.blocks));
 		return (
 			<div className={classes.root}>

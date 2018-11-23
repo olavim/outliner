@@ -1,6 +1,7 @@
 import webpack from 'webpack';
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlPlugin from 'html-webpack-plugin';
+import ServiceWorkerWebpackPlugin from 'serviceworker-webpack-plugin';
 import {paths} from './utils';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -31,6 +32,9 @@ webpackConfig.plugins = [
 	new HtmlPlugin({
 		template: paths.src('client/index.html'),
 		filename: paths.dist('client/index.html')
+	}),
+	new ServiceWorkerWebpackPlugin({
+		entry: paths.src('client/sw.js')
 	})
 ];
 

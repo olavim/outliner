@@ -64,7 +64,7 @@ const styles = createStyles({
 		display: 'flex',
 		textAlign: 'left',
 		paddingRight: '2rem',
-		'& textarea, & pre': {
+		'& pre': {
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px',
 			resize: 'none',
@@ -85,7 +85,7 @@ const styles = createStyles({
 		display: 'flex',
 		textAlign: 'left',
 		paddingRight: '2rem',
-		'& textarea, & pre': {
+		'& pre': {
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px',
 			resize: 'none',
@@ -99,6 +99,18 @@ const styles = createStyles({
 		},
 		'@media print': {
 			paddingRight: 0
+		}
+	},
+	textarea: {
+		fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
+		fontSize: '11px',
+		resize: 'none',
+		flex: 1,
+		border: 'none',
+		padding: '0.6rem',
+		backgroundColor: 'transparent',
+		'$title > &': {
+			fontWeight: 500
 		}
 	},
 	actionsLeft: {
@@ -549,6 +561,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 							style={{backgroundColor: block.color}}
 						>
 							<TextareaAutosize
+								className={classes.textarea}
 								tabIndex={exp ? -1 : tabIndex}
 								ref={this.titleRef}
 								value={block.title}
@@ -556,7 +569,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 								onClick={this.handleCloseColorPicker}
 								spellCheck={false}
 								autoFocus
-								async
 							/>
 						</div>
 					)}
@@ -566,6 +578,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 							style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
 						>
 							<TextareaAutosize
+								className={classes.textarea}
 								tabIndex={exp ? -1 : tabIndex + (block.showTitle ? 1 : 0)}
 								ref={this.bodyRef}
 								value={block.body}
@@ -573,7 +586,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 								onClick={this.handleCloseColorPicker}
 								spellCheck={false}
 								autoFocus
-								async
 							/>
 						</div>
 					)}
