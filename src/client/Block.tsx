@@ -111,6 +111,17 @@ const styles = createStyles({
 		backgroundColor: 'transparent',
 		'$title > &': {
 			fontWeight: 500
+		},
+		'pre&': {
+			display: 'none',
+			margin: 0,
+			whiteSpace: 'pre-wrap'
+		},
+		'.print textarea&': {
+			display: 'none'
+		},
+		'.print pre&': {
+			display: 'block'
 		}
 	},
 	actionsLeft: {
@@ -582,6 +593,9 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 								autoFocus
 								async
 							/>
+							<pre className={classes.textarea}>
+								{block.title}
+							</pre>
 						</div>
 					)}
 					{block.showBody && (
@@ -600,6 +614,9 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 								autoFocus
 								async
 							/>
+							<pre className={classes.textarea}>
+								{block.body}
+							</pre>
 						</div>
 					)}
 					<CSSTransition

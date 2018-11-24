@@ -38,7 +38,7 @@ const styles = createStyles({
 		overflowX: 'hidden',
 		alignItems: 'baseline',
 		'&.print': {
-			flex: '0 0 0px'
+			// flex: '0 0 0px'
 		},
 		'@media print': {
 			overflowY: 'visible'
@@ -65,6 +65,18 @@ const styles = createStyles({
 		opacity: 0,
 		zIndex: -1,
 		cursor: 'pointer'
+	},
+	progressOverlay: {
+		width: '100%',
+		height: '100%',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		backgroundColor: '#ffffffaa',
+		zIndex: 500
 	}
 });
 
@@ -84,7 +96,7 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		fontsLoaded: false,
 		loaded: false,
 		blocks: [],
-		exporting: true
+		exporting: false
 	};
 
 	public componentDidMount() {
@@ -133,8 +145,8 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		}
 	}
 
-	public componentDidUpdate() {
-		if (this.state.fontsLoaded) {
+	public componentDidUpdate(_prevProps: any, prevState: State) {
+		if (!prevState.fontsLoaded && this.state.fontsLoaded) {
 			setTimeout(() => {
 				window.requestAnimationFrame(() => {
 					const elem = findDOMNode(this.listRef.current) as HTMLElement;
@@ -171,20 +183,24 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 
 	public handleExport = () => {
 		this.setState({exporting: true}, () => {
-			const elem = document.getElementById('export-content');
-			if (elem) {
-				const opts = {
-					filename: 'outline.pdf',
-					pagebreak: {avoid: 'div'}
-				};
-				html2pdf().set(opts).from(elem).save()
-					.then(() => {
-						this.setState({exporting: false});
-					})
-					.catch((err: any) => {
-						console.error(err);
-					});
-			}
+			setTimeout(() => {
+				window.requestAnimationFrame(() => {
+					const elem = document.getElementById('visible-content');
+					if (elem) {
+						const opts = {
+							filename: 'outline.pdf',
+							pagebreak: {avoid: 'div'}
+						};
+						html2pdf().set(opts).from(elem).save()
+							.then(() => {
+								this.setState({exporting: false});
+							})
+							.catch((err: any) => {
+								console.error(err);
+							});
+					}
+				});
+			}, 0);
 		});
 	}
 
@@ -193,7 +209,7 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 
 		if (!this.state.fontsLoaded) {
 			return (
-				<div style={{width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+				<div className={classes.progressOverlay}>
 					<CircularProgress disableShrink/>
 				</div>
 			);
@@ -202,6 +218,11 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		const blockDataString = encodeURIComponent(JSON.stringify(this.state.blocks));
 		return (
 			<div className={classes.root}>
+				{this.state.exporting && (
+					<div className={classes.progressOverlay}>
+						<CircularProgress disableShrink/>
+					</div>
+				)}
 				<div className={classes.header}>
 					<div className={cls('outline', classes.uploadWrapper)}>
 						<input className={classes.uploadInput} type="file" id="file" onChange={this.handleOpenFile}/>
@@ -226,17 +247,10 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 						<img src={githubIcon}/>
 					</a>
 				</div>
-				<div className={classes.content} id="visible-content" ref={this.listRef}>
+				<div className={cls(classes.content, {print: this.state.exporting})} id="visible-content" ref={this.listRef}>
 					<BlockList
 						blocks={this.state.blocks}
 						onChange={this.handleBlocksChange}
-					/>
-				</div>
-				<div className={cls(classes.content, 'print')} id="export-content">
-					<BlockList
-						blocks={this.state.blocks}
-						onChange={this.handleBlocksChange}
-						export
 					/>
 				</div>
 			</div>
