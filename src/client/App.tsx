@@ -26,6 +26,10 @@ const styles = createStyles({
 		alignItems: 'center',
 		boxShadow: '0 0 0.6rem 0 #00000066',
 		zIndex: 100,
+		'& .outline': {
+			marginRight: '1rem',
+			minHeight: '2.6rem'
+		},
 		'@media only print': {
 			display: 'none'
 		}
@@ -45,7 +49,6 @@ const styles = createStyles({
 		}
 	},
 	uploadWrapper: {
-		marginRight: '1rem',
 		position: 'relative',
 		overflow: 'hidden',
 		minHeight: '2.4rem'
@@ -86,6 +89,10 @@ interface State {
 	fontsLoaded: boolean;
 	blocks: BlockData[];
 	exporting: boolean;
+}
+
+const trimNewLines = (str: string) => {
+	return str.replace(/(\n|\r)+$/, '').replace(/^(\n|\r)+/, '');
 }
 
 class App extends React.Component<WithStyles<typeof styles>, State> {
@@ -181,7 +188,7 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		}
 	}
 
-	public handleExport = () => {
+	public handleExportPDF = () => {
 		this.setState({exporting: true}, () => {
 			setTimeout(() => {
 				window.requestAnimationFrame(() => {
@@ -204,6 +211,41 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		});
 	}
 
+	public handleExportText = () => {
+		setTimeout(() => {
+			window.requestAnimationFrame(() => {
+				const blocks = this.state.blocks;
+				const blockStrings = blocks.map(b => {
+					const parts = [];
+					if (b.showTitle) {
+						parts.push(trimNewLines(b.title));
+					}
+					if (b.showBody) {
+						parts.push(trimNewLines(b.body));
+					}
+					return parts.join('\n');
+				});
+				const str = blockStrings.join('\n\n\n');
+				this.downloadData('outline.txt', str);
+			});
+		}, 0);
+	}
+
+	public handleSave = () => {
+		this.downloadData('outline.otl', JSON.stringify(this.state.blocks));
+	}
+
+	public downloadData = (filename: string, data: string) => {
+		const el = document.createElement('a');
+		el.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+		el.setAttribute('download', filename);
+
+		el.style.display = 'none';
+		document.body.appendChild(el);
+		el.click();
+		document.body.removeChild(el);
+	}
+
 	public render() {
 		const {classes} = this.props;
 
@@ -215,7 +257,6 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 			);
 		}
 
-		const blockDataString = encodeURIComponent(JSON.stringify(this.state.blocks));
 		return (
 			<div className={classes.root}>
 				{this.state.exporting && (
@@ -226,18 +267,16 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 				<div className={classes.header}>
 					<div className={cls('outline', classes.uploadWrapper)}>
 						<input className={classes.uploadInput} type="file" id="file" onChange={this.handleOpenFile}/>
-						<label className={classes.uploadLabel} htmlFor="file">open</label>
+						<label className={classes.uploadLabel} htmlFor="file">Open</label>
 					</div>
-					<a
-						className="outline"
-						href={`data:text/plain;charset=utf-8,${blockDataString}`}
-						download="outline.otl"
-						style={{minHeight: '2.4rem', marginRight: '1rem'}}
-					>
-						save
-					</a>
-					<button className="outline" onClick={this.handleExport} style={{minHeight: '2.6rem'}}>
+					<button className="outline" onClick={this.handleSave}>
+						Save
+					</button>
+					<button className="outline" onClick={this.handleExportPDF}>
 						Export PDF
+					</button>
+					<button className="outline" onClick={this.handleExportText}>
+						Export Text
 					</button>
 					<a
 						href="https://github.com/olavim/outliner"
