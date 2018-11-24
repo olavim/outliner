@@ -196,7 +196,8 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 					if (elem) {
 						const opts = {
 							filename: 'outline.pdf',
-							pagebreak: {avoid: 'div'}
+							pagebreak: {avoid: 'div'},
+							html2canvas: {scale: 1}
 						};
 						html2pdf().set(opts).from(elem).save()
 							.then(() => {
