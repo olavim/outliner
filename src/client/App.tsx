@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {findDOMNode} from 'react-dom';
 import {createStyles, WithStyles, withStyles, CircularProgress} from '@material-ui/core';
 import cls from 'classnames';
 import html2pdf from 'html2pdf.js';
@@ -69,15 +70,19 @@ const styles = createStyles({
 
 interface State {
 	logs: string[];
+	loaded: boolean;
 	fontsLoaded: boolean;
 	blocks: BlockData[];
 	exporting: boolean;
 }
 
 class App extends React.Component<WithStyles<typeof styles>, State> {
+	public listRef = React.createRef<any>();
+
 	public state: State = {
 		logs: [],
 		fontsLoaded: false,
+		loaded: false,
 		blocks: [],
 		exporting: true
 	};
@@ -124,7 +129,20 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		const data = localStorage.getItem('outliner-data');
 		if (data) {
 			const blocks = JSON.parse(data);
-			this.setState({blocks: blocks.filter(Boolean)});
+			this.setState({blocks: blocks.filter(Boolean), loaded: true});
+		}
+	}
+
+	public componentDidUpdate() {
+		if (this.state.fontsLoaded) {
+			setTimeout(() => {
+				window.requestAnimationFrame(() => {
+					const elem = findDOMNode(this.listRef.current) as HTMLElement;
+					if (elem) {
+						elem.scrollTo(0, 0);
+					}
+				});
+			}, 0);
 		}
 	}
 
@@ -159,9 +177,13 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 					filename: 'outline.pdf',
 					pagebreak: {avoid: 'div'}
 				};
-				html2pdf().set(opts).from(elem).save().then(() => {
-					this.setState({exporting: false});
-				});
+				html2pdf().set(opts).from(elem).save()
+					.then(() => {
+						this.setState({exporting: false});
+					})
+					.catch((err: any) => {
+						console.error(err);
+					});
 			}
 		});
 	}
@@ -172,7 +194,7 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		if (!this.state.fontsLoaded) {
 			return (
 				<div style={{width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-					<CircularProgress/>
+					<CircularProgress disableShrink/>
 				</div>
 			);
 		}
@@ -204,7 +226,7 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 						<img src={githubIcon}/>
 					</a>
 				</div>
-				<div className={classes.content}>
+				<div className={classes.content} id="visible-content" ref={this.listRef}>
 					<BlockList
 						blocks={this.state.blocks}
 						onChange={this.handleBlocksChange}
