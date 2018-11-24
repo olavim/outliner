@@ -26,6 +26,10 @@ const styles = createStyles({
 		alignItems: 'center',
 		boxShadow: '0 0 0.6rem 0 #00000066',
 		zIndex: 100,
+		'& .outline': {
+			marginRight: '1rem',
+			minHeight: '2.6rem'
+		},
 		'@media only print': {
 			display: 'none'
 		}
@@ -38,14 +42,13 @@ const styles = createStyles({
 		overflowX: 'hidden',
 		alignItems: 'baseline',
 		'&.print': {
-			flex: '0 0 0px'
+			// flex: '0 0 0px'
 		},
 		'@media print': {
 			overflowY: 'visible'
 		}
 	},
 	uploadWrapper: {
-		marginRight: '1rem',
 		position: 'relative',
 		overflow: 'hidden',
 		minHeight: '2.4rem'
@@ -65,6 +68,18 @@ const styles = createStyles({
 		opacity: 0,
 		zIndex: -1,
 		cursor: 'pointer'
+	},
+	progressOverlay: {
+		width: '100%',
+		height: '100%',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		backgroundColor: '#ffffffaa',
+		zIndex: 500
 	}
 });
 
@@ -76,6 +91,10 @@ interface State {
 	exporting: boolean;
 }
 
+const trimNewLines = (str: string) => {
+	return str.replace(/(\n|\r)+$/, '').replace(/^(\n|\r)+/, '');
+}
+
 class App extends React.Component<WithStyles<typeof styles>, State> {
 	public listRef = React.createRef<any>();
 
@@ -84,7 +103,7 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		fontsLoaded: false,
 		loaded: false,
 		blocks: [],
-		exporting: true
+		exporting: false
 	};
 
 	public componentDidMount() {
@@ -133,8 +152,8 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		}
 	}
 
-	public componentDidUpdate() {
-		if (this.state.fontsLoaded) {
+	public componentDidUpdate(_prevProps: any, prevState: State) {
+		if (!prevState.fontsLoaded && this.state.fontsLoaded) {
 			setTimeout(() => {
 				window.requestAnimationFrame(() => {
 					const elem = findDOMNode(this.listRef.current) as HTMLElement;
@@ -169,23 +188,62 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		}
 	}
 
-	public handleExport = () => {
+	public handleExportPDF = () => {
 		this.setState({exporting: true}, () => {
-			const elem = document.getElementById('export-content');
-			if (elem) {
-				const opts = {
-					filename: 'outline.pdf',
-					pagebreak: {avoid: 'div'}
-				};
-				html2pdf().set(opts).from(elem).save()
-					.then(() => {
-						this.setState({exporting: false});
-					})
-					.catch((err: any) => {
-						console.error(err);
-					});
-			}
+			setTimeout(() => {
+				window.requestAnimationFrame(() => {
+					const elem = document.getElementById('visible-content');
+					if (elem) {
+						const opts = {
+							filename: 'outline.pdf',
+							pagebreak: {avoid: 'div'}
+						};
+						html2pdf().set(opts).from(elem).save()
+							.then(() => {
+								this.setState({exporting: false});
+							})
+							.catch((err: any) => {
+								console.error(err);
+							});
+					}
+				});
+			}, 0);
 		});
+	}
+
+	public handleExportText = () => {
+		setTimeout(() => {
+			window.requestAnimationFrame(() => {
+				const blocks = this.state.blocks;
+				const blockStrings = blocks.map(b => {
+					const parts = [];
+					if (b.showTitle) {
+						parts.push(trimNewLines(b.title));
+					}
+					if (b.showBody) {
+						parts.push(trimNewLines(b.body));
+					}
+					return parts.join('\n');
+				});
+				const str = blockStrings.join('\n\n\n');
+				this.downloadData('outline.txt', str);
+			});
+		}, 0);
+	}
+
+	public handleSave = () => {
+		this.downloadData('outline.otl', JSON.stringify(this.state.blocks));
+	}
+
+	public downloadData = (filename: string, data: string) => {
+		const el = document.createElement('a');
+		el.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+		el.setAttribute('download', filename);
+
+		el.style.display = 'none';
+		document.body.appendChild(el);
+		el.click();
+		document.body.removeChild(el);
 	}
 
 	public render() {
@@ -193,30 +251,32 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 
 		if (!this.state.fontsLoaded) {
 			return (
-				<div style={{width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+				<div className={classes.progressOverlay}>
 					<CircularProgress disableShrink/>
 				</div>
 			);
 		}
 
-		const blockDataString = encodeURIComponent(JSON.stringify(this.state.blocks));
 		return (
 			<div className={classes.root}>
+				{this.state.exporting && (
+					<div className={classes.progressOverlay}>
+						<CircularProgress disableShrink/>
+					</div>
+				)}
 				<div className={classes.header}>
 					<div className={cls('outline', classes.uploadWrapper)}>
 						<input className={classes.uploadInput} type="file" id="file" onChange={this.handleOpenFile}/>
-						<label className={classes.uploadLabel} htmlFor="file">open</label>
+						<label className={classes.uploadLabel} htmlFor="file">Open</label>
 					</div>
-					<a
-						className="outline"
-						href={`data:text/plain;charset=utf-8,${blockDataString}`}
-						download="outline.otl"
-						style={{minHeight: '2.4rem', marginRight: '1rem'}}
-					>
-						save
-					</a>
-					<button className="outline" onClick={this.handleExport} style={{minHeight: '2.6rem'}}>
+					<button className="outline" onClick={this.handleSave}>
+						Save
+					</button>
+					<button className="outline" onClick={this.handleExportPDF}>
 						Export PDF
+					</button>
+					<button className="outline" onClick={this.handleExportText}>
+						Export Text
 					</button>
 					<a
 						href="https://github.com/olavim/outliner"
@@ -226,17 +286,10 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 						<img src={githubIcon}/>
 					</a>
 				</div>
-				<div className={classes.content} id="visible-content" ref={this.listRef}>
+				<div className={cls(classes.content, {print: this.state.exporting})} id="visible-content" ref={this.listRef}>
 					<BlockList
 						blocks={this.state.blocks}
 						onChange={this.handleBlocksChange}
-					/>
-				</div>
-				<div className={cls(classes.content, 'print')} id="export-content">
-					<BlockList
-						blocks={this.state.blocks}
-						onChange={this.handleBlocksChange}
-						export
 					/>
 				</div>
 			</div>
