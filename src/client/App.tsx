@@ -238,14 +238,12 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 	}
 
 	public downloadData = (filename: string, data: string) => {
+		const blob = new Blob(['\ufeff', data]);
 		const el = document.createElement('a');
-		el.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
-		el.setAttribute('download', filename);
-
-		el.style.display = 'none';
-		document.body.appendChild(el);
+		el.href = window.URL.createObjectURL(blob);
+		el.download = filename;
 		el.click();
-		document.body.removeChild(el);
+		window.URL.revokeObjectURL(el.href);
 	}
 
 	public render() {
