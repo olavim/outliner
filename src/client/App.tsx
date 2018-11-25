@@ -2,10 +2,12 @@ import * as React from 'react';
 import {findDOMNode} from 'react-dom';
 import {createStyles, WithStyles, withStyles, CircularProgress} from '@material-ui/core';
 import cls from 'classnames';
-import html2pdf from 'html2pdf.js';
 import runtime from 'serviceworker-webpack-plugin/lib/runtime';
 import registerEvents from 'serviceworker-webpack-plugin/lib/browser/registerEvents';
 import WebFont from 'webfontloader';
+import PDFDocument from 'pdfkit-browserify';
+import blobStream from 'blob-stream';
+import FileSaver from 'file-saver';
 import githubIcon from './github-32px.png';
 import BlockList, {BlockData} from './BlockList';
 
@@ -41,9 +43,6 @@ const styles = createStyles({
 		overflowY: 'auto',
 		overflowX: 'hidden',
 		alignItems: 'baseline',
-		'&.print': {
-			// flex: '0 0 0px'
-		},
 		'@media print': {
 			overflowY: 'visible'
 		}
@@ -190,27 +189,111 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 
 	public handleExportPDF = () => {
 		this.setState({exporting: true}, () => {
-			setTimeout(() => {
-				window.requestAnimationFrame(() => {
-					const elem = document.getElementById('visible-content');
-					if (elem) {
-						const opts = {
-							filename: 'outline.pdf',
-							pagebreak: {avoid: 'div'},
-							html2canvas: {scale: 1},
-							jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}
-						};
-						html2pdf().set(opts).from(elem).save()
-							.then(() => {
-								this.setState({exporting: false});
-							})
-							.catch((err: any) => {
-								console.error(err);
-							});
-					}
-				});
-			}, 0);
-		});
+			const ppi = 72;
+			const pageWidth = 8.3 * ppi;
+			const pageHeight = 11.7 * ppi;
+			const indentWidth = 20;
+			const margin = 0.5 * ppi;
+			const blockMargin = 0.03 * ppi;
+			const blockPadding = 0.1 * ppi;
+			const borderRadius = 2;
+			const fontSize = 8;
+			const baseBlockTextWidth = pageWidth - (2 * margin) - (2 * blockPadding);
+			const maxPageContentHeight = pageHeight - (2 * margin);
+
+			const doc = new PDFDocument({size: 'a4', margin});
+			const stream = doc.pipe(blobStream());
+			doc.fontSize(fontSize);
+
+			const roundedRect = (x: number, y: number, w: number, h: number, tl: number, tr: number, bl: number, br: number) => {
+				return doc
+					.moveTo(x + borderRadius, y)
+					.lineTo(x + w - tr, y)
+					.quadraticCurveTo(
+						x + w, y,
+						x + w, y + tr
+					)
+					.lineTo(x + w, y + h - br)
+					.quadraticCurveTo(
+						x + w, y + h,
+						x + w - br, y + h
+					)
+					.lineTo(x + bl, y + h)
+					.quadraticCurveTo(
+						x, y + h,
+						x, y + h - bl
+					)
+					.lineTo(x, y + tl)
+					.quadraticCurveTo(
+						x, y,
+						x + tl, y
+					);
+			};
+
+			let pageContentHeight = 0;
+
+			for (const block of this.state.blocks) {
+				const title = block.title.replace(/\t/g, '    ');
+				const body = block.body.replace(/\t/g, '    ');
+				const maxTextWidth = baseBlockTextWidth - (block.indent * indentWidth);
+				const x = margin + (block.indent * indentWidth);
+				let y = margin + pageContentHeight + blockMargin;
+
+				const titleHeight = block.showTitle
+					? doc.font('Courier-Bold').heightOfString(title, {width: maxTextWidth}) + (1.5 * blockPadding)
+					: 0;
+				const bodyHeight = block.showBody
+					? doc.font('Courier').heightOfString(body, {width: maxTextWidth}) + (1.5 * blockPadding)
+					: 0;
+				const blockWidth = maxTextWidth + (2 * blockPadding);
+				const blockHeight = titleHeight + bodyHeight;
+
+				pageContentHeight += blockHeight + (2 * blockMargin);
+
+				if (pageContentHeight > maxPageContentHeight) {
+					doc.addPage();
+					pageContentHeight = blockHeight + (2 * blockMargin);
+					y = margin;
+				}
+
+				if (block.showTitle && block.showBody) {
+					roundedRect(x, y, blockWidth, titleHeight, borderRadius, borderRadius, 0, 0)
+						.fillOpacity(1)
+						.fill(block.color);
+					roundedRect(x, y + titleHeight, blockWidth, bodyHeight, 0, 0, borderRadius, borderRadius)
+						.fillOpacity(0.5)
+						.fill(block.color);
+				} else if (block.showTitle) {
+					roundedRect(x, y, blockWidth, titleHeight, borderRadius, borderRadius, borderRadius, borderRadius)
+						.fillOpacity(1)
+						.fill(block.color);
+				} else if (block.showBody) {
+					roundedRect(x, y + titleHeight, blockWidth, bodyHeight, borderRadius, borderRadius, borderRadius, borderRadius)
+						.fillOpacity(1)
+						.fill(block.color);
+				}
+
+				doc.fillOpacity(1).fill('#000000');
+
+				if (block.showTitle) {
+					doc
+						.font('Courier-Bold')
+						.text(title, x + blockPadding, y + blockPadding, {width: maxTextWidth});
+				}
+				if (block.showBody) {
+					doc
+						.font('Courier')
+						.text(body, x + blockPadding, y + titleHeight + blockPadding, {width: maxTextWidth});
+				}
+			}
+
+			doc.end();
+			stream.on('finish', () => {
+				const blob = stream.toBlob('application/pdf');
+				FileSaver.saveAs(blob, 'outline.pdf');
+				this.setState({exporting: false});
+			});
+		})
 	}
 
 	public handleExportText = () => {
@@ -288,7 +371,7 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 						<img src={githubIcon}/>
 					</a>
 				</div>
-				<div className={cls(classes.content, {print: this.state.exporting})} id="visible-content" ref={this.listRef}>
+				<div className={classes.content} ref={this.listRef}>
 					<BlockList
 						blocks={this.state.blocks}
 						onChange={this.handleBlocksChange}
