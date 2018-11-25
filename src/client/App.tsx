@@ -242,7 +242,9 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 		const el = document.createElement('a');
 		el.href = window.URL.createObjectURL(blob);
 		el.download = filename;
+		document.body.appendChild(el);
 		el.click();
+		document.body.removeChild(el);
 		window.URL.revokeObjectURL(el.href);
 	}
 
