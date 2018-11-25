@@ -113,9 +113,15 @@ const styles = createStyles({
 			fontWeight: 500
 		},
 		'pre&': {
-			display: 'none',
 			margin: 0,
-			whiteSpace: 'pre-wrap'
+			whiteSpace: 'pre-wrap',
+			cursor: 'pointer'
+		},
+		'pre&:active': {
+			cursor: 'text'
+		},
+		'$focus pre&': {
+			display: 'none'
 		},
 		'.print textarea&': {
 			display: 'none'
@@ -571,7 +577,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						classNames={transitionClassNames}
 						timeout={0}
 					>
-						<div className={classes.actionsTop} onClick={this.handleCloseColorPicker}>
+						<div className={classes.actionsTop}>
 							{actionsTop.map(a => (
 								<button key={a.label} onClick={a.fn}>{a.label}</button>
 							))}
@@ -582,17 +588,18 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 							className={classes.title}
 							style={{backgroundColor: block.color}}
 						>
-							<TextareaAutosize
-								className={classes.textarea}
-								tabIndex={exp ? -1 : tabIndex}
-								ref={this.titleRef}
-								value={block.title}
-								onChange={this.getInputHandler('title')}
-								onClick={this.handleCloseColorPicker}
-								spellCheck={false}
-								autoFocus
-								async
-							/>
+							{focus && (
+								<TextareaAutosize
+									className={classes.textarea}
+									tabIndex={exp ? -1 : tabIndex}
+									ref={this.titleRef}
+									value={block.title}
+									onChange={this.getInputHandler('title')}
+									onClick={this.handleCloseColorPicker}
+									spellCheck={false}
+									autoFocus
+								/>
+							)}
 							<pre className={classes.textarea}>
 								{block.title}
 							</pre>
@@ -603,17 +610,18 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 							className={classes.text}
 							style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
 						>
-							<TextareaAutosize
-								className={classes.textarea}
-								tabIndex={exp ? -1 : tabIndex + (block.showTitle ? 1 : 0)}
-								ref={this.bodyRef}
-								value={block.body}
-								onChange={this.getInputHandler('body')}
-								onClick={this.handleCloseColorPicker}
-								spellCheck={false}
-								autoFocus
-								async
-							/>
+							{focus && (
+								<TextareaAutosize
+									className={classes.textarea}
+									tabIndex={exp ? -1 : tabIndex + (block.showTitle ? 1 : 0)}
+									ref={this.bodyRef}
+									value={block.body}
+									onChange={this.getInputHandler('body')}
+									onClick={this.handleCloseColorPicker}
+									spellCheck={false}
+									autoFocus
+								/>
+							)}
 							<pre className={classes.textarea}>
 								{block.body}
 							</pre>

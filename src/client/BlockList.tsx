@@ -118,7 +118,11 @@ class BlockList extends React.Component<Props, State> {
 		const blocks = this.props.blocks.slice();
 		if (index !== -1) {
 			const id = new Date().getTime();
-			const prevColor = blocks.length > 0 ? blocks[blocks.length - 1].color : '#ffcc88';
+			const prevColor =
+				index > 0 ? blocks[index - 1].color :
+				index < blocks.length - 1 ? blocks[index].color :
+				'#ffcc88';
+
 			blocks.splice(index, 0, {
 				id,
 				title: '',
@@ -126,7 +130,7 @@ class BlockList extends React.Component<Props, State> {
 				showTitle: true,
 				showBody: false,
 				color: prevColor,
-				indent: 0
+				indent: index > 0 ? blocks[index - 1].indent : 0
 			});
 			setTimeout(() => {
 				this.setState({focusedBlock: id});
