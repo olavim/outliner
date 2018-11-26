@@ -5,11 +5,9 @@ import cls from 'classnames';
 import runtime from 'serviceworker-webpack-plugin/lib/runtime';
 import registerEvents from 'serviceworker-webpack-plugin/lib/browser/registerEvents';
 import WebFont from 'webfontloader';
-import PDFDocument from 'pdfkit-browserify';
-import blobStream from 'blob-stream';
-import FileSaver from 'file-saver';
 import githubIcon from './github-32px.png';
 import BlockList, {BlockData} from './BlockList';
+import PDF from '@/lib/create-pdf';
 
 const styles = createStyles({
 	root: {
@@ -190,109 +188,25 @@ class App extends React.Component<WithStyles<typeof styles>, State> {
 	public handleExportPDF = () => {
 		this.setState({exporting: true}, () => {
 			const ppi = 72;
-			const pageWidth = 8.3 * ppi;
-			const pageHeight = 11.7 * ppi;
-			const indentWidth = 20;
-			const margin = 0.5 * ppi;
-			const blockMargin = 0.03 * ppi;
-			const blockPadding = 0.1 * ppi;
-			const borderRadius = 2;
-			const fontSize = 8;
-			const baseBlockTextWidth = pageWidth - (2 * margin) - (2 * blockPadding);
-			const maxPageContentHeight = pageHeight - (2 * margin);
-
-			const doc = new PDFDocument({size: 'a4', margin});
-			const stream = doc.pipe(blobStream());
-			doc.fontSize(fontSize);
-
-			const roundedRect = (x: number, y: number, w: number, h: number, tl: number, tr: number, bl: number, br: number) => {
-				return doc
-					.moveTo(x + borderRadius, y)
-					.lineTo(x + w - tr, y)
-					.quadraticCurveTo(
-						x + w, y,
-						x + w, y + tr
-					)
-					.lineTo(x + w, y + h - br)
-					.quadraticCurveTo(
-						x + w, y + h,
-						x + w - br, y + h
-					)
-					.lineTo(x + bl, y + h)
-					.quadraticCurveTo(
-						x, y + h,
-						x, y + h - bl
-					)
-					.lineTo(x, y + tl)
-					.quadraticCurveTo(
-						x, y,
-						x + tl, y
-					);
-			};
-
-			let pageContentHeight = 0;
-
-			for (const block of this.state.blocks) {
-				const title = block.title.replace(/\t/g, '    ');
-				const body = block.body.replace(/\t/g, '    ');
-				const maxTextWidth = baseBlockTextWidth - (block.indent * indentWidth);
-				const x = margin + (block.indent * indentWidth);
-				let y = margin + pageContentHeight + blockMargin;
-
-				const titleHeight = block.showTitle
-					? doc.font('Courier-Bold').heightOfString(title, {width: maxTextWidth}) + (1.5 * blockPadding)
-					: 0;
-				const bodyHeight = block.showBody
-					? doc.font('Courier').heightOfString(body, {width: maxTextWidth}) + (1.5 * blockPadding)
-					: 0;
-				const blockWidth = maxTextWidth + (2 * blockPadding);
-				const blockHeight = titleHeight + bodyHeight;
-
-				pageContentHeight += blockHeight + (2 * blockMargin);
-
-				if (pageContentHeight > maxPageContentHeight) {
-					doc.addPage();
-					pageContentHeight = blockHeight + (2 * blockMargin);
-					y = margin;
-				}
-
-				if (block.showTitle && block.showBody) {
-					roundedRect(x, y, blockWidth, titleHeight, borderRadius, borderRadius, 0, 0)
-						.fillOpacity(1)
-						.fill(block.color);
-					roundedRect(x, y + titleHeight, blockWidth, bodyHeight, 0, 0, borderRadius, borderRadius)
-						.fillOpacity(0.5)
-						.fill(block.color);
-				} else if (block.showTitle) {
-					roundedRect(x, y, blockWidth, titleHeight, borderRadius, borderRadius, borderRadius, borderRadius)
-						.fillOpacity(1)
-						.fill(block.color);
-				} else if (block.showBody) {
-					roundedRect(x, y + titleHeight, blockWidth, bodyHeight, borderRadius, borderRadius, borderRadius, borderRadius)
-						.fillOpacity(1)
-						.fill(block.color);
-				}
-
-				doc.fillOpacity(1).fill('#000000');
-
-				if (block.showTitle) {
-					doc
-						.font('Courier-Bold')
-						.text(title, x + blockPadding, y + blockPadding, {width: maxTextWidth});
-				}
-				if (block.showBody) {
-					doc
-						.font('Courier')
-						.text(body, x + blockPadding, y + titleHeight + blockPadding, {width: maxTextWidth});
-				}
-			}
-
-			doc.end();
-			stream.on('finish', () => {
-				const blob = stream.toBlob('application/pdf');
-				FileSaver.saveAs(blob, 'outline.pdf');
-				this.setState({exporting: false});
+			const pdf = new PDF({
+				pageWidth: 8.3 * ppi,
+				pageHeight: 11.7 * ppi,
+				indentWidth: 40,
+				margin: 0.5 * ppi,
+				blockMargin: 0.04 * ppi,
+				blockPadding: 0.07 * ppi,
+				borderRadius: 4,
+				fontSize: 9
 			});
+
+			setTimeout(() => {
+				window.requestAnimationFrame(() => {
+					pdf.export(this.state.blocks)
+						.then(() => {
+							this.setState({exporting: false});
+						});
+				});
+			}, 0);
 		})
 	}
 
