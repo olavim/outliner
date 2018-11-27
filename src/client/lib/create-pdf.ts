@@ -26,12 +26,13 @@ export default class PDF {
 	private doc: any = null;
 	private stream: any = null;
 	private page: number = 0;
+	private pageContentHeight: number = 0;
 
 	constructor(opts: PDFOptions) {
 		this.options = opts;
 	}
 
-	nextPage = () => {
+	private nextPage = () => {
 		if (this.doc.bufferedPageRange().count - 1 > this.page) {
 			this.doc.switchToPage(this.page + 1);
 		} else {
@@ -40,14 +41,12 @@ export default class PDF {
 		this.page++;
 	}
 
-	previousPage = () => {
-		if (this.page > 0) {
-			this.doc.switchToPage(this.page - 1);
-			this.page--;
-		}
+	private setPage = (page: number) => {
+		this.doc.switchToPage(page);
+		this.page = page;
 	}
 
-	roundedRect = (
+	private roundedRect = (
 		x: number,
 		y: number,
 		width: number,
@@ -62,7 +61,6 @@ export default class PDF {
 		const {margin, pageHeight} = this.options;
 
 		// We might need multiple paths if rect overflows page
-		const origPage = this.page;
 		const multiPage = y + height + margin > pageHeight;
 
 		// Start from bottom left
@@ -72,16 +70,10 @@ export default class PDF {
 		let path = this.doc.moveTo(x, startY)
 			// Line to top left
 			.lineTo(x, y + topLeft)
-			.quadraticCurveTo(
-				x, y,
-				x + topLeft, y
-			)
+			.quadraticCurveTo(x, y, x + topLeft, y)
 			// Line to top right
 			.lineTo(x + width - topRight, y)
-			.quadraticCurveTo(
-				x + width, y,
-				x + width, y + topRight
-			)
+			.quadraticCurveTo(x + width, y, x + width, y + topRight)
 
 		// Line to bottom right (stop at page end)
 		if (multiPage) {
@@ -126,16 +118,10 @@ export default class PDF {
 		}
 
 		path = path
-			.quadraticCurveTo(
-				x + width, y + height,
-				x + width - bottomRight, y + height
-			)
+			.quadraticCurveTo(x + width, y + height, x + width - bottomRight, y + height)
 			// Line to bottom left
 			.lineTo(x + bottomLeft, y + height)
-			.quadraticCurveTo(
-				x, y + height,
-				x, y + height - bottomLeft
-			)
+			.quadraticCurveTo(x, y + height, x, y + height - bottomLeft)
 			.lineTo(x, endY);
 
 		if (closePath) {
@@ -143,15 +129,144 @@ export default class PDF {
 		}
 
 		pathCallback(path);
-		this.doc.switchToPage(origPage);
-		this.page = origPage;
 	};
 
-	export = (blocks: BlockData[]) => {
+	private text = (str: string, x: number, y: number, textOpts: any) => {
+		const {margin, pageHeight} = this.options;
+		const lineHeight = this.doc.currentLineHeight();
+
+		this.doc.fillOpacity(1)
+			._text(str, x, y, textOpts, (line: string, opts: any) => {
+				this.doc.fillOpacity(1).fill(opts.fill)._fragment(line, x, y, opts);
+
+				y += lineHeight;
+
+				if (y + lineHeight + margin > pageHeight) {
+					const overflowHeight = y + lineHeight + margin - pageHeight;
+					this.nextPage();
+					y = margin - overflowHeight;
+				}
+			});
+
+		return y;
+	}
+
+	private addContent = (blockHeight: number) => {
+		const {pageHeight, margin, blockMargin} = this.options;
+		const maxPageContentHeight = pageHeight - (2 * margin);
+		let contentStart = margin + this.pageContentHeight + blockMargin;
+		let totalBlockHeight = blockHeight + (2 * blockMargin);
+
+		if (this.pageContentHeight === 0) {
+			totalBlockHeight -= blockMargin;
+			contentStart -= blockMargin;
+		}
+
+		this.pageContentHeight += totalBlockHeight;
+
+		// If we need to split content, recalculate height of remaining page content on new page
+		if (totalBlockHeight > maxPageContentHeight) {
+			let newHeight = totalBlockHeight - (pageHeight - contentStart - margin) - blockMargin;
+			while (newHeight > maxPageContentHeight) {
+				newHeight -= maxPageContentHeight;
+			}
+			this.pageContentHeight = newHeight;
+		}
+
+		// Add block on new page if it would overflow
+		if (this.pageContentHeight > maxPageContentHeight) {
+			this.nextPage();
+			// Do not add top margin for first block of page
+			this.pageContentHeight = blockHeight + blockMargin;
+			contentStart = margin;
+		}
+
+		return contentStart;
+	}
+
+	private renderBlock = (block: BlockData) => {
+		const {pageWidth, margin, indentWidth, blockPadding, borderRadius} = this.options;
+		const baseBlockTextWidth = pageWidth - (2 * margin) - (2 * blockPadding);
+
+		// PDFKit doesn't support tabs
+		const title = block.title.replace(/\t/g, '    ');
+		const body = block.body.replace(/\t/g, '    ');
+		const maxTextWidth = baseBlockTextWidth - (block.indent * indentWidth);
+
+		const titleTextHeight = this.doc.font(titleFont).heightOfString(title, {width: maxTextWidth});
+		const bodyTextHeight = this.doc.font(bodyFont).heightOfString(body, {width: maxTextWidth});
+		const titleHeight = block.showTitle ? titleTextHeight + (2 * blockPadding) : 0;
+		const bodyHeight = block.showBody ? bodyTextHeight + (2 * blockPadding) : 0;
+		const blockWidth = maxTextWidth + (2 * blockPadding);
+		const blockHeight = titleHeight + bodyHeight;
+
+		const x = margin + (block.indent * indentWidth);
+		const y = this.addContent(blockHeight);
+
+		const origPage = this.page;
+
+		if (block.showTitle && block.showBody) {
+			// Draw two separate rectangles because of different colors
+
+			this.roundedRect(
+				x, y,
+				blockWidth, titleHeight,
+				borderRadius, borderRadius, 0, 0,
+				true,
+				(path: any) => path.fillOpacity(1).fill(block.color)
+			);
+			this.roundedRect(
+				x, y + titleHeight,
+				blockWidth, bodyHeight,
+				0, 0, borderRadius, borderRadius,
+				true,
+				(path: any) => path.fillOpacity(0.5).fill(block.color)
+			);
+		} else {
+			this.roundedRect(
+				x, y,
+				blockWidth, block.showTitle ? titleHeight : bodyHeight,
+				borderRadius, borderRadius, borderRadius, borderRadius,
+				true,
+				(path: any) => path.fillOpacity(1).fill(block.color)
+			);
+		}
+
+		this.setPage(origPage);
+
+		this.roundedRect(
+			x, y,
+			blockWidth, blockHeight,
+			borderRadius, borderRadius, borderRadius, borderRadius,
+			false,
+			(path: any) => path.lineWidth(0.1).stroke('#666')
+		);
+
+		this.setPage(origPage);
+
+		let bodyY = y + titleHeight;
+
+		if (block.showTitle) {
+			this.doc.font(titleFont);
+			const nextLineY = this.text(title, x + blockPadding, y + blockPadding, {
+				width: maxTextWidth,
+				fill: '#000000'
+			});
+			bodyY = nextLineY + blockPadding;
+		}
+
+		if (block.showBody) {
+			this.doc.font(bodyFont);
+			this.text(body, x + blockPadding, bodyY + blockPadding, {
+				width: maxTextWidth,
+				fill: '#000000'
+			});
+		}
+	}
+
+	public export = (blocks: BlockData[]) => {
 		return new Promise(resolve => {
-			const {pageWidth, pageHeight, margin, fontSize, indentWidth, blockMargin, blockPadding, borderRadius} = this.options;
-			const baseBlockTextWidth = pageWidth - (2 * margin) - (2 * blockPadding);
-			const maxPageContentHeight = pageHeight - (2 * margin);
+			const {margin, fontSize} = this.options;
 
 			this.doc = new PDFDocument({size: 'a4', margin, bufferPages: true});
 			this.stream = this.doc.pipe(blobStream());
@@ -165,114 +280,7 @@ export default class PDF {
 
 			this.doc.fontSize(fontSize);
 
-			let pageContentHeight = 0;
-
-			blocks.forEach((block, index) => {
-				const title = block.title.replace(/\t/g, '    ');
-				const body = block.body.replace(/\t/g, '    ');
-				const maxTextWidth = baseBlockTextWidth - (block.indent * indentWidth);
-				const x = margin + (block.indent * indentWidth);
-				let y = margin + pageContentHeight + blockMargin;
-
-				const titleTextHeight = this.doc.font(titleFont).heightOfString(title, {width: maxTextWidth});
-				const bodyTextHeight = this.doc.font(bodyFont).heightOfString(body, {width: maxTextWidth});
-				const titleHeight = block.showTitle ? titleTextHeight + (2 * blockPadding) : 0;
-				const bodyHeight = block.showBody ? bodyTextHeight + (2 * blockPadding) : 0;
-				const blockWidth = maxTextWidth + (2 * blockPadding);
-				const blockHeight = titleHeight + bodyHeight;
-
-				pageContentHeight += blockHeight + (2 * blockMargin);
-
-				if (index === 0) {
-					// Remove top margin for first block
-					y -= blockMargin;
-					pageContentHeight -= blockMargin;
-				}
-
-				// If we need to split content, recalculate height of remaining page content on new page
-				if (blockHeight + (2 * blockMargin) > maxPageContentHeight) {
-					let newHeight = blockHeight + (2 * blockMargin) - (pageHeight - y - margin);
-					while (newHeight > maxPageContentHeight) {
-						newHeight -= maxPageContentHeight;
-					}
-					pageContentHeight = newHeight;
-				}
-
-				// Add block on new page if it would overflow
-				if (pageContentHeight > maxPageContentHeight) {
-					this.nextPage();
-					// Do not add top margin for first block of page
-					pageContentHeight = blockHeight + blockMargin;
-					y = margin;
-				}
-
-				if (block.showTitle && block.showBody) {
-					// Draw two separate rectangles because of different colors
-
-					this.roundedRect(
-						x, y,
-						blockWidth, titleHeight,
-						borderRadius, borderRadius, 0, 0,
-						true,
-						(path: any) => path.fillOpacity(1).fill(block.color)
-					);
-					this.roundedRect(
-						x, y + titleHeight,
-						blockWidth, bodyHeight,
-						0, 0, borderRadius, borderRadius,
-						true,
-						(path: any) => path.fillOpacity(0.5).fill(block.color)
-					);
-				} else {
-					this.roundedRect(
-						x, y,
-						blockWidth, block.showTitle ? titleHeight : bodyHeight,
-						borderRadius, borderRadius, borderRadius, borderRadius,
-						true,
-						(path: any) => path.fillOpacity(1).fill(block.color)
-					);
-				}
-
-				this.roundedRect(
-					x, y,
-					blockWidth, blockHeight,
-					borderRadius, borderRadius, borderRadius, borderRadius,
-					false,
-					(path: any) => path.lineWidth(0.1).stroke('#666')
-				);
-
-				// Reset font color
-				this.doc.fillOpacity(1).fill('#000000');
-
-				if (block.showTitle) {
-					this.doc
-						.font(titleFont)
-						.text(title, x + blockPadding, y + blockPadding, {width: maxTextWidth});
-				}
-				if (block.showBody) {
-					const lineHeight = this.doc.currentLineHeight();
-					let curY = y + titleHeight + blockPadding;
-
-					this.doc
-						.fillOpacity(1)
-						.fill('#000000')
-						.font(bodyFont)
-						._text(body, x + blockPadding, curY, {width: maxTextWidth}, (line: string, opts: any) => {
-							this.doc
-								.fillOpacity(1)
-								.fill('#000000')
-								._fragment(line.replace(/\n/g, '') || 'asd', x + blockPadding, curY, opts);
-
-							curY += lineHeight;
-
-							if (curY + lineHeight + margin > pageHeight) {
-								const overflowHeight = curY + lineHeight + margin - pageHeight;
-								this.nextPage();
-								curY = margin - overflowHeight;
-							}
-						});
-				}
-			});
+			blocks.forEach(this.renderBlock);
 
 			this.doc.end();
 		});
