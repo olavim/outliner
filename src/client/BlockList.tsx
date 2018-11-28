@@ -12,18 +12,11 @@ const styles = createStyles({
 		minHeight: 'calc(100% - 4rem)',
 		maxWidth: '60rem',
 		width: 'calc(100% - 8rem)',
-		borderLeft: '1px solid rgba(0,0,0,0.1)',
-		borderRight: '1px solid rgba(0,0,0,0.1)',
 		display: 'flex',
-		'.print &': {
-			width: '60rem',
-			minWidth: '60rem',
-			borderLeft: '1px solid rgba(0,0,0,0)',
-			borderRight: '1px solid rgba(0,0,0,0)'
-		},
-		'@media print': {
-			borderLeft: '1px solid rgba(0,0,0,0)',
-			borderRight: '1px solid rgba(0,0,0,0)'
+		paddingTop: '2rem',
+		'@media (min-width: 600px)': {
+			borderLeft: '1px dotted rgba(0,0,0,0.1)',
+			borderRight: '1px dotted rgba(0,0,0,0.1)'
 		}
 	},
 	root: {
@@ -33,27 +26,15 @@ const styles = createStyles({
 		display: 'flex',
 		flexDirection: 'column',
 		boxSizing: 'border-box',
-		'.print &': {
-			padding: '0rem 1rem 0rem 1rem'
-		},
-		'@media print': {
-			padding: '0rem 1rem 0rem 1rem'
-		},
 		'&$focus': {
-			'@media (max-width: 500px)': {
+			'@media (max-width: 600px)': {
 				paddingTop: '5rem'
 			}
 		}
 	},
 	listActions: {
 		marginTop: '0.6rem',
-		textAlign: 'right',
-		'.print &': {
-			display: 'none'
-		},
-		'@media print': {
-			display: 'none'
-		}
+		textAlign: 'right'
 	}
 });
 
