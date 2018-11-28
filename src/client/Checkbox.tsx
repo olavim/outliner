@@ -4,7 +4,6 @@ import cls from 'classnames';
 
 const styles = createStyles({
 	container: {
-		zIndex: 70,
 		cursor: 'pointer',
 		display: 'flex',
 		alignItems: 'center',
