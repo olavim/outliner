@@ -73,12 +73,6 @@ const styles = createStyles({
 			padding: '0.6rem',
 			backgroundColor: 'transparent',
 			fontWeight: 500
-		},
-		'.print &': {
-			paddingRight: 0
-		},
-		'@media print': {
-			paddingRight: 0
 		}
 	},
 	text: {
@@ -93,12 +87,6 @@ const styles = createStyles({
 			border: 'none',
 			padding: '0.6rem',
 			backgroundColor: 'transparent'
-		},
-		'.print &': {
-			paddingRight: 0
-		},
-		'@media print': {
-			paddingRight: 0
 		}
 	},
 	textarea: {
@@ -122,12 +110,6 @@ const styles = createStyles({
 		},
 		'$focus pre&': {
 			display: 'none'
-		},
-		'.print textarea&': {
-			display: 'none'
-		},
-		'.print pre&': {
-			display: 'block'
 		}
 	},
 	actionsLeft: {
@@ -196,12 +178,6 @@ const styles = createStyles({
 		},
 		'&:active': {
 			cursor: 'move'
-		},
-		'.print &': {
-			display: 'none'
-		},
-		'@media print': {
-			display: 'none'
 		}
 	},
 	handleIcon: {
@@ -227,10 +203,7 @@ const styles = createStyles({
 			fontSize: '1rem',
 			fontWeight: 700
 		},
-		'.print &': {
-			display: 'none'
-		},
-		'@media (max-width: 500px)': {
+		'@media (max-width: 600px)': {
 			zIndex: 70,
 			position: 'fixed',
 			top: '5rem',
@@ -238,9 +211,6 @@ const styles = createStyles({
 			width: '100%',
 			boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.6)',
 			padding: '0 1rem'
-		},
-		'@media print': {
-			display: 'none'
 		}
 	},
 	actionsBottom: {
@@ -266,7 +236,7 @@ const styles = createStyles({
 		'.print &': {
 			display: 'none'
 		},
-		'@media (max-width: 500px)': {
+		'@media (max-width: 600px)': {
 			zIndex: 70,
 			position: 'fixed',
 			bottom: 0,
@@ -274,22 +244,19 @@ const styles = createStyles({
 			width: '100%',
 			boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.6)',
 			padding: '0 1rem'
-		},
-		'@media print': {
-			display: 'none'
 		}
 	},
 	actionsEnter: {
 		padding: '0 2.6rem 0 0.6rem',
 		height: 0,
-		'@media (max-width: 500px)': {
+		'@media (max-width: 600px)': {
 			padding: '0 1rem'
 		}
 	},
 	actionsActive: {
 		padding: '0 2.6rem 0 0.6rem',
 		height: '2.2rem',
-		'@media (max-width: 500px)': {
+		'@media (max-width: 600px)': {
 			padding: '0.6rem 1rem',
 			height: '5rem'
 		}
@@ -297,7 +264,7 @@ const styles = createStyles({
 	actionsEnterDone: {
 		padding: '0 2.6rem 0 0.6rem',
 		height: '2.2rem',
-		'@media (max-width: 500px)': {
+		'@media (max-width: 600px)': {
 			padding: '0.6rem 1rem',
 			height: '5rem'
 		}
@@ -305,7 +272,7 @@ const styles = createStyles({
 	actionsExit: {
 		padding: '0 2.6rem 0 0.6rem',
 		height: '2.2rem',
-		'@media (max-width: 500px)': {
+		'@media (max-width: 600px)': {
 			padding: '0.6rem 1rem',
 			height: '5rem'
 		}
@@ -313,7 +280,7 @@ const styles = createStyles({
 	actionsExitActive: {
 		padding: '0 2.6rem 0 0.6rem',
 		height: 0,
-		'@media (max-width: 500px)': {
+		'@media (max-width: 600px)': {
 			padding: '0 1rem'
 		}
 	}
