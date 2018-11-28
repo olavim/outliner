@@ -3,6 +3,7 @@ import {createStyles, WithStyles, withStyles} from '@material-ui/core';
 import cls from 'classnames';
 import * as _memoize from 'memoizee';
 import Block from './Block';
+import Checkbox from '@/Checkbox';
 
 const memoize = (_memoize as any).default;
 
@@ -11,12 +12,18 @@ const styles = createStyles({
 	wrapper: {
 		minHeight: 'calc(100% - 4rem)',
 		maxWidth: '60rem',
-		width: 'calc(100% - 8rem)',
+		width: 'calc(100% - 6rem)',
 		display: 'flex',
-		paddingTop: '2rem',
-		'@media (min-width: 600px)': {
+		flexDirection: 'column',
+		'@media (min-width: 960px)': {
 			borderLeft: '1px dotted rgba(0,0,0,0.1)',
-			borderRight: '1px dotted rgba(0,0,0,0.1)'
+			borderRight: '1px dotted rgba(0,0,0,0.1)',
+			width: 'calc(100% - 8rem)'
+		},
+		'&$focus': {
+			'@media (max-width: 960px)': {
+				paddingTop: '5rem'
+			}
 		}
 	},
 	root: {
@@ -25,16 +32,28 @@ const styles = createStyles({
 		padding: '0.4rem 1rem 60vh 1rem',
 		display: 'flex',
 		flexDirection: 'column',
-		boxSizing: 'border-box',
-		'&$focus': {
-			'@media (max-width: 600px)': {
-				paddingTop: '5rem'
-			}
-		}
+		boxSizing: 'border-box'
 	},
 	listActions: {
 		marginTop: '0.6rem',
 		textAlign: 'right'
+	},
+	checkboxContainer: {
+		position: 'relative',
+		height: '3.2rem',
+		display: 'flex',
+		marginTop: '1rem',
+		padding: '0 1rem',
+		justifyContent: 'flex-end',
+		alignItems: 'center',
+		'& > span': {
+			marginRight: '0.6rem',
+			color: '#000000de'
+		}
+	},
+	checkbox: {
+		margin: '0.5rem',
+		border: '2px solid #00ccff'
 	}
 });
 
@@ -46,25 +65,27 @@ export interface BlockData {
 	showBody: boolean;
 	color: string;
 	indent: number;
+	export: boolean;
 }
 
 interface Props extends WithStyles<typeof styles> {
 	blocks: BlockData[];
 	onChange: (blocks: BlockData[]) => any;
-	export?: boolean;
 }
 
 interface State {
 	focusedBlock: any;
+	exportAllChecked: boolean;
 }
 
 class BlockList extends React.Component<Props, State> {
-	public state = {
-		focusedBlock: -1
+	public state: State = {
+		focusedBlock: -1,
+		exportAllChecked: this.props.blocks.some(b => b.export)
 	};
 
 	public getBlock = memoize(
-		(block: BlockData, index: number, focused: boolean, exp?: boolean) => (
+		(block: BlockData, index: number, focused: boolean) => (
 			<Block
 				key={block.id}
 				index={index}
@@ -77,10 +98,9 @@ class BlockList extends React.Component<Props, State> {
 				focus={focused}
 				onClick={this.handleFocusBlock(block.id)}
 				moveBlock={this.handleMoveBlock}
-				export={exp}
 			/>
 		),
-		{normalizer: (args: any) => JSON.stringify(args)}
+		{normalizer: (args: any) => args[2] ? Date.now() : JSON.stringify(args)}
 	);
 
 	public componentDidMount() {
@@ -111,7 +131,8 @@ class BlockList extends React.Component<Props, State> {
 				showTitle: true,
 				showBody: false,
 				color: prevColor,
-				indent: index > 0 ? blocks[index - 1].indent : 0
+				indent: index > 0 ? blocks[index - 1].indent : 0,
+				export: true
 			});
 			setTimeout(() => {
 				this.setState({focusedBlock: id});
@@ -181,13 +202,32 @@ class BlockList extends React.Component<Props, State> {
 		}
 	}
 
+	public handleClickExportAll = () => {
+		const checked = this.state.exportAllChecked;
+		const blocks = this.props.blocks.map(block => ({
+			...block,
+			export: !checked
+		}));
+		this.props.onChange(blocks);
+
+		this.setState({exportAllChecked: !checked});
+	}
+
 	public render() {
 		const {classes, blocks} = this.props;
 		return (
-			<div className={classes.wrapper}>
-				<div className={cls(classes.root, {[classes.focus]: this.state.focusedBlock !== -1})}>
+			<div className={cls(classes.wrapper, {[classes.focus]: this.state.focusedBlock !== -1})}>
+				<div className={classes.checkboxContainer}>
+					<span>Enable for Export</span>
+					<Checkbox
+						className={classes.checkbox}
+						checked={this.state.exportAllChecked}
+						onClick={this.handleClickExportAll}
+					/>
+				</div>
+				<div className={classes.root}>
 					{blocks.map((block, index) =>
-						this.getBlock(block, index, block.id === this.state.focusedBlock, this.props.export)
+						this.getBlock(block, index, block.id === this.state.focusedBlock)
 					)}
 					<div className={classes.listActions}>
 						<button className="outline" onClick={this.handleAddEnd}>

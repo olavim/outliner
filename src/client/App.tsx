@@ -36,12 +36,12 @@ const styles = createStyles({
 			marginRight: '1rem',
 			minHeight: '2.6rem'
 		},
-		'@media (max-width: 600px)': {
+		'@media (max-width: 960px)': {
 			flex: '0 0 5rem'
 		}
 	},
 	menuButton: {
-		'@media (min-width: 600px)': {
+		'@media (min-width: 960px)': {
 			display: 'none'
 		}
 	},
@@ -97,19 +97,28 @@ const styles = createStyles({
 		zIndex: 2000
 	},
 	drawer: {
-		'@media (min-width: 600px)': {
-			width: '24rem'
+		'@media (min-width: 960px)': {
+			width: '22%',
+			maxWidth: '24rem',
+			minWidth: '15rem'
 		}
 	},
 	drawerContainer: {
 		zIndex: 1000,
-		'@media (min-width: 600px)': {
-			flex: '0 0 24rem',
+		'@media (min-width: 960px)': {
+			width: '22%',
+			maxWidth: '24rem',
+			minWidth: '15rem',
 			boxShadow: '0 0 2rem 0 #00000022'
 		}
 	},
 	drawerPaper: {
-		width: '24rem'
+		width: '22%',
+		maxWidth: '24rem',
+		minWidth: '15rem',
+		'@media (max-width: 960px)': {
+			width: '24rem'
+		}
 	},
 	drawerHeader: {
 		display: 'flex',
@@ -119,7 +128,7 @@ const styles = createStyles({
 		fontSize: '2rem',
 		height: '6.4rem',
 		color: '#0000008a',
-		'@media (max-width: 600px)': {
+		'@media (max-width: 960px)': {
 			paddingLeft: '1.6rem',
 			height: '5rem'
 		}
@@ -273,7 +282,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles>, 
 
 			setTimeout(() => {
 				window.requestAnimationFrame(() => {
-					pdf.export(this.state.blocks)
+					pdf.export(this.state.blocks.filter(b => b.export))
 						.then(() => {
 							this.setState({exporting: false});
 						});
@@ -285,7 +294,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles>, 
 	public handleExportText = () => {
 		setTimeout(() => {
 			window.requestAnimationFrame(() => {
-				const blocks = this.state.blocks;
+				const blocks = this.state.blocks.filter(b => b.export);
 				const blockStrings = blocks.map(b => {
 					const parts = [];
 					if (b.showTitle) {
@@ -380,7 +389,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles>, 
 					</div>
 				)}
 				<div className={classes.drawerContainer}>
-					<Hidden smUp implementation="css">
+					<Hidden mdUp implementation="css">
 						<Drawer
 							variant="temporary"
 							anchor="left"
@@ -392,7 +401,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles>, 
 							{drawer}
 						</Drawer>
 					</Hidden>
-					<Hidden xsDown implementation="css">
+					<Hidden smDown implementation="css">
 						<Drawer
 							classes={{paper: classes.drawerPaper}}
 							variant="permanent"

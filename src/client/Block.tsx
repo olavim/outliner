@@ -18,6 +18,17 @@ import {
 } from 'react-dnd';
 import {XYCoord} from 'dnd-core';
 import {BlockData} from './BlockList';
+import Checkbox from '@/Checkbox';
+
+const theme = {
+	handleBreakpoint: '960px',
+	actions: {
+		height: {
+			primary: '4rem',
+			responsive: '5rem'
+		}
+	}
+}
 
 const styles = createStyles({
 	color: {
@@ -29,7 +40,7 @@ const styles = createStyles({
 	focus: {},
 	root: {
 		position: 'relative',
-		paddingTop: '0.6rem',
+		marginTop: '0.6rem',
 		display: 'flex',
 		flexDirection: 'column',
 		'& button': {
@@ -47,13 +58,18 @@ const styles = createStyles({
 			opacity: 0.6
 		}
 	},
+	outerContent: {
+		position: 'relative',
+		flex: 1,
+		display: 'flex'
+	},
 	content: {
 		position: 'relative',
 		flex: 1,
 		display: 'flex',
 		flexDirection: 'column',
-		border: '1px solid #0000007a',
-		boxShadow: '0 0 4px 0 #00000033',
+		border: '1px solid #00000022',
+		boxShadow: '0 0 0.3rem 0 #00000022',
 		borderRadius: '0.4rem',
 		overflow: 'hidden',
 		'$focus &': {
@@ -120,7 +136,7 @@ const styles = createStyles({
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
-		width: '5rem',
+		width: '6rem',
 		height: '100%',
 		opacity: 0,
 		'$focus &': {
@@ -131,17 +147,20 @@ const styles = createStyles({
 		},
 		'@media (hover: none)': {
 			opacity: 0.5
+		},
+		[`@media (max-width: ${theme.handleBreakpoint})`]: {
+			width: '4rem'
 		}
 	},
 	actionsRight: {
 		position: 'absolute',
 		top: 0,
-		right: 0,
+		right: '-3rem',
 		transform: 'translateX(100%)',
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
-		width: '5rem',
+		width: '2rem',
 		height: '100%',
 		opacity: 0,
 		'$focus &': {
@@ -152,13 +171,24 @@ const styles = createStyles({
 		},
 		'@media (hover: none)': {
 			opacity: 0.5
+		},
+		[`@media (max-width: ${theme.handleBreakpoint})`]: {
+			right: 0,
+			width: '4rem'
+		}
+	},
+	handleWrapper: {
+		position: 'absolute',
+		top: 0,
+		right: '-2.4rem',
+		paddingLeft: '0.4rem',
+		height: '100%',
+		[`@media (max-width: ${theme.handleBreakpoint})`]: {
+			display: 'none'
 		}
 	},
 	handle: {
 		backgroundColor: '#888',
-		position: 'absolute',
-		top: 0,
-		right: 0,
 		width: '2rem',
 		height: '100%',
 		display: 'flex',
@@ -167,6 +197,8 @@ const styles = createStyles({
 		cursor: 'grab',
 		zIndex: 60,
 		opacity: 0,
+		boxShadow: '0 0 1rem 0 #00000047',
+		borderRadius: '0.4rem',
 		'$focus &': {
 			opacity: 1
 		},
@@ -186,103 +218,94 @@ const styles = createStyles({
 		color: '#000',
 		opacity: 0.4
 	},
-	actionsTop: {
+	actions: {
+		height: 0,
+		borderRadius: '0.4rem',
+		width: '100%',
 		display: 'flex',
 		overflow: 'hidden',
 		justifyContent: 'space-around',
 		alignItems: 'center',
-		backgroundColor: '#666666',
-		padding: '0 2.6rem 0 0.6rem',
+		backgroundColor: '#ffffff',
+		padding: '0 0.6rem',
 		boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.3)',
-		height: 0,
 		zIndex: 50,
 		boxSizing: 'border-box',
 		transition: 'all 0.3s',
 		'& > button': {
-			color: '#ffffffbb',
-			fontSize: '1rem',
-			fontWeight: 700
-		},
-		'@media (max-width: 600px)': {
-			zIndex: 70,
-			position: 'fixed',
-			top: '5rem',
-			left: 0,
-			width: '100%',
-			boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.6)',
-			padding: '0 1rem'
-		}
-	},
-	actionsBottom: {
-		display: 'flex',
-		overflow: 'hidden',
-		justifyContent: 'space-around',
-		alignItems: 'center',
-		backgroundColor: '#666666',
-		padding: '0 2.6rem 0 0.6rem',
-		boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.3)',
-		height: 0,
-		zIndex: 50,
-		boxSizing: 'border-box',
-		transition: 'all 0.3s',
-		'& > button': {
-			color: '#ffffffbb',
+			color: '#000000bb',
 			fontSize: '1rem',
 			fontWeight: 700
 		},
 		'& > button:disabled': {
-			color: '#ffffff77'
+			color: '#00000077'
 		},
-		'.print &': {
-			display: 'none'
-		},
-		'@media (max-width: 600px)': {
+		'@media (max-width: 960px)': {
 			zIndex: 70,
 			position: 'fixed',
-			bottom: 0,
 			left: 0,
 			width: '100%',
 			boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.6)',
-			padding: '0 1rem'
+			padding: '0 1rem',
+			borderRadius: 0
+		}
+	},
+	actionsTop: {
+		'@media (max-width: 960px)': {
+			top: '5rem'
+		}
+	},
+	actionsBottom: {
+		'@media (max-width: 960px)': {
+			bottom: 0
 		}
 	},
 	actionsEnter: {
-		padding: '0 2.6rem 0 0.6rem',
+		margin: 0,
 		height: 0,
-		'@media (max-width: 600px)': {
+		'@media (max-width: 960px)': {
 			padding: '0 1rem'
 		}
 	},
 	actionsActive: {
-		padding: '0 2.6rem 0 0.6rem',
-		height: '2.2rem',
-		'@media (max-width: 600px)': {
+		margin: '0.6rem 0',
+		height: theme.actions.height.primary,
+		'@media (max-width: 960px)': {
+			margin: 0,
 			padding: '0.6rem 1rem',
-			height: '5rem'
+			height: theme.actions.height.responsive
 		}
 	},
 	actionsEnterDone: {
-		padding: '0 2.6rem 0 0.6rem',
-		height: '2.2rem',
-		'@media (max-width: 600px)': {
+		margin: '0.6rem 0',
+		height: theme.actions.height.primary,
+		'@media (max-width: 960px)': {
+			margin: 0,
 			padding: '0.6rem 1rem',
-			height: '5rem'
+			height: theme.actions.height.responsive
 		}
 	},
 	actionsExit: {
-		padding: '0 2.6rem 0 0.6rem',
-		height: '2.2rem',
-		'@media (max-width: 600px)': {
+		margin: '0.6rem 0',
+		height: theme.actions.height.primary,
+		'@media (max-width: 960px)': {
+			margin: 0,
 			padding: '0.6rem 1rem',
-			height: '5rem'
+			height: theme.actions.height.responsive
 		}
 	},
 	actionsExitActive: {
-		padding: '0 2.6rem 0 0.6rem',
+		margin: 0,
 		height: 0,
-		'@media (max-width: 600px)': {
+		'@media (max-width: 960px)': {
 			padding: '0 1rem'
 		}
+	},
+	checkbox: {
+		position: 'absolute',
+		top: 0,
+		right: 0,
+		margin: '0.6rem'
 	}
 });
 
@@ -297,7 +320,6 @@ interface OwnProps {
 	onDelete: (id: any) => any;
 	onClick: (evt: React.MouseEvent) => any;
 	focus: boolean;
-	export?: boolean;
 }
 
 interface BlockSourceCollectedProps {
@@ -475,6 +497,12 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 		evt.stopPropagation();
 	}
 
+	public handleClickExportCheckbox = (evt: React.MouseEvent) => {
+		const {onChange, block} = this.props;
+		evt.stopPropagation();
+		onChange(block.id, 'export', !block.export);
+	}
+
 	public render() {
 		const {
 			block,
@@ -486,8 +514,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 			connectDropTarget,
 			connectDragPreview,
 			isDragging,
-			index,
-			export: exp
+			index
 		} = this.props;
 
 		const actionsTop = [
@@ -537,81 +564,90 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						<IndentDecIcon/>
 					</button>
 				</div>
-				<div className={classes.content}>
-					<CSSTransition
-						in={focus}
-						key={`${block.id}-top`}
-						classNames={transitionClassNames}
-						timeout={0}
-					>
-						<div className={classes.actionsTop}>
-							{actionsTop.map(a => (
-								<button key={a.label} onClick={a.fn}>{a.label}</button>
-							))}
-						</div>
-					</CSSTransition>
-					{block.showTitle && (
-						<div
-							className={classes.title}
-							style={{backgroundColor: block.color}}
-						>
-							{focus && (
-								<TextareaAutosize
-									className={classes.textarea}
-									tabIndex={exp ? -1 : tabIndex}
-									ref={this.titleRef}
-									value={block.title}
-									onChange={this.getInputHandler('title')}
-									onClick={this.handleCloseColorPicker}
-									spellCheck={false}
-									autoFocus
-								/>
-							)}
-							<pre className={classes.textarea}>
-								{block.title}
-							</pre>
-						</div>
-					)}
-					{block.showBody && (
-						<div
-							className={classes.text}
-							style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
-						>
-							{focus && (
-								<TextareaAutosize
-									className={classes.textarea}
-									tabIndex={exp ? -1 : tabIndex + (block.showTitle ? 1 : 0)}
-									ref={this.bodyRef}
-									value={block.body}
-									onChange={this.getInputHandler('body')}
-									onClick={this.handleCloseColorPicker}
-									spellCheck={false}
-									autoFocus
-								/>
-							)}
-							<pre className={classes.textarea}>
-								{block.body}
-							</pre>
-						</div>
-					)}
-					<CSSTransition
-						in={focus}
-						key={`${block.id}-bottom`}
-						classNames={transitionClassNames}
-						timeout={0}
-					>
-						<div className={classes.actionsBottom} onClick={this.handleCloseColorPicker}>
-							{actionsBottom.map(a => (
-								<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
-							))}
-						</div>
-					</CSSTransition>
-					{connectDragSource(
-						<div className={classes.handle}>
-							<MenuIcon className={classes.handleIcon}/>
-						</div>
-					)}
+				<CSSTransition
+					in={focus}
+					key={`${block.id}-top`}
+					classNames={transitionClassNames}
+					timeout={0}
+				>
+					<div className={cls(classes.actions, classes.actionsTop)}>
+						{actionsTop.map(a => (
+							<button key={a.label} onClick={a.fn}>{a.label}</button>
+						))}
+					</div>
+				</CSSTransition>
+				<div className={classes.outerContent}>
+					<div className={classes.content}>
+						<Checkbox
+							checked={block.export}
+							onClick={this.handleClickExportCheckbox}
+							className={classes.checkbox}
+						/>
+						{block.showTitle && (
+							<div
+								className={classes.title}
+								style={{backgroundColor: block.color}}
+							>
+								{focus && (
+									<TextareaAutosize
+										className={classes.textarea}
+										tabIndex={tabIndex}
+										ref={this.titleRef}
+										value={block.title}
+										onChange={this.getInputHandler('title')}
+										onClick={this.handleCloseColorPicker}
+										spellCheck={false}
+										autoFocus
+									/>
+								)}
+								<pre className={classes.textarea}>
+									{block.title}
+								</pre>
+							</div>
+						)}
+						{block.showBody && (
+							<div
+								className={classes.text}
+								style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
+							>
+								{focus && (
+									<TextareaAutosize
+										className={classes.textarea}
+										tabIndex={tabIndex + (block.showTitle ? 1 : 0)}
+										ref={this.bodyRef}
+										value={block.body}
+										onChange={this.getInputHandler('body')}
+										onClick={this.handleCloseColorPicker}
+										spellCheck={false}
+										autoFocus
+									/>
+								)}
+								<pre className={classes.textarea}>
+									{block.body}
+								</pre>
+							</div>
+						)}
+					</div>
+					<div className={classes.handleWrapper}>
+						{connectDragSource(
+							<div className={classes.handle}>
+								<MenuIcon className={classes.handleIcon}/>
+							</div>
+						)}
+					</div>
 				</div>
+				<CSSTransition
+					in={focus}
+					key={`${block.id}-bottom`}
+					classNames={transitionClassNames}
+					timeout={0}
+				>
+					<div className={cls(classes.actions, classes.actionsBottom)} onClick={this.handleCloseColorPicker}>
+						{actionsBottom.map(a => (
+							<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
+						))}
+					</div>
+				</CSSTransition>
 				<div className={classes.actionsRight}>
 					<button onClick={this.handleIncreaseIndent}>
 						<IndentIncIcon/>
