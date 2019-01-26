@@ -228,7 +228,7 @@ export default class PDF {
 				blockWidth, block.showTitle ? titleHeight : bodyHeight,
 				borderRadius, borderRadius, borderRadius, borderRadius,
 				true,
-				(path: any) => path.fillOpacity(1).fill(block.color)
+				(path: any) => path.fillOpacity(block.showTitle ? 1 : 0.5).fill(block.color)
 			);
 		}
 

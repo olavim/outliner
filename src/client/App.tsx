@@ -355,7 +355,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles>, 
 
 		const drawer = (
 			<div>
-				<div className={classes.drawerHeader}>Outlined</div>
+				<div className={classes.drawerHeader}>Colorbox</div>
 				<Divider/>
 				<List>
 					<ListItem button className={classes.drawerItem} onClick={this.handleOpenNewDialog}>

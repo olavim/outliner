@@ -12,6 +12,7 @@ import DeleteIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import ColorIcon from '@material-ui/icons/ColorLens';
 import MenuIcon from '@material-ui/icons/Menu';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 import {SketchPicker, ColorResult} from 'react-color';
 import {
 	DragSource,
@@ -225,6 +226,10 @@ const styles = createStyles({
 		color: '#000',
 		opacity: 0.4
 	},
+	focusTaker: {
+		marginTop: 'auto',
+		marginBottom: 'auto'
+	},
 	actions: {
 		height: 0,
 		borderRadius: '0.4rem',
@@ -289,14 +294,25 @@ const styles = createStyles({
 		width: 0,
 		flexDirection: 'column',
 		padding: 0,
+		'& > button:not(:last-child)': {
+			marginRight: 0
+		},
+		'& > button:not($focusTaker)': {
+			'@media (max-height: 240px) and (orientation:landscape)': {
+				display: 'none'
+			}
+		},
+		'& > $focusTaker': {
+			display: 'none',
+			'@media (max-height: 240px) and (orientation:landscape)': {
+				display: 'flex'
+			}
+		},
 		'@media (max-height: 500px) and (orientation:landscape)': {
 			display: 'flex',
 			left: 0,
 			top: '5rem',
 			height: 'calc(100% - 5rem)'
-		},
-		'& > button:not(:last-child)': {
-			marginRight: 0
 		}
 	},
 	actionsEnter: {
@@ -722,6 +738,9 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 					timeout={0}
 				>
 					<div className={cls(classes.actions, classes.actionsLeft)}>
+						<IconButton className={classes.focusTaker}>
+							<MoreVertIcon/>
+						</IconButton>
 						{actionsLeft.map(a => a.icon ? (
 							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
 								<a.icon/>
@@ -763,7 +782,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						{block.showBody && (
 							<div
 								className={classes.text}
-								style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
+								style={{backgroundColor: `${block.color}66`}}
 							>
 								{focus && (
 									<TextareaAutosize
