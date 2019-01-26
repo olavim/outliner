@@ -135,7 +135,7 @@ const styles = createStyles({
 			display: 'none'
 		}
 	},
-	actionsLeft: {
+	indentLeft: {
 		position: 'absolute',
 		top: 0,
 		left: 0,
@@ -159,7 +159,7 @@ const styles = createStyles({
 			width: '4rem'
 		}
 	},
-	actionsRight: {
+	indentRight: {
 		position: 'absolute',
 		top: 0,
 		right: '-3rem',
@@ -271,11 +271,32 @@ const styles = createStyles({
 		},
 		'@media (max-width: 960px)': {
 			top: '5rem'
+		},
+		'@media (max-height: 500px) and (orientation:landscape)': {
+			display: 'none'
 		}
 	},
 	actionsBottom: {
 		'@media (max-width: 960px)': {
 			bottom: 0
+		},
+		'@media (max-height: 500px) and (orientation:landscape)': {
+			display: 'none'
+		}
+	},
+	actionsLeft: {
+		display: 'none',
+		width: 0,
+		flexDirection: 'column',
+		padding: 0,
+		'@media (max-height: 500px) and (orientation:landscape)': {
+			display: 'flex',
+			left: 0,
+			top: '5rem',
+			height: 'calc(100% - 5rem)'
+		},
+		'& > button:not(:last-child)': {
+			marginRight: 0
 		}
 	},
 	actionsEnter: {
@@ -318,6 +339,26 @@ const styles = createStyles({
 		'@media (max-width: 960px)': {
 			padding: '0 1rem'
 		}
+	},
+	actionsLeftEnter: {
+		width: 0,
+		padding: 0
+	},
+	actionsLeftActive: {
+		width: '6rem',
+		padding: '1rem 1rem'
+	},
+	actionsLeftEnterDone: {
+		width: '6rem',
+		padding: '1rem 1rem'
+	},
+	actionsLeftExit: {
+		width: '6rem',
+		padding: '1rem 1rem'
+	},
+	actionsLeftExitActive: {
+		width: 0,
+		padding: 0
 	},
 	checkbox: {
 		position: 'absolute',
@@ -540,6 +581,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 
 	public handleMoveUp = (evt: React.MouseEvent) => {
 		evt.stopPropagation();
+		console.log(this.props.block.id);
 		this.props.moveBlock(this.props.index - 1, this.props.index);
 	}
 
@@ -597,6 +639,14 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 			{label: 'Delete', icon: DeleteIcon, fn: this.handleDelete, disabled: false}
 		];
 
+		// Landscape mode actions
+		const actionsLeft = [
+			actionsTop[0], actionsBottom[0],
+			actionsTop[1], actionsTop[2],
+			actionsBottom[1],
+			actionsBottom[2]
+		];
+
 		const tabIndex = index * 2 + 1;
 
 		const actionsTransitionClassNames = {
@@ -605,6 +655,14 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 			enterDone: classes.actionsEnterDone,
 			exit: classes.actionsExit,
 			exitActive: classes.actionsExitActive
+		};
+
+		const actionsLeftTransitionClassNames = {
+			enter: classes.actionsLeftEnter,
+			enterActive: classes.actionsLeftActive,
+			enterDone: classes.actionsLeftEnterDone,
+			exit: classes.actionsLeftExit,
+			exitActive: classes.actionsLeftExitActive
 		};
 
 		const addButtonTransitionClassNames = {
@@ -625,7 +683,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 				}}
 				onClick={onClick}
 			>
-				<div className={classes.actionsLeft}>
+				<div className={classes.indentLeft}>
 					<button onClick={this.handleDecreaseIndent}>
 						<IndentDecIcon/>
 					</button>
@@ -649,6 +707,22 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 				>
 					<div className={cls(classes.actions, classes.actionsTop)}>
 						{actionsTop.map(a => a.icon ? (
+							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
+								<a.icon/>
+							</IconButton>
+						) : (
+							<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
+						))}
+					</div>
+				</CSSTransition>
+				<CSSTransition
+					in={focus}
+					key={`${block.id}-left`}
+					classNames={actionsLeftTransitionClassNames}
+					timeout={0}
+				>
+					<div className={cls(classes.actions, classes.actionsLeft)}>
+						{actionsLeft.map(a => a.icon ? (
 							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
 								<a.icon/>
 							</IconButton>
@@ -744,7 +818,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						Add Block
 					</div>
 				</CSSTransition>
-				<div className={classes.actionsRight}>
+				<div className={classes.indentRight}>
 					<button onClick={this.handleIncreaseIndent}>
 						<IndentIncIcon/>
 					</button>
