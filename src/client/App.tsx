@@ -312,7 +312,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles>, 
 	}
 
 	public handleSave = () => {
-		this.downloadData('outline.otl', JSON.stringify(this.state.blocks));
+		this.downloadData('outline.cbo', JSON.stringify(this.state.blocks));
 	}
 
 	public downloadData = (filename: string, data: string) => {
@@ -365,7 +365,13 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles>, 
 						<ListItemText primary="Save" disableTypography/>
 					</ListItem>
 					<ListItem button className={classes.drawerItem}>
-						<input className={classes.uploadInput} type="file" id="file" onChange={this.handleOpenFile}/>
+						<input
+							className={classes.uploadInput}
+							type="file"
+							id="file"
+							onChange={this.handleOpenFile}
+							accept=".otl,.cbo"
+						/>
 						<label className={classes.uploadLabel} htmlFor="file">Open</label>
 					</ListItem>
 				</List>
