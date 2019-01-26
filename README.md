@@ -1,4 +1,4 @@
-# Outliner
+# Colorbox Outliner
 
 A simple outlining web app.
 
