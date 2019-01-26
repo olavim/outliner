@@ -51,8 +51,10 @@ const styles = createStyles({
 			color: '#000000de'
 		}
 	},
-	checkbox: {
+	checkboxRoot: {
 		margin: '0.5rem',
+	},
+	checkbox: {
 		border: '2px solid #00ccff'
 	}
 });
@@ -218,9 +220,9 @@ class BlockList extends React.Component<Props, State> {
 		return (
 			<div className={cls(classes.wrapper, {[classes.focus]: this.state.focusedBlock !== -1})}>
 				<div className={classes.checkboxContainer}>
-					<span>Enable for Export</span>
+					<span>Export All</span>
 					<Checkbox
-						className={classes.checkbox}
+						classNames={{root: classes.checkboxRoot, checkbox: classes.checkbox}}
 						checked={this.state.exportAllChecked}
 						onClick={this.handleClickExportAll}
 					/>
