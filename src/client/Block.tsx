@@ -782,7 +782,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						{block.showBody && (
 							<div
 								className={classes.text}
-								style={{backgroundColor: block.showTitle ? `${block.color}66` : block.color}}
+								style={{backgroundColor: `${block.color}66`}}
 							>
 								{focus && (
 									<TextareaAutosize
