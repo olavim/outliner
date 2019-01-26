@@ -1,11 +1,16 @@
 import * as React from 'react';
 import {findDOMNode} from 'react-dom';
 import cls from 'classnames';
-import {WithStyles, createStyles, withStyles} from '@material-ui/core';
+import {WithStyles, createStyles, withStyles, IconButton} from '@material-ui/core';
 import TextareaAutosize from 'react-autosize-textarea';
 import {CSSTransition} from 'react-transition-group';
 import IndentDecIcon from '@material-ui/icons/KeyboardArrowLeft';
 import IndentIncIcon from '@material-ui/icons/KeyboardArrowRight';
+import UpIcon from '@material-ui/icons/ArrowUpward';
+import DownIcon from '@material-ui/icons/ArrowDownward';
+import DeleteIcon from '@material-ui/icons/Close';
+import AddIcon from '@material-ui/icons/Add';
+import ColorIcon from '@material-ui/icons/ColorLens';
 import MenuIcon from '@material-ui/icons/Menu';
 import {SketchPicker, ColorResult} from 'react-color';
 import {
@@ -18,13 +23,13 @@ import {
 } from 'react-dnd';
 import {XYCoord} from 'dnd-core';
 import {BlockData} from './BlockList';
-import Checkbox from '@/Checkbox';
+import Checkbox from './Checkbox';
 
 const theme = {
 	handleBreakpoint: '960px',
 	actions: {
 		height: {
-			primary: '4rem',
+			primary: '3.4rem',
 			responsive: '5rem'
 		}
 	}
@@ -68,12 +73,14 @@ const styles = createStyles({
 		flex: 1,
 		display: 'flex',
 		flexDirection: 'column',
-		border: '1px solid #00000022',
+		border: '1px solid #00000033',
 		boxShadow: '0 0 0.3rem 0 #00000022',
 		borderRadius: '0.4rem',
 		overflow: 'hidden',
 		'$focus &': {
-			boxShadow: '0 0 20px 0 #0043ff6e'
+			'@media (max-width: 960px)': {
+				boxShadow: '0 0 2rem 0 #0043ff6e'
+			}
 		}
 	},
 	title: {
@@ -128,7 +135,7 @@ const styles = createStyles({
 			display: 'none'
 		}
 	},
-	actionsLeft: {
+	indentLeft: {
 		position: 'absolute',
 		top: 0,
 		left: 0,
@@ -152,7 +159,7 @@ const styles = createStyles({
 			width: '4rem'
 		}
 	},
-	actionsRight: {
+	indentRight: {
 		position: 'absolute',
 		top: 0,
 		right: '-3rem',
@@ -224,21 +231,28 @@ const styles = createStyles({
 		width: '100%',
 		display: 'flex',
 		overflow: 'hidden',
-		justifyContent: 'space-around',
+		justifyContent: 'space-between',
 		alignItems: 'center',
 		backgroundColor: '#ffffff',
-		padding: '0 0.6rem',
-		boxShadow: '0 0 0.8rem 0 rgba(0,0,0,0.3)',
+		padding: '0 1rem',
+		boxShadow: '0 0 0.4rem 0 rgba(0,0,0,0.1)',
 		zIndex: 50,
 		boxSizing: 'border-box',
 		transition: 'all 0.3s',
 		'& > button': {
 			color: '#000000bb',
 			fontSize: '1rem',
-			fontWeight: 700
+			fontWeight: 700,
+			padding: '0.4rem'
 		},
 		'& > button:disabled': {
 			color: '#00000077'
+		},
+		'& > button:not(:last-child)': {
+			marginRight: '2rem'
+		},
+		'& svg': {
+			fontSize: '1.8rem'
 		},
 		'@media (max-width: 960px)': {
 			zIndex: 70,
@@ -251,13 +265,38 @@ const styles = createStyles({
 		}
 	},
 	actionsTop: {
+		justifyContent: 'flex-end',
+		'& button:first-child': {
+			marginRight: 'auto'
+		},
 		'@media (max-width: 960px)': {
 			top: '5rem'
+		},
+		'@media (max-height: 500px) and (orientation:landscape)': {
+			display: 'none'
 		}
 	},
 	actionsBottom: {
 		'@media (max-width: 960px)': {
 			bottom: 0
+		},
+		'@media (max-height: 500px) and (orientation:landscape)': {
+			display: 'none'
+		}
+	},
+	actionsLeft: {
+		display: 'none',
+		width: 0,
+		flexDirection: 'column',
+		padding: 0,
+		'@media (max-height: 500px) and (orientation:landscape)': {
+			display: 'flex',
+			left: 0,
+			top: '5rem',
+			height: 'calc(100% - 5rem)'
+		},
+		'& > button:not(:last-child)': {
+			marginRight: 0
 		}
 	},
 	actionsEnter: {
@@ -301,11 +340,73 @@ const styles = createStyles({
 			padding: '0 1rem'
 		}
 	},
+	actionsLeftEnter: {
+		width: 0,
+		padding: 0
+	},
+	actionsLeftActive: {
+		width: '6rem',
+		padding: '1rem 1rem'
+	},
+	actionsLeftEnterDone: {
+		width: '6rem',
+		padding: '1rem 1rem'
+	},
+	actionsLeftExit: {
+		width: '6rem',
+		padding: '1rem 1rem'
+	},
+	actionsLeftExitActive: {
+		width: 0,
+		padding: 0
+	},
 	checkbox: {
 		position: 'absolute',
 		top: 0,
 		right: 0,
 		margin: '0.6rem'
+	},
+	addButton: {
+		margin: 0,
+		height: 0,
+		overflow: 'hidden',
+		fontSize: '1.1rem',
+		fontWeight: 600,
+		borderRadius: '0.4rem',
+		color: '#00000080',
+		cursor: 'pointer',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		transition: 'all 0.3s',
+		'&:hover': {
+			color: '#00000060'
+		},
+		'& svg': {
+			color: 'inherit',
+			marginRight: '0.6rem',
+			fontSize: '1.6rem'
+		}
+	},
+	addButtonEnter: {
+		margin: 0,
+		height: 0
+	},
+	addButtonActive: {
+		margin: '0.6rem',
+		height: theme.actions.height.primary
+	},
+	addButtonEnterDone: {
+		margin: '0.6rem',
+		height: theme.actions.height.primary
+	},
+	addButtonExit: {
+		margin: '0.6rem',
+		height: theme.actions.height.primary
+	},
+	addButtonExitActive: {
+		margin: 0,
+		height: 0
 	}
 });
 
@@ -480,6 +581,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 
 	public handleMoveUp = (evt: React.MouseEvent) => {
 		evt.stopPropagation();
+		console.log(this.props.block.id);
 		this.props.moveBlock(this.props.index - 1, this.props.index);
 	}
 
@@ -518,14 +620,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 		} = this.props;
 
 		const actionsTop = [
-			{label: 'Add Before', fn: this.handleAddBefore},
-			{label: 'Add After', fn: this.handleAddAfter},
-			{label: 'Move Up', fn: this.handleMoveUp},
-			{label: 'Move Down', fn: this.handleMoveDown}
-		];
-
-		const actionsBottom = [
-			{label: 'Color', fn: this.handleOpenColorPicker},
+			{label: 'Move Up', icon: UpIcon, fn: this.handleMoveUp, disabled: false},
 			{
 				label: block.showTitle ? 'Remove Title' : 'Add Title',
 				fn: this.handleToggleTitle,
@@ -535,18 +630,47 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 				label: block.showBody ? 'Remove Body' : 'Add Body',
 				fn: this.handleToggleBody,
 				disabled: block.showBody && !block.showTitle
-			},
-			{label: 'Delete', fn: this.handleDelete}
+			}
+		];
+
+		const actionsBottom = [
+			{label: 'Move Down', icon: DownIcon, fn: this.handleMoveDown, disabled: false},
+			{label: 'Color', icon: ColorIcon, fn: this.handleOpenColorPicker, disabled: false},
+			{label: 'Delete', icon: DeleteIcon, fn: this.handleDelete, disabled: false}
+		];
+
+		// Landscape mode actions
+		const actionsLeft = [
+			actionsTop[0], actionsBottom[0],
+			actionsTop[1], actionsTop[2],
+			actionsBottom[1],
+			actionsBottom[2]
 		];
 
 		const tabIndex = index * 2 + 1;
 
-		const transitionClassNames = {
+		const actionsTransitionClassNames = {
 			enter: classes.actionsEnter,
 			enterActive: classes.actionsActive,
 			enterDone: classes.actionsEnterDone,
 			exit: classes.actionsExit,
 			exitActive: classes.actionsExitActive
+		};
+
+		const actionsLeftTransitionClassNames = {
+			enter: classes.actionsLeftEnter,
+			enterActive: classes.actionsLeftActive,
+			enterDone: classes.actionsLeftEnterDone,
+			exit: classes.actionsLeftExit,
+			exitActive: classes.actionsLeftExitActive
+		};
+
+		const addButtonTransitionClassNames = {
+			enter: classes.addButtonEnter,
+			enterActive: classes.addButtonActive,
+			enterDone: classes.addButtonEnterDone,
+			exit: classes.addButtonExit,
+			exitActive: classes.addButtonExitActive
 		};
 
 		let elem = (
@@ -559,20 +683,51 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 				}}
 				onClick={onClick}
 			>
-				<div className={classes.actionsLeft}>
+				<div className={classes.indentLeft}>
 					<button onClick={this.handleDecreaseIndent}>
 						<IndentDecIcon/>
 					</button>
 				</div>
 				<CSSTransition
 					in={focus}
+					key={`${block.id}-addbtn-top`}
+					classNames={addButtonTransitionClassNames}
+					timeout={0}
+				>
+					<div className={classes.addButton} onClick={this.handleAddBefore}>
+						<AddIcon/>
+						Add Block
+					</div>
+				</CSSTransition>
+				<CSSTransition
+					in={focus}
 					key={`${block.id}-top`}
-					classNames={transitionClassNames}
+					classNames={actionsTransitionClassNames}
 					timeout={0}
 				>
 					<div className={cls(classes.actions, classes.actionsTop)}>
-						{actionsTop.map(a => (
-							<button key={a.label} onClick={a.fn}>{a.label}</button>
+						{actionsTop.map(a => a.icon ? (
+							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
+								<a.icon/>
+							</IconButton>
+						) : (
+							<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
+						))}
+					</div>
+				</CSSTransition>
+				<CSSTransition
+					in={focus}
+					key={`${block.id}-left`}
+					classNames={actionsLeftTransitionClassNames}
+					timeout={0}
+				>
+					<div className={cls(classes.actions, classes.actionsLeft)}>
+						{actionsLeft.map(a => a.icon ? (
+							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
+								<a.icon/>
+							</IconButton>
+						) : (
+							<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
 						))}
 					</div>
 				</CSSTransition>
@@ -581,7 +736,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						<Checkbox
 							checked={block.export}
 							onClick={this.handleClickExportCheckbox}
-							className={classes.checkbox}
+							classNames={{root: classes.checkbox}}
 						/>
 						{block.showTitle && (
 							<div
@@ -639,16 +794,31 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 				<CSSTransition
 					in={focus}
 					key={`${block.id}-bottom`}
-					classNames={transitionClassNames}
+					classNames={actionsTransitionClassNames}
 					timeout={0}
 				>
 					<div className={cls(classes.actions, classes.actionsBottom)} onClick={this.handleCloseColorPicker}>
-						{actionsBottom.map(a => (
+						{actionsBottom.map(a => a.icon ? (
+							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
+								<a.icon/>
+							</IconButton>
+						) : (
 							<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
 						))}
 					</div>
 				</CSSTransition>
-				<div className={classes.actionsRight}>
+				<CSSTransition
+					in={focus}
+					key={`${block.id}-addbtn-bottom`}
+					classNames={addButtonTransitionClassNames}
+					timeout={0}
+				>
+					<div className={classes.addButton} onClick={this.handleAddAfter}>
+						<AddIcon/>
+						Add Block
+					</div>
+				</CSSTransition>
+				<div className={classes.indentRight}>
 					<button onClick={this.handleIncreaseIndent}>
 						<IndentIncIcon/>
 					</button>

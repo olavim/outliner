@@ -1,5 +1,6 @@
 import React from 'react';
 import {createStyles, WithStyles, withStyles} from '@material-ui/core';
+import CheckIcon from '@material-ui/icons/Check';
 import cls from 'classnames';
 
 const styles = createStyles({
@@ -8,28 +9,40 @@ const styles = createStyles({
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		borderRadius: '0.3rem',
 		color: '#ffffff',
-		boxShadow: '0 0 2rem 0 currentColor',
-		overflow: 'hidden',
-		backgroundColor: 'currentColor'
+		'&$checked': {
+			color: '#00ccff',
+		},
+		'&:hover': {
+			opacity: 0.6
+		}
 	},
 	checkbox: {
 		color: 'inherit',
-		padding: '0.1rem',
-		width: '1.2rem',
-		height: '1.2rem'
+		width: '1.4rem',
+		height: '1.4rem',
+		boxShadow: '0 0 0.4rem 0 #00000044',
+		backgroundColor: 'currentColor',
+		borderRadius: '0.3rem',
+		'& svg': {
+			color: '#ffffff',
+			width: '100%',
+			height: '100%'
+		},
+		'$checked &': {
+			boxShadow: '0 0 0.4rem 0 #00000044'
+		}
 	},
-	checked: {
-		color: '#00ccff',
-		boxShadow: '0 0 0.4rem 0 #00000044'
-	}
+	checked: {}
 });
 
 interface Props extends WithStyles<typeof styles> {
 	checked: boolean;
 	onClick: (evt: React.MouseEvent) => any;
-	className?: string;
+	classNames?: {
+		root?: string;
+		checkbox?: string;
+	}
 }
 
 class Checkbox extends React.Component<Props> {
@@ -38,13 +51,25 @@ class Checkbox extends React.Component<Props> {
 	}
 
 	public render() {
-		const {classes, checked, className} = this.props;
+		const {classes, checked, classNames} = this.props;
 		return (
-			<div className={cls(classes.container, {[classes.checked]: checked}, className)} onClick={this.handleClick}>
+			<div
+				className={cls(
+					classes.container,
+					{[classes.checked]: checked},
+					classNames && classNames.root
+				)}
+				onClick={this.handleClick}
+			>
 				<div
-					className={classes.checkbox}
+					className={cls(
+						classes.checkbox,
+						classNames && classNames.checkbox
+					)}
 					color="primary"
-				/>
+				>
+					<CheckIcon/>
+				</div>
 			</div>
 		)
 	}

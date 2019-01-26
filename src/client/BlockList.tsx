@@ -15,6 +15,7 @@ const styles = createStyles({
 		width: 'calc(100% - 6rem)',
 		display: 'flex',
 		flexDirection: 'column',
+		transition: 'padding 0.2s, margin 0.2s',
 		'@media (min-width: 960px)': {
 			borderLeft: '1px dotted rgba(0,0,0,0.1)',
 			borderRight: '1px dotted rgba(0,0,0,0.1)',
@@ -23,6 +24,11 @@ const styles = createStyles({
 		'&$focus': {
 			'@media (max-width: 960px)': {
 				paddingTop: '5rem'
+			},
+			'@media (max-height: 500px) and (orientation:landscape)': {
+				paddingTop: 'inherit',
+				marginLeft: '6rem',
+				width: 'calc(100% - 12rem)'
 			}
 		}
 	},
@@ -51,8 +57,10 @@ const styles = createStyles({
 			color: '#000000de'
 		}
 	},
-	checkbox: {
+	checkboxRoot: {
 		margin: '0.5rem',
+	},
+	checkbox: {
 		border: '2px solid #00ccff'
 	}
 });
@@ -218,9 +226,9 @@ class BlockList extends React.Component<Props, State> {
 		return (
 			<div className={cls(classes.wrapper, {[classes.focus]: this.state.focusedBlock !== -1})}>
 				<div className={classes.checkboxContainer}>
-					<span>Enable for Export</span>
+					<span>Export All</span>
 					<Checkbox
-						className={classes.checkbox}
+						classNames={{root: classes.checkboxRoot, checkbox: classes.checkbox}}
 						checked={this.state.exportAllChecked}
 						onClick={this.handleClickExportAll}
 					/>
