@@ -27,7 +27,8 @@ import {BlockData} from './BlockList';
 import Checkbox from './Checkbox';
 
 const theme = {
-	handleBreakpoint: '960px',
+	handleBreakpoint: '700px',
+	actionsBreakpoint: '760px',
 	actions: {
 		height: {
 			primary: '3.4rem',
@@ -79,7 +80,7 @@ const styles = createStyles({
 		borderRadius: '0.4rem',
 		overflow: 'hidden',
 		'$focus &': {
-			'@media (max-width: 960px)': {
+			[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 				boxShadow: '0 0 2rem 0 #0043ff6e'
 			}
 		}
@@ -259,7 +260,7 @@ const styles = createStyles({
 		'& svg': {
 			fontSize: '1.8rem'
 		},
-		'@media (max-width: 960px)': {
+		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			zIndex: 70,
 			position: 'fixed',
 			left: 0,
@@ -274,7 +275,7 @@ const styles = createStyles({
 		'& button:first-child': {
 			marginRight: 'auto'
 		},
-		'@media (max-width: 960px)': {
+		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			top: '5rem'
 		},
 		'@media (max-height: 500px) and (orientation:landscape)': {
@@ -282,7 +283,7 @@ const styles = createStyles({
 		}
 	},
 	actionsBottom: {
-		'@media (max-width: 960px)': {
+		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			bottom: 0
 		},
 		'@media (max-height: 500px) and (orientation:landscape)': {
@@ -318,14 +319,14 @@ const styles = createStyles({
 	actionsEnter: {
 		margin: 0,
 		height: 0,
-		'@media (max-width: 960px)': {
+		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			padding: '0 1rem'
 		}
 	},
 	actionsActive: {
 		margin: '0.6rem 0',
 		height: theme.actions.height.primary,
-		'@media (max-width: 960px)': {
+		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			margin: 0,
 			padding: '0.6rem 1rem',
 			height: theme.actions.height.responsive
@@ -334,7 +335,7 @@ const styles = createStyles({
 	actionsEnterDone: {
 		margin: '0.6rem 0',
 		height: theme.actions.height.primary,
-		'@media (max-width: 960px)': {
+		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			margin: 0,
 			padding: '0.6rem 1rem',
 			height: theme.actions.height.responsive
@@ -343,7 +344,7 @@ const styles = createStyles({
 	actionsExit: {
 		margin: '0.6rem 0',
 		height: theme.actions.height.primary,
-		'@media (max-width: 960px)': {
+		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			margin: 0,
 			padding: '0.6rem 1rem',
 			height: theme.actions.height.responsive
@@ -352,7 +353,7 @@ const styles = createStyles({
 	actionsExitActive: {
 		margin: 0,
 		height: 0,
-		'@media (max-width: 960px)': {
+		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			padding: '0 1rem'
 		}
 	},
