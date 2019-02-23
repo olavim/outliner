@@ -36,6 +36,9 @@ jobs:
             sudo npm install -g gh-pages
             git config user.email "tilastokeskus@gmail.com"
             git config user.name "ci-build"
+      - add_ssh_keys:
+          fingerprints:
+            - "1c:2c:a5:02:39:28:5c:ea:7d:b5:2c:55:20:df:6f:11"
       - run:
           name: Deploy to gh-pages branch
           command: gh-pages --dist dist/client
