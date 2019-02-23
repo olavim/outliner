@@ -19,7 +19,7 @@ const webpackConfig = {
 	module: {},
 	output: {
 		path: paths.dist('client'),
-		publicPath: '/'
+		publicPath: ''
 	}
 };
 
