@@ -34,7 +34,8 @@ webpackConfig.plugins = [
 		filename: paths.dist('client/index.html')
 	}),
 	new ServiceWorkerWebpackPlugin({
-		entry: paths.src('client/sw.js')
+		entry: paths.src('client/sw.js'),
+		publicPath: ''
 	})
 ];
 
