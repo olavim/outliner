@@ -95,8 +95,8 @@ export default class PDF {
 			height -= pageHeight - y - margin;
 			y = 0;
 
-			// If remaining path doesn't fit in current page
-			if (y + height + margin > pageHeight) {
+			// If remaining path doesn't fit in current page (overflow at least 1 pixel)
+			if (y + height + margin - pageHeight >= 1) {
 				// Line from top left to bottom left
 				path = this.doc.moveTo(x, y).lineTo(x, pageHeight);
 
@@ -141,7 +141,8 @@ export default class PDF {
 
 				y += lineHeight;
 
-				if (y + lineHeight + margin > pageHeight) {
+				// If text overflows by at least 1 pixel
+				if (y + lineHeight + margin - pageHeight >= 1) {
 					const overflowHeight = y + lineHeight + margin - pageHeight;
 					this.nextPage();
 					y = margin - overflowHeight;
