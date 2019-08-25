@@ -4,6 +4,7 @@ import cls from 'classnames';
 import * as _memoize from 'memoizee';
 import Block from './Block';
 import Checkbox from '@/Checkbox';
+import {ColorResult, SketchPicker} from 'react-color';
 
 const memoize = (_memoize as any).default;
 
@@ -62,6 +63,57 @@ const styles = createStyles({
 	},
 	checkbox: {
 		border: '2px solid #00ccff'
+	},
+	colorChooser: {
+		position: 'absolute',
+		top: '0',
+		left: '0',
+		width: '100%',
+		height: '100%',
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: '#000000aa',
+		zIndex: 2000
+	},
+	colorChooserContent: {
+		display: 'flex',
+		flexDirection: 'row',
+		maxWidth: '60rem',
+		width: '60rem',
+		backgroundColor: '#fafafa',
+		padding: '2rem',
+		borderRadius: '0.5rem',
+		overflow: 'hidden',
+		boxShadow: '0 0 6rem 0 #ffffff55',
+		'@media (max-width: 760px)': {
+			width: 'auto',
+			flexDirection: 'column-reverse'
+		}
+	},
+	colorPreview: {
+		display: 'flex',
+		flexDirection: 'column',
+		flex: 1,
+		borderRadius: '0.5rem',
+		overflow: 'hidden',
+		marginLeft: '1rem',
+		border: '1px solid #00000033',
+		'& > div:first-child': {
+			flex: 0.5,
+			width: '100%'
+		},
+		'& > div:last-child': {
+			flex: 1,
+			width: '100%'
+		},
+		'@media (max-width: 760px)': {
+			height: '12rem',
+			marginLeft: 0,
+			marginBottom: '1rem',
+			'& > div': {
+				width: '24rem'
+			}
+		}
 	}
 });
 
@@ -84,12 +136,14 @@ interface Props extends WithStyles<typeof styles> {
 interface State {
 	focusedBlock: any;
 	exportAllChecked: boolean;
+	showColorPicker: any;
 }
 
 class BlockList extends React.Component<Props, State> {
 	public state: State = {
 		focusedBlock: -1,
-		exportAllChecked: this.props.blocks.some(b => b.export)
+		exportAllChecked: this.props.blocks.some(b => b.export),
+		showColorPicker: null
 	};
 
 	public getBlock = memoize(
@@ -99,12 +153,12 @@ class BlockList extends React.Component<Props, State> {
 				index={index}
 				block={block}
 				onChange={this.handleChangeBlock}
-				presetColors={this.getPresetColors()}
 				onAddBefore={this.handleAddBefore}
 				onAddAfter={this.handleAddAfter}
 				onDelete={this.handleDelete}
 				focus={focused}
 				onClick={this.handleFocusBlock(block.id)}
+				onChangeColor={this.handleOpenColorPicker}
 				moveBlock={this.handleMoveBlock}
 			/>
 		),
@@ -199,6 +253,23 @@ class BlockList extends React.Component<Props, State> {
 		this.setState({focusedBlock: id});
 	}
 
+	public handleOpenColorPicker = (evt: React.MouseEvent) => {
+		evt.stopPropagation();
+		this.setState({showColorPicker: true});
+	}
+
+	public handleCloseColorPicker = (evt: React.MouseEvent) => {
+		evt.stopPropagation();
+		this.setState({showColorPicker: false});
+	}
+
+	public handleChangeBlockColor = (color: ColorResult) => {
+		const focusedBlock = this.props.blocks.find(b => b.id === this.state.focusedBlock);
+		if (focusedBlock) {
+			this.handleChangeBlock(focusedBlock.id, 'color', color.hex);
+		}
+	}
+
 	public handleMoveBlock = (dragIndex: any, hoverIndex: any) => {
 		const {blocks, onChange} = this.props;
 		if (dragIndex >= 0 && hoverIndex >= 0 && dragIndex < blocks.length && hoverIndex < blocks.length) {
@@ -223,6 +294,8 @@ class BlockList extends React.Component<Props, State> {
 
 	public render() {
 		const {classes, blocks} = this.props;
+		const focusedBlock = blocks.find(b => b.id === this.state.focusedBlock);
+
 		return (
 			<div className={cls(classes.wrapper, {[classes.focus]: this.state.focusedBlock !== -1})}>
 				<div className={classes.checkboxContainer}>
@@ -243,6 +316,26 @@ class BlockList extends React.Component<Props, State> {
 						</button>
 					</div>
 				</div>
+				{focusedBlock && (
+					<div
+						className={classes.colorChooser}
+						style={{display: this.state.showColorPicker ? 'flex' : 'none'}}
+						onClick={this.handleCloseColorPicker}
+					>
+						<div className={classes.colorChooserContent} onClick={this.handleOpenColorPicker}>
+							<SketchPicker
+								disableAlpha
+								color={focusedBlock.color}
+								onChange={this.handleChangeBlockColor}
+								presetColors={this.getPresetColors()}
+							/>
+							<div className={classes.colorPreview}>
+								<div style={{backgroundColor: focusedBlock.color}} />
+								<div style={{backgroundColor: `${focusedBlock.color}66`}} />
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		);
 	}

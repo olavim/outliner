@@ -13,7 +13,6 @@ import AddIcon from '@material-ui/icons/Add';
 import ColorIcon from '@material-ui/icons/ColorLens';
 import MenuIcon from '@material-ui/icons/Menu';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import {SketchPicker, ColorResult} from 'react-color';
 import {
 	DragSource,
 	DropTarget,
@@ -38,12 +37,6 @@ const theme = {
 }
 
 const styles = createStyles({
-	color: {
-		position: 'absolute',
-		bottom: '-0.6rem',
-		transform: 'translateY(100%)',
-		zIndex: 200
-	},
 	focus: {},
 	root: {
 		position: 'relative',
@@ -430,13 +423,13 @@ const styles = createStyles({
 interface OwnProps {
 	block: BlockData;
 	index: number;
-	presetColors: string[];
 	moveBlock: (hoverIndex: number, dragIndex: number) => any;
 	onChange: (id: any, prop: keyof BlockData, value: any) => any;
 	onAddBefore: (id: any) => any;
 	onAddAfter: (id: any) => any;
 	onDelete: (id: any) => any;
 	onClick: (evt: React.MouseEvent) => any;
+	onChangeColor: (evt: React.MouseEvent) => any;
 	focus: boolean;
 }
 
@@ -515,10 +508,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 	public titleRef = React.createRef<any>();
 	public bodyRef = React.createRef<any>();
 
-	public state = {
-		showColorPicker: false
-	};
-
 	public componentDidUpdate(prevProps: OwnProps) {
 		if (prevProps.block.indent !== this.props.block.indent) {
 			if (this.titleRef.current) {
@@ -560,11 +549,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 		}
 	}
 
-	public handleChangeColor = (color: ColorResult) => {
-		const {onChange, block} = this.props;
-		onChange(block.id, 'color', color.hex);
-	};
-
 	public handleToggleTitle = (evt: React.MouseEvent) => {
 		const {onChange, block} = this.props;
 		evt.stopPropagation();
@@ -576,15 +560,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 		evt.stopPropagation();
 		onChange(block.id, 'showBody', !block.showBody);
 	};
-
-	public handleOpenColorPicker = (evt: React.MouseEvent) => {
-		evt.stopPropagation();
-		this.setState({showColorPicker: true});
-	}
-
-	public handleCloseColorPicker = () => {
-		this.setState({showColorPicker: false});
-	}
 
 	public handleAddBefore = (evt: React.MouseEvent) => {
 		evt.stopPropagation();
@@ -625,9 +600,9 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 	public render() {
 		const {
 			block,
-			presetColors,
 			classes,
 			onClick,
+			onChangeColor,
 			focus,
 			connectDragSource,
 			connectDropTarget,
@@ -652,7 +627,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 
 		const actionsBottom = [
 			{label: 'Move Down', icon: DownIcon, fn: this.handleMoveDown, disabled: false},
-			{label: 'Color', icon: ColorIcon, fn: this.handleOpenColorPicker, disabled: false},
+			{label: 'Color', icon: ColorIcon, fn: onChangeColor, disabled: false},
 			{label: 'Delete', icon: DeleteIcon, fn: this.handleDelete, disabled: false}
 		];
 
@@ -770,7 +745,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 										ref={this.titleRef}
 										value={block.title}
 										onChange={this.getInputHandler('title')}
-										onClick={this.handleCloseColorPicker}
 										spellCheck={false}
 										autoFocus
 									/>
@@ -792,7 +766,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 										ref={this.bodyRef}
 										value={block.body}
 										onChange={this.getInputHandler('body')}
-										onClick={this.handleCloseColorPicker}
 										spellCheck={false}
 										autoFocus
 									/>
@@ -817,7 +790,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 					classNames={actionsTransitionClassNames}
 					timeout={0}
 				>
-					<div className={cls(classes.actions, classes.actionsBottom)} onClick={this.handleCloseColorPicker}>
+					<div className={cls(classes.actions, classes.actionsBottom)}>
 						{actionsBottom.map(a => a.icon ? (
 							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
 								<a.icon/>
@@ -842,17 +815,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 					<button onClick={this.handleIncreaseIndent}>
 						<IndentIncIcon/>
 					</button>
-				</div>
-				<div
-					className={classes.color}
-					style={{display: this.state.showColorPicker && focus ? 'block' : 'none'}}
-				>
-					<SketchPicker
-						disableAlpha
-						color={block.color}
-						onChange={this.handleChangeColor}
-						presetColors={presetColors}
-					/>
 				</div>
 			</div>
 		);
