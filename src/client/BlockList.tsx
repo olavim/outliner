@@ -4,8 +4,9 @@ import cls from 'classnames';
 import * as _memoize from 'memoizee';
 import Block from './Block';
 import Checkbox from '@/Checkbox';
-import {ColorResult, SketchPicker} from 'react-color';
+import {ColorResult, SketchPicker as _SketchPicker} from 'react-color';
 
+const SketchPicker = _SketchPicker as any;
 const memoize = (_memoize as any).default;
 
 const styles = createStyles({
@@ -72,32 +73,37 @@ const styles = createStyles({
 		height: '100%',
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#000000aa',
 		zIndex: 2000
+	},
+	colorChooserComponent: {
+		zIndex: 5
 	},
 	colorChooserContent: {
 		display: 'flex',
 		flexDirection: 'row',
 		maxWidth: '60rem',
 		width: '60rem',
-		backgroundColor: '#fafafa',
 		padding: '2rem',
 		borderRadius: '0.5rem',
 		overflow: 'hidden',
-		boxShadow: '0 0 6rem 0 #ffffff55',
+		boxShadow: '0 0 20rem 0 #000000',
+		position: 'relative',
 		'@media (max-width: 760px)': {
 			width: 'auto',
+			height: '32rem',
 			flexDirection: 'column-reverse'
 		}
 	},
 	colorPreview: {
 		display: 'flex',
 		flexDirection: 'column',
-		flex: 1,
-		borderRadius: '0.5rem',
-		overflow: 'hidden',
-		marginLeft: '1rem',
-		border: '1px solid #00000033',
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		width: '100%',
+		height: '100%',
+		backgroundColor: '#fafafa',
+		borderRadius: '1rem',
 		'& > div:first-child': {
 			flex: 0.5,
 			width: '100%'
@@ -105,14 +111,6 @@ const styles = createStyles({
 		'& > div:last-child': {
 			flex: 1,
 			width: '100%'
-		},
-		'@media (max-width: 760px)': {
-			height: '12rem',
-			marginLeft: 0,
-			marginBottom: '1rem',
-			'& > div': {
-				width: '24rem'
-			}
 		}
 	}
 });
@@ -328,6 +326,7 @@ class BlockList extends React.Component<Props, State> {
 								color={focusedBlock.color}
 								onChange={this.handleChangeBlockColor}
 								presetColors={this.getPresetColors()}
+								className={classes.colorChooserComponent}
 							/>
 							<div className={classes.colorPreview}>
 								<div style={{backgroundColor: focusedBlock.color}} />
