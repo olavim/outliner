@@ -133,14 +133,12 @@ interface Props extends WithStyles<typeof styles> {
 
 interface State {
 	focusedBlock: any;
-	exportAllChecked: boolean;
 	showColorPicker: any;
 }
 
 class BlockList extends React.Component<Props, State> {
 	public state: State = {
 		focusedBlock: -1,
-		exportAllChecked: this.props.blocks.some(b => b.export),
 		showColorPicker: null
 	};
 
@@ -175,24 +173,20 @@ class BlockList extends React.Component<Props, State> {
 		this.setState({focusedBlock: -1});
 	}
 
-	public handleAddAt = (index: number) => {
+	public handleAddAt = (index: number, parentBlock: BlockData | null = null) => {
 		const blocks = this.props.blocks.slice();
 		if (index !== -1) {
 			const id = new Date().getTime();
-			const prevColor =
-				index > 0 ? blocks[index - 1].color :
-				index < blocks.length - 1 ? blocks[index].color :
-				'#ffcc88';
 
 			blocks.splice(index, 0, {
 				id,
 				title: '',
 				body: '',
-				showTitle: true,
-				showBody: false,
-				color: prevColor,
-				indent: index > 0 ? blocks[index - 1].indent : 0,
-				export: true
+				showTitle: parentBlock ? parentBlock.showTitle : true,
+				showBody: parentBlock ? parentBlock.showBody : false,
+				color: parentBlock ? parentBlock.color : '#ffcc88',
+				indent: parentBlock ? parentBlock.indent : 0,
+				export: parentBlock ? parentBlock.export : true
 			});
 			setTimeout(() => {
 				this.setState({focusedBlock: id});
@@ -203,12 +197,12 @@ class BlockList extends React.Component<Props, State> {
 
 	public handleAddBefore = (id: any) => {
 		const index = this.props.blocks.findIndex(b => b.id === id);
-		this.handleAddAt(index);
+		this.handleAddAt(index, this.props.blocks[index]);
 	};
 
 	public handleAddAfter = (id: any) => {
 		const index = this.props.blocks.findIndex(b => b.id === id);
-		this.handleAddAt(index + 1);
+		this.handleAddAt(index + 1, this.props.blocks[index]);
 	};
 
 	public handleAddEnd = (evt: React.MouseEvent) => {
@@ -280,19 +274,18 @@ class BlockList extends React.Component<Props, State> {
 	}
 
 	public handleClickExportAll = () => {
-		const checked = this.state.exportAllChecked;
+		const checked = this.props.blocks.every(b => b.export);
 		const blocks = this.props.blocks.map(block => ({
 			...block,
 			export: !checked
 		}));
 		this.props.onChange(blocks);
-
-		this.setState({exportAllChecked: !checked});
 	}
 
 	public render() {
 		const {classes, blocks} = this.props;
 		const focusedBlock = blocks.find(b => b.id === this.state.focusedBlock);
+		const exportAllChecked = blocks.every(b => b.export);
 
 		return (
 			<div className={cls(classes.wrapper, {[classes.focus]: this.state.focusedBlock !== -1})}>
@@ -300,7 +293,7 @@ class BlockList extends React.Component<Props, State> {
 					<span>Export All</span>
 					<Checkbox
 						classNames={{root: classes.checkboxRoot, checkbox: classes.checkbox}}
-						checked={this.state.exportAllChecked}
+						checked={exportAllChecked}
 						onClick={this.handleClickExportAll}
 					/>
 				</div>

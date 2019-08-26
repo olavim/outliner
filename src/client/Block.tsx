@@ -750,7 +750,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 									/>
 								)}
 								<pre className={classes.textarea}>
-									{block.title}
+									{block.title || ' '}
 								</pre>
 							</div>
 						)}
@@ -771,7 +771,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 									/>
 								)}
 								<pre className={classes.textarea}>
-									{block.body}
+									{block.body || ' '}
 								</pre>
 							</div>
 						)}
