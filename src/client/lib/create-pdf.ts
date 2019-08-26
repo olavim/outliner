@@ -140,10 +140,10 @@ export default class PDF {
 				this.doc.fillOpacity(1).fill(opts.fill)._fragment(line, x, y, opts);
 
 				y += lineHeight;
+				const overflowHeight = y + margin - pageHeight;
 
 				// If text overflows by at least 1 pixel
-				if (y + lineHeight + margin - pageHeight >= 1) {
-					const overflowHeight = y + lineHeight + margin - pageHeight;
+				if (overflowHeight >= 1) {
 					this.nextPage();
 					y = margin - overflowHeight;
 				}
