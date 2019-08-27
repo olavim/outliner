@@ -4,7 +4,7 @@ import cls from 'classnames';
 import * as _memoize from 'memoizee';
 import Block from './Block';
 import Checkbox from '@/Checkbox';
-import {ColorResult, SketchPicker as _SketchPicker} from 'react-color';
+import {ColorState, SketchPicker as _SketchPicker} from 'react-color';
 
 const SketchPicker = _SketchPicker as any;
 const memoize = (_memoize as any).default;
@@ -255,7 +255,7 @@ class BlockList extends React.Component<Props, State> {
 		this.setState({showColorPicker: false});
 	}
 
-	public handleChangeBlockColor = (color: ColorResult) => {
+	public handleChangeBlockColor = (color: ColorState) => {
 		const focusedBlock = this.props.blocks.find(b => b.id === this.state.focusedBlock);
 		if (focusedBlock) {
 			this.handleChangeBlock(focusedBlock.id, 'color', color.hex);

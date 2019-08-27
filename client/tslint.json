@@ -27,9 +27,9 @@
     "interface-name": [true, "never-prefix"],
     "variable-name": [true, "check-format", "ban-keywords", "allow-pascal-case", "allow-leading-underscore"],
     "max-line-length": false,
-		"max-classes-per-file": false,
+    "max-classes-per-file": false,
     "jsx-no-multiline-js": false,
-		"jsx-boolean-value": false
+    "jsx-boolean-value": false
   },
   "rulesDirectory": []
 }

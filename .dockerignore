@@ -1,0 +1,36 @@
+# CI Config
+shippable.yml
+.circleci/
+
+# Project files
+.env
+
+# Editor config
+.editorconfig
+/.project
+/.settings
+/.idea
+/.vscode
+
+# Random
+.DS_Store
+next_git_comment.txt
+*.log
+
+# git
+.git*
+
+# Node artifacts
+node_modules
+.npmrc
+
+# Built files
+dist/
+
+# Test Coverage
+.nyc_output
+coverage
+xunit-test-results.xml
+
+# Docker
+*Dockerfile

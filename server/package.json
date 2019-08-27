@@ -1,0 +1,20 @@
+{
+	"name": "server",
+	"version": "0.1.0",
+	"private": true,
+	"license": "See LICENSE",
+	"sideEffects": false,
+	"scripts": {
+		"start": "node dist/index.js",
+		"build": "babel --source-maps -d dist/ src/"
+	},
+	"dependencies": {
+		"cors": "^2.8.5",
+		"express": "^4.17.1"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.0.0",
+		"@babel/core": "^7.0.0",
+		"@babel/preset-env": "^7.0.0"
+	}
+}
