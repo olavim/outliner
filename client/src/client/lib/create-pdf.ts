@@ -265,7 +265,7 @@ export default class PDF {
 		}
 	}
 
-	public export = (blocks: BlockData[]) => {
+	public export = (blocks: BlockData[], filename: string = 'outline') => {
 		return new Promise(resolve => {
 			const {margin, fontSize} = this.options;
 
@@ -275,7 +275,7 @@ export default class PDF {
 
 			this.stream.on('finish', () => {
 				const blob = this.stream.toBlob('application/pdf');
-				FileSaver.saveAs(blob, 'outline.pdf');
+				FileSaver.saveAs(blob, `${filename}.pdf`);
 				resolve();
 			});
 

@@ -1,5 +1,5 @@
 /* tslint:disable:no-console */
-const isLocalhost = Boolean(
+const isLocalhost = false;Boolean(
 	window.location.hostname === 'localhost' ||
 	window.location.hostname === '[::1]' ||
 	window.location.hostname.match(

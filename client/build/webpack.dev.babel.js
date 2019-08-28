@@ -1,8 +1,11 @@
 const merge = require('webpack-merge');
 const webpack = require('webpack');
+const dotenv = require('dotenv');
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 const common = require('./webpack.common');
 const {paths} = require('./utils');
+
+const BROWSER_ENV_PREFIX = 'BROWSER_';
 
 module.exports = merge(common, {
 	output: {
@@ -18,6 +21,18 @@ module.exports = merge(common, {
 			rewrites: [
 				{from: /^(\/.*)?$/, to: '/'}
 			]
+		},
+		before(app) {
+			app.get('/env.js', (_req, res) => {
+				const env = dotenv.config({path: paths.base('.env')}).parsed || {};
+
+				const envStr = Object.keys(env)
+					.filter(key => key.startsWith(BROWSER_ENV_PREFIX))
+					.map(key => `${key.substr(BROWSER_ENV_PREFIX.length)}:'${process.env[key]}'`)
+					.join(',');
+
+				res.end(`window.env = {${envStr}}`);
+			});
 		}
 	},
 	plugins: [

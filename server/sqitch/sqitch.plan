@@ -1,0 +1,6 @@
+%syntax-version=1.0.0
+%project=outliner
+
+init 2019-08-27T10:38:12Z Olavi Mustanoja <tilastokeskus@gmail.com> # Init database
+updatedatfunc 2019-08-27T10:39:59Z Olavi Mustanoja <tilastokeskus@gmail.com> # Updated at function
+outline 2019-08-27T10:41:27Z Olavi Mustanoja <tilastokeskus@gmail.com> # outline table

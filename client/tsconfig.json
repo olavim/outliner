@@ -26,6 +26,6 @@
   },
   "include": [
     "vendor.d.ts",
-    "src/client"
+    "src/client", "global.d.ts"
   ]
 }

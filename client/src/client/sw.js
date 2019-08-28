@@ -11,7 +11,8 @@ const {assets} = global.serviceWorkerOption;
 
 const CACHE_NAME = new Date().toISOString();
 
-let assetsToCache = [...assets, './', 'https://fonts.googleapis.com/css?family=Montserrat:500,700%7CRoboto+Mono:400,500'];
+let assetsToCache = [...assets, './'];
+const fetchOrigins = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'];
 
 assetsToCache = assetsToCache.map(path => {
 	return new URL(path, global.location).toString();
@@ -92,13 +93,13 @@ self.addEventListener('fetch', event => {
 
 	const requestUrl = new URL(request.url);
 
-	// Ignore difference origin.
-	// if (requestUrl.origin !== location.origin) {
-	// 	if (DEBUG) {
-	// 		console.log(`[SW] Ignore difference origin ${requestUrl.origin}`);
-	// 	}
-	// 	return;
-	// }
+	// Ignore different origin.
+	if (requestUrl.origin !== location.origin && !fetchOrigins.includes(requestUrl.origin)) {
+		if (DEBUG) {
+			console.log(`[SW] Ignore different origin ${requestUrl.origin}`);
+		}
+		return;
+	}
 
 	const resource = global.caches.match(request).then(response => {
 		if (response) {

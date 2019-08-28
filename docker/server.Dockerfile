@@ -1,17 +1,15 @@
 FROM node:10 as builder
 
-ENV project
-
 WORKDIR /usr/src/app
 
 COPY package.json ./
 COPY lerna.json ./
-COPY ${project}/ ./${project}/
+COPY server/ ./server/
 
 RUN yarn install
-RUN yarn build --scope ${project}
+RUN yarn build --scope server
 
 EXPOSE 80
 
-WORKDIR /usr/src/app/${project}
+WORKDIR /usr/src/app/server
 CMD ["node", "dist/index.js"]
