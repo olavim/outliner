@@ -15,25 +15,33 @@ jobs:
             curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             sudo mv /tmp/docker/* /usr/bin
-      - run:
-          docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - persist_to_workspace:
+          root: /usr
+          paths:
+            - bin/*
   deploy-client:
     docker:
       - image: circleci/node:8
     steps:
       - checkout
+      - attach_workspace:
+          at: /usr
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
           docker build -t olavim/outliner-client:$TAG -f docker/client.Dockerfile .
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push olavim/outliner-client:$TAG
   deploy-server:
     docker:
       - image: circleci/node:8
     steps:
       - checkout
+      - attach_workspace:
+          at: /usr
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
           docker build -t olavim/outliner-server:$TAG -f docker/server.Dockerfile .
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push olavim/outliner-client:$TAG
 
 workflows:
