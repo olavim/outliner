@@ -1,48 +1,49 @@
 version: 2
 jobs:
-  build-deps:
+  build-client:
     docker:
-      - image: circleci/node:8
+      - image: circleci/buildpack-deps:stretch
     steps:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          name: Install Docker client
-          command: |
-            set -x
-            VER="18.06.0-ce"
-            curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
-            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
-            sudo mv /tmp/docker/* /usr/bin
-      - persist_to_workspace:
-          root: /usr
-          paths:
-            - bin/*
+          name: Build client Docker image
+          command: docker build -t olavim/outliner-client:1.0.$CIRCLE_BUILD_NUM -f docker/client.Dockerfile .
+  build-server:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build server Docker image
+          command: docker build -t olavim/outliner-server:1.0.$CIRCLE_BUILD_NUM -f docker/server.Dockerfile .
   deploy-client:
     docker:
-      - image: circleci/node:8
+      - image: circleci/buildpack-deps:stretch
     steps:
       - checkout
-      - attach_workspace:
-          at: /usr
-      - run: |
-          TAG=0.1.$CIRCLE_BUILD_NUM
-          docker build -t olavim/outliner-client:$TAG -f docker/client.Dockerfile .
-          docker login -u $DOCKER_USER -p $DOCKER_PASS
-          docker push olavim/outliner-client:$TAG
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Publish client Docker image to Docker Hub
+          command: |
+            echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
+            docker push olavim/outliner-client:1.0.$CIRCLE_BUILD_NUM
   deploy-server:
     docker:
-      - image: circleci/node:8
+      - image: circleci/buildpack-deps:stretch
     steps:
       - checkout
-      - attach_workspace:
-          at: /usr
-      - run: |
-          TAG=0.1.$CIRCLE_BUILD_NUM
-          docker build -t olavim/outliner-server:$TAG -f docker/server.Dockerfile .
-          docker login -u $DOCKER_USER -p $DOCKER_PASS
-          docker push olavim/outliner-client:$TAG
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Publish server Docker image to Docker Hub
+          command: |
+            echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
+            docker push olavim/outliner-server:1.0.$CIRCLE_BUILD_NUM
 
 workflows:
   version: 2
@@ -51,13 +52,13 @@ workflows:
       - build-deps
       - deploy-client:
           requires:
-            - build-deps
+            - build-client
           filters:
             branches:
               only: server
       - deploy-server:
           requires:
-            - build-deps
+            - build-server
           filters:
             branches:
               only: server
