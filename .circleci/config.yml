@@ -5,7 +5,7 @@ build_defaults: &build_defaults
         docker_layer_caching: true
     - run:
         name: Build $SERVICE Docker image
-        command: docker build -t olavim/outliner-$SERVICE:1.0.$CIRCLE_BUILD_NUM -f docker/$SERVICE.Dockerfile .
+        command: docker build -t olavim/outliner-$SERVICE:$CIRCLE_SHA1 -f docker/$SERVICE.Dockerfile .
     - run:
         name: Archive $SERVICE Docker image
         command: docker save -o image.tar olavim/outliner-$SERVICE
@@ -26,7 +26,7 @@ deploy_defaults: &deploy_defaults
         name: Publish $SERVICE Docker image to Docker Hub
         command: |
           echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
-          docker push olavim/outliner-$SERVICE:1.0.$CIRCLE_BUILD_NUM
+          docker push olavim/outliner-$SERVICE:$CIRCLE_SHA1
 
 version: 2.1
 executors:
