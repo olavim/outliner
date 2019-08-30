@@ -8,11 +8,11 @@
 	"sideEffects": false,
 	"scripts": {
 		"build": "lerna exec --parallel yarn build",
-		"build:docker:client": "docker build -t olavim/outliner -f docker/client.Dockerfile .",
-		"build:docker:server": "docker build -t olavim/outliner-api -f docker/server.Dockerfile .",
+		"build:docker:client": "docker build -t olavim/outliner-client -f docker/client.Dockerfile .",
+		"build:docker:server": "docker build -t olavim/outliner-server -f docker/server.Dockerfile .",
 		"build:docker": "yarn build:docker:client && yarn build:docker:server",
-		"publish:docker:client": "docker push olavim/outliner",
-		"publish:docker:server": "docker push olavim/outliner-api",
+		"publish:docker:client": "docker push olavim/outliner-client",
+		"publish:docker:server": "docker push olavim/outliner-server",
 		"publish:docker": "yarn publish:docker:client && yarn publish:docker:server"
 	},
 	"dependencies": {},
