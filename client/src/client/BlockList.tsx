@@ -56,7 +56,7 @@ const styles = createStyles({
 		alignItems: 'center',
 		'& > span': {
 			marginRight: '0.6rem',
-			color: '#000000de'
+			color: 'rgba(0,0,0,0.87)'
 		}
 	},
 	checkboxRoot: {
@@ -109,7 +109,7 @@ const styles = createStyles({
 			width: '100%'
 		},
 		'& > div:last-child': {
-			flex: 1,
+			flex: '1 1 auto',
 			width: '100%'
 		}
 	}

@@ -182,7 +182,7 @@ class MenuDrawer extends React.Component<Props> {
 			</div>
 		);
 
-		if (variant === 'responsive') {
+		if (variant === 'temporary') {
 			return (
 				<Drawer
 					variant="temporary"

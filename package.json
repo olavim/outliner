@@ -7,7 +7,13 @@
 	"license": "See LICENSE",
 	"sideEffects": false,
 	"scripts": {
-		"build": "lerna exec --parallel yarn build"
+		"build": "lerna exec --parallel yarn build",
+		"build:docker:client": "docker build -t olavim/outliner -f docker/client.Dockerfile .",
+		"build:docker:server": "docker build -t olavim/outliner-api -f docker/server.Dockerfile .",
+		"build:docker": "yarn build:docker:client && yarn build:docker:server",
+		"publish:docker:client": "docker push olavim/outliner",
+		"publish:docker:server": "docker push olavim/outliner-api",
+		"publish:docker": "yarn publish:docker:client && yarn publish:docker:server"
 	},
 	"dependencies": {},
 	"devDependencies": {

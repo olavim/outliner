@@ -42,7 +42,7 @@ const styles = createStyles({
 		display: 'flex',
 		flexDirection: 'column',
 		textAlign: 'center',
-		flex: 1,
+		flex: '1 1 auto',
 		width: '100%'
 	},
 	appBar: {
@@ -68,7 +68,7 @@ const styles = createStyles({
 	content: {
 		display: 'flex',
 		justifyContent: 'center',
-		flex: 1,
+		flex: '1 1 auto',
 		overflowY: 'scroll',
 		overflowX: 'hidden',
 		alignItems: 'baseline'

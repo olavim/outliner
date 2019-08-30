@@ -22,6 +22,7 @@ import {
 	ConnectDragPreview
 } from 'react-dnd';
 import {XYCoord} from 'dnd-core';
+import hex2rgba from 'hex-to-rgba';
 import {BlockData} from './BlockList';
 import Checkbox from './Checkbox';
 
@@ -60,21 +61,21 @@ const styles = createStyles({
 	},
 	outerContent: {
 		position: 'relative',
-		flex: 1,
+		flex: '1 1 auto',
 		display: 'flex'
 	},
 	content: {
 		position: 'relative',
-		flex: 1,
+		flex: '1 1 auto',
 		display: 'flex',
 		flexDirection: 'column',
-		border: '1px solid #00000033',
-		boxShadow: '0 0 0.3rem 0 #00000022',
+		border: '1px solid rgba(0,0,0,0.2)',
+		boxShadow: '0 0 0.3rem 0 rgba(0,0,0,0.13)',
 		borderRadius: '0.4rem',
 		overflow: 'hidden',
 		'$focus &': {
 			[`@media (max-width: ${theme.actionsBreakpoint})`]: {
-				boxShadow: '0 0 2rem 0 #0043ff6e'
+				boxShadow: '0 0 2rem 0 rgba(0,67,255,0.43)'
 			}
 		}
 	},
@@ -86,7 +87,7 @@ const styles = createStyles({
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px',
 			resize: 'none',
-			flex: 1,
+			flex: '1 1 auto',
 			border: 'none',
 			padding: '0.6rem',
 			backgroundColor: 'transparent',
@@ -101,7 +102,7 @@ const styles = createStyles({
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px',
 			resize: 'none',
-			flex: 1,
+			flex: '1 1 auto',
 			border: 'none',
 			padding: '0.6rem',
 			backgroundColor: 'transparent'
@@ -111,7 +112,7 @@ const styles = createStyles({
 		fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 		fontSize: '11px',
 		resize: 'none',
-		flex: 1,
+		flex: '1 1 auto',
 		border: 'none',
 		padding: '0.6rem',
 		backgroundColor: 'transparent',
@@ -199,7 +200,7 @@ const styles = createStyles({
 		cursor: 'grab',
 		zIndex: 60,
 		opacity: 0,
-		boxShadow: '0 0 1rem 0 #00000047',
+		boxShadow: '0 0 1rem 0 rgba(0,0,0,0.28)',
 		borderRadius: '0.4rem',
 		'$focus &': {
 			opacity: 1
@@ -239,13 +240,13 @@ const styles = createStyles({
 		boxSizing: 'border-box',
 		transition: 'all 0.3s',
 		'& > button': {
-			color: '#000000bb',
+			color: 'rgba(0,0,0,0.73)',
 			fontSize: '1rem',
 			fontWeight: 700,
 			padding: '0.4rem'
 		},
 		'& > button:disabled': {
-			color: '#00000077'
+			color: 'rgba(0,0,0,0.47)'
 		},
 		'& > button:not(:last-child)': {
 			marginRight: '2rem'
@@ -264,7 +265,6 @@ const styles = createStyles({
 		}
 	},
 	actionsTop: {
-		justifyContent: 'flex-end',
 		'& button:first-child': {
 			marginRight: 'auto'
 		},
@@ -383,14 +383,14 @@ const styles = createStyles({
 		fontSize: '1.1rem',
 		fontWeight: 600,
 		borderRadius: '0.4rem',
-		color: '#00000080',
+		color: 'rgba(0,0,0,0.5)',
 		cursor: 'pointer',
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'center',
 		transition: 'all 0.3s',
 		'&:hover': {
-			color: '#00000060'
+			color: 'rgba(0,0,0,0.38)'
 		},
 		'& svg': {
 			color: 'inherit',
@@ -507,17 +507,6 @@ const cardTarget = {
 class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & BlockSourceCollectedProps & BlockTargetCollectedProps> {
 	public titleRef = React.createRef<any>();
 	public bodyRef = React.createRef<any>();
-
-	public componentDidUpdate(prevProps: OwnProps) {
-		if (prevProps.block.indent !== this.props.block.indent) {
-			if (this.titleRef.current) {
-				this.titleRef.current.dispatchEvent('autosize:update');
-			}
-			if (this.bodyRef.current) {
-				this.bodyRef.current.dispatchEvent('autosize:update');
-			}
-		}
-	}
 
 	public handleDecreaseIndent = () => {
 		const {onChange, block} = this.props;
@@ -757,7 +746,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						{block.showBody && (
 							<div
 								className={classes.text}
-								style={{backgroundColor: `${block.color}66`}}
+								style={{backgroundColor: hex2rgba(`${block.color}66`)}}
 							>
 								{focus && (
 									<TextareaAutosize

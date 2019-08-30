@@ -21,7 +21,7 @@ const styles = createStyles({
 		color: 'inherit',
 		width: '1.4rem',
 		height: '1.4rem',
-		boxShadow: '0 0 0.4rem 0 #00000044',
+		boxShadow: '0 0 0.4rem 0 rgba(0,0,0,0.27)',
 		backgroundColor: 'currentColor',
 		borderRadius: '0.3rem',
 		'& svg': {
@@ -30,7 +30,7 @@ const styles = createStyles({
 			height: '100%'
 		},
 		'$checked &': {
-			boxShadow: '0 0 0.4rem 0 #00000044'
+			boxShadow: '0 0 0.4rem 0 rgba(0,0,0,0.27)'
 		}
 	},
 	checked: {}

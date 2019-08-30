@@ -4112,6 +4112,11 @@ he@1.2.x:
   resolved "https://registry.npmjs.org/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
+hex-to-rgba@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/hex-to-rgba/-/hex-to-rgba-2.0.1.tgz#4176977882a1cb32b83ce5ab1db6828ab84d5a13"
+  integrity sha512-5XqPJBpsEUMsseJUi2w2Hl7cHFFi3+OO10M2pzAvKB1zL6fc+koGMhmBqoDOCB4GemiRM/zvDMRIhVw6EkB8dQ==
+
 history@^4.9.0:
   version "4.9.0"
   resolved "https://registry.npmjs.org/history/-/history-4.9.0.tgz#84587c2068039ead8af769e9d6a6860a14fa1bca"
@@ -6720,10 +6725,10 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-autosize-textarea@^5.0.0:
-  version "5.0.1"
-  resolved "https://registry.npmjs.org/react-autosize-textarea/-/react-autosize-textarea-5.0.1.tgz#71bdd13941dc6ff465efee412b41a5ebf6c6fb58"
-  integrity sha512-VHYFObl0XtI4xy2pEMqKDIFCOs1e4JEaDaq2WgwZAZdXrahspnzJAX+Zy4V9eKZIhY+lUKA2MlVZxtqexx/7YA==
+react-autosize-textarea@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.npmjs.org/react-autosize-textarea/-/react-autosize-textarea-7.0.0.tgz#4f633e4238de7ba73c1da8fdc307353c50f1c5ab"
+  integrity sha512-rGQLpGUaELvzy3NKzp0kkcppaUtZTptsyR0PGuLotaJDjwRbT0DpD000yCzETpXseJQ/eMsyVGDDHXjXP93u8w==
   dependencies:
     autosize "^4.0.2"
     line-height "^0.3.1"

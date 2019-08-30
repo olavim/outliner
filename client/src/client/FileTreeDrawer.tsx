@@ -81,7 +81,7 @@ const styles = createStyles({
 		}
 	},
 	fileTreeContainer: {
-		flex: 1,
+		flex: '1 1 auto',
 		display: 'flex',
 		flexDirection: 'column',
 		'& hr': {
@@ -125,7 +125,7 @@ const styles = createStyles({
 		}
 	},
 	fileTreeList: {
-		flex: 1,
+		flex: '1 1 auto',
 		backgroundColor: '#475a6f',
 		color: '#ffffff',
 		paddingTop: 0,
