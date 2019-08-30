@@ -27,6 +27,9 @@ deploy_defaults: &deploy_defaults
         command: |
           echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
           docker push olavim/outliner-$SERVICE:$CIRCLE_SHA1
+    - run:
+        name: Deploy $SERVICE
+        command: ssh root@olavim.io docker service update --image olavim/outliner-$SERVICE:$CIRCLE_SHA1 outliner_$SERVICE
 
 version: 2.1
 executors:
