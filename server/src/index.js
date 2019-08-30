@@ -35,6 +35,13 @@ class FetchCache {
 	}
 }
 
+const userInfoStore = new FetchCache(async authz => {
+	const res = await axios.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
+		headers: {Authorization: authz}
+	});
+	return res.data;
+}, 60000);
+
 const pg = knex({
 	client: 'pg',
 	connection: {
@@ -58,13 +65,6 @@ const checkJwt = jwt({
 	algorithm: ['RS256']
 });
 
-const userInfoStore = new FetchCache(async authz => {
-	const res = await axios.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
-		headers: {Authorization: authz}
-	});
-	return res.data;
-}, 60000);
-
 const userInfo = (req, _res, next) => {
 	userInfoStore.fetch(req.headers.authorization)
 		.then(data => {
@@ -76,9 +76,17 @@ const userInfo = (req, _res, next) => {
 		});
 };
 
+const noCache = (_req, res, next) => {
+	res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+	res.header('Pragma', 'no-cache');
+	res.header('Expires', '0');
+	next();
+};
+
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(noCache);
 
 app.get('/', (req, res) => {
 	res.json({status: 'ok'});

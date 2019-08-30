@@ -1,46 +1,35 @@
 import * as React from 'react';
 import {findDOMNode} from 'react-dom';
-import axios from 'axios';
+import axios, {AxiosInstance} from 'axios';
 import {cloneDeep, pick, debounce} from 'lodash';
 import {
 	createStyles,
 	WithStyles,
 	withStyles,
 	CircularProgress,
-	List,
-	ListItem,
-	ListItemText,
-	Divider,
 	IconButton,
-	Hidden,
-	Drawer,
-	SwipeableDrawer,
+	Button,
+	Fab,
 	Dialog,
 	DialogTitle,
 	DialogContent,
-	DialogActions,
-	Button,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableRow,
 	TextField,
-	ListItemIcon,
-	Fab,
-	DialogContentText
+	DialogActions
 } from '@material-ui/core';
 import withMobileDialog, {InjectedProps as WithMobileDialog} from '@material-ui/core/withMobileDialog';
 import runtime from 'serviceworker-webpack-plugin/lib/runtime';
 import WebFont from 'webfontloader';
+import FileSaver from 'file-saver';
 import MenuIcon from '@material-ui/icons/Menu';
 import FileIcon from '@material-ui/icons/InsertDriveFile';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DownloadIcon from '@material-ui/icons/GetApp';
 import githubIcon from './github-32px.png';
 import BlockList, {BlockData} from './BlockList';
 import PDF from '@/lib/create-pdf';
 import withAuth, {WithAuthProps} from '@/hocs/with-auth';
+import isMobile from '@/lib/is-mobile';
+import MenuDrawer from '@/MenuDrawer';
+import FileTreeDrawer from '@/FileTreeDrawer';
 
 const styles = createStyles({
 	root: {
@@ -63,7 +52,7 @@ const styles = createStyles({
 		padding: '0 2rem',
 		justifyContent: 'flex-start',
 		alignItems: 'center',
-		boxShadow: '0 0 0.6rem 0 #00000066',
+		boxShadow: '0 0 0.6rem 0 rgba(0,0,0,0.4)',
 		zIndex: 100,
 		'& .outline': {
 			marginRight: '1rem',
@@ -84,37 +73,6 @@ const styles = createStyles({
 		overflowX: 'hidden',
 		alignItems: 'baseline'
 	},
-	uploadWrapper: {
-		overflow: 'hidden'
-	},
-	uploadLabel: {
-		width: '100%',
-		height: '100%',
-		cursor: 'pointer',
-		position: 'absolute',
-		boxSizing: 'border-box',
-		display: 'flex',
-		alignItems: 'center',
-		top: 0,
-		left: 0,
-		paddingLeft: '16px',
-		'& *': {
-			pointerEvents: 'none'
-		},
-		'@media (max-width: 600px)': {
-			paddingLeft: '1.6rem'
-		}
-	},
-	uploadInput: {
-		position: 'absolute',
-		left: 0,
-		top: 0,
-		width: '6rem',
-		height: '2.4rem',
-		opacity: 0,
-		zIndex: -1,
-		cursor: 'pointer'
-	},
 	progressOverlay: {
 		width: '100%',
 		height: '100%',
@@ -124,15 +82,8 @@ const styles = createStyles({
 		position: 'absolute',
 		top: 0,
 		left: 0,
-		backgroundColor: '#ffffffaa',
+		backgroundColor: 'rgba(255, 255, 255, 0.5)',
 		zIndex: 2000
-	},
-	drawer: {
-		'@media (min-width: 960px)': {
-			width: '22%',
-			maxWidth: '24rem',
-			minWidth: '15rem'
-		}
 	},
 	drawerContainer: {
 		zIndex: 1000,
@@ -140,138 +91,38 @@ const styles = createStyles({
 			width: '22%',
 			maxWidth: '24rem',
 			minWidth: '15rem',
-			boxShadow: '0 0 2rem 0 #00000022'
-		}
-	},
-	drawerPaper: {
-		width: '22%',
-		maxWidth: '24rem',
-		minWidth: '15rem',
-		'@media (max-width: 960px)': {
-			width: '24rem'
-		}
-	},
-	drawerHeader: {
-		display: 'flex',
-		alignItems: 'center',
-		paddingLeft: '1.6rem',
-		fontWeight: 600,
-		fontSize: '2rem',
-		height: '5rem',
-		color: '#0000008a'
-	},
-	drawerItem: {
-		paddingTop: 0,
-		paddingBottom: 0,
-		height: '3.6rem',
-		fontSize: '1.3rem',
-		fontWeight: 400
-	},
-	fileTreeHandleContainer: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		width: '0.7rem',
-		height: '100%',
-		backgroundColor: '#475a6f',
-		display: 'flex',
-		alignItems: 'center'
-	},
-	fileTreeHandle: {
-		width: '0.7rem',
-		height: '5rem',
-		backgroundColor: '#778a9f',
-		cursor: 'pointer',
-		zIndex: 1200,
-		'&:hover': {
-			backgroundColor: '#6296d0'
-		}
-	},
-	fileTreeContainer: {
-		flex: 1,
-		display: 'flex',
-		flexDirection: 'column',
-		'& hr': {
-			backgroundColor: '#000000cf'
-		},
-		'@media (max-width: 960px)': {
-			borderRight: '0.2rem solid #2c3744'
-		}
-	},
-	fileTreeHeader: {
-		backgroundColor: '#303942',
-		display: 'flex',
-		alignItems: 'center',
-		paddingLeft: '1rem',
-		fontWeight: 600,
-		fontSize: '2rem',
-		height: '5rem',
-		color: '#ffffffa1',
-		'& button': {
-			padding: '0.6rem'
-		}
-	},
-	fileTreeActions: {
-		display: 'flex',
-		flexDirection: 'row',
-		backgroundColor: '#374656',
-		padding: '0 1rem',
-		'& button': {
-			padding: '0.6rem',
-			margin: '0.6rem 0',
-			'&:first-child': {
-				marginRight: 'auto'
-			}
-		},
-		'& svg': {
-			color: '#fff',
-			fontSize: '20px'
-		},
-		'@media (max-width: 960px)': {
-			height: '5rem'
-		}
-	},
-	fileTreeList: {
-		flex: 1,
-		backgroundColor: '#475a6f',
-		color: '#ffffff',
-		'& svg': {
-			opacity: 0.6,
-			fontSize: '16px'
-		},
-		'@media (min-width: 960px)': {
-			boxShadow: 'inset -0.4rem 0.4rem 4rem 0 #00000026'
+			boxShadow: '0 0 2rem 0 rgba(0,0,0,0.13)'
 		}
 	},
 	dialogTitle: {
 		fontSize: '1.6rem',
 		fontWeight: 600,
-		color: '#000000de'
-	},
-	dialogText: {
-		fontSize: '1.6rem',
-		fontWeight: 500,
-		fontFamily: 'Montserrat, Arial, sans-serif'
+		color: 'rgba(0,0,0,0.87)'
 	},
 	dialogButton: {
 		fontSize: '1.3rem',
 		fontWeight: 600,
 		color: '#2196f3'
 	},
-	outlineTable: {
-		'& *': {
-			fontSize: '1.2rem'
-		}
-	},
-	outlineTableRow: {
-		cursor: 'pointer',
-		'&:hover': {
-			backgroundColor: '#def3ff'
-		}
-	},
-	active: {},
 	noDocumentContainer: {
 		padding: '5rem',
+		'& button': {
+			backgroundColor: '#5e8fc5',
+			fontSize: '1.2rem',
+			color: '#fff',
+			fontWeight: 600,
+			'&:hover': {
+				backgroundColor: '#6596cc'
+			},
+			'& svg': {
+				marginRight: '0.8rem'
+			}
+		}
+	},
+	downloadDialog: {
+		backgroundColor: 'transparent',
+		overflowY: 'visible',
+		boxShadow: 'none',
 		'& button': {
 			backgroundColor: '#5e8fc5',
 			fontSize: '1.2rem',
@@ -287,14 +138,14 @@ const styles = createStyles({
 	}
 });
 
-interface ListOutline {
+export interface ListOutline {
 	id: string;
 	name: string;
 	createdAt: string;
 	updatedAt?: string;
 }
 
-interface GetOutline {
+export interface GetOutline {
 	data: BlockData[];
 	id?: string;
 	name?: string;
@@ -307,6 +158,7 @@ interface State {
 	outline?: GetOutline;
 	availableOutlines: ListOutline[];
 	nameStr: string;
+	loading: boolean;
 	exporting: boolean;
 	showDrawer: boolean;
 	showFileTree: boolean;
@@ -314,27 +166,45 @@ interface State {
 	showRenameDialog: boolean;
 	showNewDialog: boolean;
 	showConfirmDialog: boolean;
+	downloadData: {blob: Blob; filename: string} | null;
 }
 
 const trimNewLines = (str: string) => {
 	return str.replace(/(\n|\r)+$/, '').replace(/^(\n|\r)+/, '');
 }
 
-class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> & WithAuthProps, State> {
+type AppProps = WithMobileDialog & WithStyles<typeof styles> & WithAuthProps;
+
+class App extends React.Component<AppProps, State> {
 	public listRef = React.createRef<any>();
+	public api: AxiosInstance;
 
 	public state: State = {
 		fontsLoaded: false,
 		availableOutlines: [],
 		nameStr: '',
+		loading: true,
 		exporting: false,
 		showDrawer: false,
 		showFileTree: false,
 		showOpenDialog: false,
 		showRenameDialog: false,
 		showNewDialog: false,
-		showConfirmDialog: false
+		showConfirmDialog: false,
+		downloadData: null
 	};
+
+	constructor(props: AppProps) {
+		super(props);
+		this.api = axios.create({
+			baseURL: window.env.API_URL
+		});
+		this.api.interceptors.request.use(async config => {
+			const token = await this.props.auth.getTokenSilently();
+			config.headers = {Authorization: `Bearer ${token}`};
+			return config;
+		});
+	}
 
 	public componentDidMount() {
 		if (
@@ -359,11 +229,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 			this.handleList(true);
 		} else {
 			const data = localStorage.getItem('outliner-data');
-			if (data) {
-				this.setState({outline: JSON.parse(data)});
-			} else {
-				this.setState({outline: {data: []}});
-			}
+			this.setState({outline: data ? JSON.parse(data) : {data: []}, loading: false});
 		}
 	}
 
@@ -393,8 +259,8 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 		this.setState({outline});
 	}
 
-	public handleImportOutline = () => {
-		const fileElem = document.getElementById('file') as HTMLInputElement | null;
+	public handleImportOutline = (evt: React.ChangeEvent<HTMLInputElement>) => {
+		const fileElem = evt.target;
 		if (fileElem && fileElem.files && fileElem.files[0]) {
 			const file = fileElem.files[0];
 			const reader = new FileReader();
@@ -409,13 +275,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 				let outline: GetOutline;
 
 				if (this.props.auth.isAuthenticated) {
-					const token = await this.props.auth.getTokenSilently();
-					const {data} = await axios.post(
-						`${window.env.API_URL}/outlines`,
-						newOutline,
-						{headers: {Authorization: `Bearer ${token}`}}
-					);
-
+					const {data} = await this.api.post('/outlines', newOutline);
 					outline = data.outline;
 				} else {
 					outline = newOutline;
@@ -447,12 +307,12 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 			});
 
 			setTimeout(() => {
-				window.requestAnimationFrame(() => {
+				window.requestAnimationFrame(async () => {
 					const outline = this.state.outline;
-					pdf.export(outline!.data.filter(b => b.export), outline!.name)
-						.then(() => {
-							this.setState({exporting: false});
-						});
+					const blob = await pdf.export(outline!.data.filter(b => b.export));
+					this.setState({exporting: false}, () => {
+						this.setDownloadData(`${outline!.name || 'outline'}.pdf`, blob);
+					});
 				});
 			}, 0);
 		})
@@ -474,29 +334,34 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 					return parts.join('\n');
 				});
 				const str = blockStrings.join('\n\n\n');
-				this.downloadData(`${outline!.name || 'outline'}.txt`, str);
+				this.setDownloadData(`${outline!.name || 'outline'}.txt`, str);
 			});
 		}, 0);
 	}
 
 	public handleExportOutline = () => {
 		const outline = this.state.outline;
-		this.downloadData(`${outline!.name || 'outline'}.cbo`, JSON.stringify(outline!.data));
+		this.setDownloadData(`${outline!.name || 'outline'}.cbo`, JSON.stringify(outline!.data));
 	}
 
-	public downloadData = (filename: string, data: string) => {
-		const blob = new Blob(['\ufeff', data]);
-		const el = document.createElement('a');
-		el.href = window.URL.createObjectURL(blob);
-		el.download = filename;
-		document.body.appendChild(el);
-		el.click();
-		document.body.removeChild(el);
-		window.URL.revokeObjectURL(el.href);
+	public setDownloadData = (filename: string, data: string | Blob) => {
+		const blob = typeof data === 'string' ? new Blob(['\ufeff', data]) : data;
+
+		if (isMobile.iOS()) {
+			this.setState({downloadData: {blob, filename}, showDrawer: false});
+		} else {
+			FileSaver.saveAs(blob, filename);
+		}
 	}
 
-	public handleToggleDrawer = () => {
-		this.setState(state => ({showDrawer: !state.showDrawer}));
+	public handleDownload = () => {
+		const {blob, filename} = this.state.downloadData!;
+		FileSaver.saveAs(blob, filename);
+		this.setState({downloadData: null});
+	}
+
+	public handleToggleDrawer = (showDrawer: boolean) => () => {
+		this.setState({showDrawer});
 	}
 
 	public handleToggleFileTree = (open: boolean) => (evt: any) => {
@@ -507,32 +372,12 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 		this.setState({showFileTree: open});
 	}
 
-	public handleCloseOpenDialog = () => {
-		this.setState({showOpenDialog: false});
-	}
-
-	public handleOpenRenameDialog = () => {
-		this.setState({showRenameDialog: true, nameStr: this.state.outline!.name || ''});
-	}
-
-	public handleCloseRenameDialog = () => {
-		this.setState({showRenameDialog: false, nameStr: ''});
-	}
-
 	public handleOpenNewDialog = () => {
 		this.setState({showNewDialog: true});
 	}
 
 	public handleCloseNewDialog = () => {
 		this.setState({showNewDialog: false, nameStr: ''});
-	}
-
-	public handleOpenConfirmDialog = () => {
-		this.setState({showConfirmDialog: true});
-	}
-
-	public handleCloseConfirmDialog = () => {
-		this.setState({showConfirmDialog: false});
 	}
 
 	public handleChangeNameStr = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -543,14 +388,13 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 		this.setState({nameStr: ''});
 	}
 
-	public handleNew = async () => {
-		const newOutline = {data: [], name: this.state.nameStr};
-		const token = await this.props.auth.getTokenSilently();
-		const {data} = await axios.post(
-			`${window.env.API_URL}/outlines`,
-			newOutline,
-			{headers: {Authorization: `Bearer ${token}`}}
-		);
+	public handleClearDownloadData = () => {
+		this.setState({downloadData: null});
+	}
+
+	public handleNew = async (name: any) => {
+		const newOutline = {data: [], name: typeof name === 'string' ? name : this.state.nameStr};
+		const {data} = await this.api.post('/outlines',	newOutline);
 
 		const outline = data.outline;
 		localStorage.setItem('outliner-data', JSON.stringify(outline));
@@ -560,21 +404,15 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 	}
 
 	public handleOpen = async (id: string) => {
-		const token = await this.props.auth.getTokenSilently();
-		const {data} = await axios.get(`${window.env.API_URL}/outlines/${id}`, {
-			headers: {Authorization: `Bearer ${token}`}
-		});
+		const {data} = await this.api.get(`/outlines/${id}`);
 
 		const outline = data.outline;
 		localStorage.setItem('outliner-data', JSON.stringify(outline));
-		this.setState({outline, showOpenDialog: false});
+		this.setState({outline, showOpenDialog: false, loading: false});
 	}
 
 	public handleList = async (firstLoad: boolean = false) => {
-		const token = await this.props.auth.getTokenSilently();
-		const {data} = await axios.get(`${window.env.API_URL}/outlines`, {
-			headers: {Authorization: `Bearer ${token}`}
-		});
+		const {data} = await this.api.get('/outlines');
 		const outlines = data.outlines as ListOutline[];
 
 		if (!firstLoad && outlines.length === 0) {
@@ -597,19 +435,15 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 				this.handleOpen(outline.id!);
 			} else if (outlines.length > 0) {
 				this.handleOpen(outlines[0].id);
+			} else {
+				this.setState({loading: false});
 			}
 		});
 	}
 
 	public handleSave = debounce(async () => {
-		const token = await this.props.auth.getTokenSilently();
 		const outline = this.state.outline;
-
-		const {data} = await axios.patch(
-			`${window.env.API_URL}/outlines/${outline!.id}`,
-			pick(outline, ['name', 'data']),
-			{headers: {Authorization: `Bearer ${token}`}}
-		);
+		const {data} = await this.api.patch(`/outlines/${outline!.id}`, pick(outline, ['name', 'data']));
 
 		localStorage.setItem('outliner-data', JSON.stringify(data.outline));
 
@@ -618,14 +452,8 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 		}
 	}, 500);
 
-	public handleRename = async () => {
-		const token = await this.props.auth.getTokenSilently();
-
-		await axios.patch(
-			`${window.env.API_URL}/outlines/${this.state.outline!.id}`,
-			{name: this.state.nameStr},
-			{headers: {Authorization: `Bearer ${token}`}}
-		);
+	public handleRename = async (name: string) => {
+		await this.api.patch(`/outlines/${this.state.outline!.id}`, {name});
 
 		this.setState({showRenameDialog: false}, () => {
 			this.handleList();
@@ -640,29 +468,33 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 			});
 		}
 
-		const token = await this.props.auth.getTokenSilently();
 		const outline = this.state.outline;
-
-		await axios.delete(`${window.env.API_URL}/outlines/${outline!.id}`, {
-			headers: {Authorization: `Bearer ${token}`}
-		});
+		await this.api.delete(`/outlines/${outline!.id}`);
 
 		this.setState({showConfirmDialog: false}, () => this.handleList());
 	}
 
 	public handleLogout = () => {
 		localStorage.setItem('outliner-data', JSON.stringify({data: []}));
-		this.props.auth.logout();
+		this.props.auth.logout({returnTo: window.location.origin});
 	}
 
 	public render() {
 		const {classes, fullScreen, auth} = this.props;
+		const {
+			outline,
+			showDrawer,
+			showFileTree,
+			fontsLoaded,
+			loading,
+			exporting,
+			availableOutlines,
+			showNewDialog,
+			nameStr,
+			downloadData
+		} = this.state;
 
-		if (auth.loading) {
-			return <div>Loading</div>
-		}
-
-		if (!this.state.fontsLoaded) {
+		if (!fontsLoaded || loading || auth.loading) {
 			return (
 				<div className={classes.progressOverlay}>
 					<CircularProgress disableShrink/>
@@ -670,169 +502,44 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 			);
 		}
 
-		const outline = this.state.outline;
-
-		const drawer = (
-			<div>
-				<div className={classes.drawerHeader}>Colorbox</div>
-				<Divider/>
-				{!auth.isAuthenticated && (
-					<>
-						<List>
-							<ListItem button className={classes.drawerItem} onClick={this.handleOpenConfirmDialog}>
-								<ListItemText primary="New" disableTypography/>
-							</ListItem>
-						</List>
-						<Divider/>
-					</>
-				)}
-				<List>
-					<ListItem button className={classes.drawerItem}>
-						<input
-							className={classes.uploadInput}
-							type="file"
-							id="file"
-							onChange={this.handleImportOutline}
-							accept=".otl,.cbo"
-						/>
-						<label className={classes.uploadLabel} htmlFor="file">Import Outline</label>
-					</ListItem>
-				</List>
-				<Divider/>
-				<List>
-					<ListItem button className={classes.drawerItem} onClick={this.handleExportOutline}>
-						<ListItemText primary="Export Outline" disableTypography/>
-					</ListItem>
-					<ListItem button className={classes.drawerItem} onClick={this.handleExportPDF}>
-						<ListItemText primary="Export PDF" disableTypography/>
-					</ListItem>
-					<ListItem button className={classes.drawerItem} onClick={this.handleExportText}>
-						<ListItemText primary="Export Text" disableTypography/>
-					</ListItem>
-				</List>
-			</div>
-		);
-
-		const fileTree = (
-			<div className={classes.fileTreeContainer}>
-				<Hidden smDown implementation="css">
-					<div className={classes.fileTreeHeader}>
-							<IconButton style={{color: 'inherit'}} onClick={this.handleToggleDrawer}>
-								<MenuIcon/>
-							</IconButton>
-					</div>
-					<Divider/>
-				</Hidden>
-				<div className={classes.fileTreeActions}>
-					<IconButton onClick={this.handleOpenNewDialog} title="New Document">
-						<FileIcon/>
-					</IconButton>
-					<IconButton onClick={this.handleOpenRenameDialog} title="Rename">
-						<EditIcon/>
-					</IconButton>
-					<IconButton onClick={this.handleOpenConfirmDialog} title="Delete">
-						<DeleteIcon/>
-					</IconButton>
-				</div>
-				<Hidden mdUp implementation="css">
-					<Divider/>
-				</Hidden>
-				<List className={classes.fileTreeList}>
-					{this.state.availableOutlines.map(o => (
-						<ListItem
-							button
-							className={classes.drawerItem}
-							onClick={() => this.handleOpen(o.id)}
-							selected={outline && o.id === outline.id}
-							key={o.id}
-							title={o.name}
-						>
-							<ListItemIcon style={{marginRight: 0, color: 'inherit'}}><FileIcon/></ListItemIcon>
-							<ListItemText
-								primary={o.name}
-								disableTypography
-								style={{textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}
-							/>
-						</ListItem>
-					))}
-				</List>
-			</div>
-		);
-
 		return (
 			<div className={classes.root}>
-				{this.state.exporting && (
+				{exporting && (
 					<div className={classes.progressOverlay}>
 						<CircularProgress disableShrink/>
 					</div>
 				)}
 				<div className={classes.drawerContainer}>
-					{auth.isAuthenticated ? (
-						<>
-							<Drawer
-								variant="temporary"
-								anchor="left"
-								open={this.state.showDrawer}
-								onClose={this.handleToggleDrawer}
-								classes={{paper: classes.drawerPaper}}
-								ModalProps={{keepMounted: true}}
-							>
-								{drawer}
-							</Drawer>
-							<Hidden mdUp implementation="css">
-								<div className={classes.fileTreeHandleContainer}>
-									<div className={classes.fileTreeHandle} onClick={this.handleToggleFileTree(true)}/>
-								</div>
-								<SwipeableDrawer
-									anchor="left"
-									open={this.state.showFileTree}
-									onOpen={this.handleToggleFileTree(true)}
-									onClose={this.handleToggleFileTree(false)}
-									classes={{paper: classes.drawerPaper}}
-									ModalProps={{keepMounted: true}}
-								>
-									{fileTree}
-								</SwipeableDrawer>
-							</Hidden>
-							<Hidden smDown implementation="css">
-								<Drawer
-									classes={{paper: classes.drawerPaper}}
-									variant="permanent"
-									open
-								>
-									{fileTree}
-								</Drawer>
-							</Hidden>
-						</>
-					) : (
-						<>
-							<Hidden mdUp implementation="css">
-								<Drawer
-									variant="temporary"
-									anchor="left"
-									open={this.state.showDrawer}
-									onClose={this.handleToggleDrawer}
-									classes={{paper: classes.drawerPaper}}
-									ModalProps={{keepMounted: true}}
-								>
-									{drawer}
-								</Drawer>
-							</Hidden>
-							<Hidden smDown implementation="css">
-								<Drawer
-									classes={{paper: classes.drawerPaper}}
-									variant="permanent"
-									open
-								>
-									{drawer}
-								</Drawer>
-							</Hidden>
-						</>
+					<MenuDrawer
+						variant={auth.isAuthenticated ? 'temporary' : 'responsive'}
+						fullScreen={fullScreen}
+						open={showDrawer}
+						onClose={this.handleToggleDrawer(false)}
+						onNew={this.handleDelete}
+						onImport={this.handleImportOutline}
+						onExportOutline={this.handleExportOutline}
+						onExportPDF={this.handleExportPDF}
+						onExportText={this.handleExportText}
+					/>
+					{auth.isAuthenticated && (
+						<FileTreeDrawer
+							fullScreen={fullScreen}
+							open={showFileTree}
+							onOpenMenu={this.handleToggleDrawer(true)}
+							onOpen={this.handleToggleFileTree(true)}
+							onClose={this.handleToggleFileTree(false)}
+							onNewOutline={this.handleNew}
+							onRenameOutline={this.handleRename}
+							onOpenOutline={this.handleOpen}
+							onDeleteOutline={this.handleDelete}
+							outlines={availableOutlines}
+							outline={outline}
+						/>
 					)}
 				</div>
 				<div className={classes.container}>
 					<div className={classes.appBar}>
-						<IconButton onClick={this.handleToggleDrawer} className={classes.menuButton}>
+						<IconButton onClick={this.handleToggleDrawer(true)} className={classes.menuButton}>
 							<MenuIcon/>
 						</IconButton>
 						{auth.isAuthenticated ? (
@@ -877,69 +584,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 				</div>
 				<Dialog
 					fullScreen={fullScreen}
-					open={this.state.showOpenDialog}
-					onClose={this.handleCloseOpenDialog}
-				>
-					<DialogTitle disableTypography className={classes.dialogTitle}>{"Open document"}</DialogTitle>
-					<Table className={classes.outlineTable}>
-						<TableHead>
-							<TableRow>
-								<TableCell>Name</TableCell>
-								<TableCell>Created</TableCell>
-								<TableCell>Last Updated</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{this.state.availableOutlines.map(o => (
-								<TableRow className={classes.outlineTableRow} onClick={() => this.handleOpen(o.id)} key={o.id}>
-									<TableCell>{o.name}</TableCell>
-									<TableCell>{new Date(o.createdAt).toLocaleString(navigator.language)}</TableCell>
-									<TableCell>{o.updatedAt ? new Date(o.updatedAt).toLocaleString(navigator.language) : '-'}</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-					<DialogActions>
-						<Button onClick={this.handleCloseOpenDialog} color="primary" className={classes.dialogButton}>
-							Cancel
-						</Button>
-					</DialogActions>
-				</Dialog>
-				<Dialog
-					fullScreen={fullScreen}
-					open={this.state.showRenameDialog}
-					onClose={this.handleCloseRenameDialog}
-					onExited={this.handleClearNameStr}
-					fullWidth
-				>
-					<DialogTitle disableTypography className={classes.dialogTitle}>{"Rename document"}</DialogTitle>
-					<DialogContent>
-						<TextField
-							autoFocus
-							fullWidth
-							value={this.state.nameStr}
-							onChange={this.handleChangeNameStr}
-							placeholder="untitled"
-							InputProps={{style: {fontSize: '1.3rem', fontFamily: 'inherit'}}}
-						/>
-					</DialogContent>
-					<DialogActions>
-						<Button onClick={this.handleCloseRenameDialog} color="primary" className={classes.dialogButton}>
-							Cancel
-						</Button>
-						<Button
-							onClick={this.handleRename}
-							color="primary"
-							className={classes.dialogButton}
-							disabled={!this.state.nameStr}
-						>
-							Rename
-						</Button>
-					</DialogActions>
-				</Dialog>
-				<Dialog
-					fullScreen={fullScreen}
-					open={this.state.showNewDialog}
+					open={showNewDialog}
 					onClose={this.handleCloseNewDialog}
 					onExited={this.handleClearNameStr}
 					fullWidth
@@ -949,7 +594,7 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 						<TextField
 							autoFocus
 							fullWidth
-							value={this.state.nameStr}
+							value={nameStr}
 							onChange={this.handleChangeNameStr}
 							placeholder="untitled"
 							InputProps={{style: {fontSize: '1.4rem', fontFamily: 'inherit'}}}
@@ -963,36 +608,21 @@ class App extends React.Component<WithMobileDialog & WithStyles<typeof styles> &
 							onClick={this.handleNew}
 							color="primary"
 							className={classes.dialogButton}
-							disabled={!this.state.nameStr}
+							disabled={!nameStr}
 						>
 							Create
 						</Button>
 					</DialogActions>
 				</Dialog>
 				<Dialog
-					fullScreen={fullScreen}
-					open={this.state.showConfirmDialog}
-					onClose={this.handleCloseConfirmDialog}
+					open={Boolean(downloadData)}
+					onClose={this.handleClearDownloadData}
+					classes={{paper: classes.downloadDialog}}
 				>
-					<DialogTitle disableTypography className={classes.dialogTitle}>
-						{auth.isAuthenticated ? 'Confirm delete' : 'Confirm new document'}
-					</DialogTitle>
-					<DialogContent>
-						<DialogContentText className={classes.dialogText}>
-							{auth.isAuthenticated
-								? 'Are you sure you want to delete the current document? This action cannot be reversed.'
-								: 'Your current document will be lost. Please save your work before creating a new document if you wish to restore it later.'
-							}
-						</DialogContentText>
-					</DialogContent>
-					<DialogActions>
-						<Button onClick={this.handleCloseConfirmDialog} color="primary" className={classes.dialogButton}>
-							Cancel
-						</Button>
-						<Button onClick={this.handleDelete} color="primary" className={classes.dialogButton} autoFocus>
-							{auth.isAuthenticated ? 'Delete' : 'Create'}
-						</Button>
-					</DialogActions>
+					<Fab variant="extended" onClick={this.handleDownload} color="primary">
+						<DownloadIcon/>
+						Download File
+					</Fab>
 				</Dialog>
 			</div>
 		);

@@ -1,7 +1,6 @@
 import {BlockData} from '@/BlockList';
 import PDFDocument from 'pdfkit-browserify';
 import blobStream from 'blob-stream';
-import FileSaver from 'file-saver';
 import RobotoMono from '../fonts/RobotoMono-Regular.ttf';
 import RobotoMonoMedium from '../fonts/RobotoMono-Medium.ttf';
 
@@ -265,7 +264,7 @@ export default class PDF {
 		}
 	}
 
-	public export = (blocks: BlockData[], filename: string = 'outline') => {
+	public export = (blocks: BlockData[]): Promise<Blob> => {
 		return new Promise(resolve => {
 			const {margin, fontSize} = this.options;
 
@@ -275,8 +274,7 @@ export default class PDF {
 
 			this.stream.on('finish', () => {
 				const blob = this.stream.toBlob('application/pdf');
-				FileSaver.saveAs(blob, `${filename}.pdf`);
-				resolve();
+				resolve(blob);
 			});
 
 			this.doc.fontSize(fontSize);
