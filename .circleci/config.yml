@@ -64,10 +64,10 @@ workflows:
             - build-client
           filters:
             branches:
-              only: server
+              only: master
       - deploy-server:
           requires:
             - build-server
           filters:
             branches:
-              only: server
+              only: master

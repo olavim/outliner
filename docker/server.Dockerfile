@@ -1,13 +1,15 @@
-FROM node:10 as builder
+FROM node:10-alpine
 
 WORKDIR /usr/src/app
 
 COPY package.json ./
+COPY yarn.lock ./
 COPY lerna.json ./
 COPY server/ ./server/
 
 RUN yarn install
-RUN yarn build --scope server
+		yarn build --scope server
+		yarn cache clean
 
 EXPOSE 80
 
