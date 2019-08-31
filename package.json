@@ -8,8 +8,8 @@
 	"sideEffects": false,
 	"scripts": {
 		"build": "lerna exec --parallel yarn build",
-		"build:docker:client": "docker build -t olavim/outliner-client -f docker/client.Dockerfile .",
-		"build:docker:server": "docker build -t olavim/outliner-server -f docker/server.Dockerfile .",
+		"build:docker:client": "docker build -t olavim/outliner-client --build-arg service=client .",
+		"build:docker:server": "docker build -t olavim/outliner-server --build-arg service=server .",
 		"build:docker": "yarn build:docker:client && yarn build:docker:server",
 		"publish:docker:client": "docker push olavim/outliner-client",
 		"publish:docker:server": "docker push olavim/outliner-server",
