@@ -29,7 +29,9 @@ deploy_defaults: &deploy_defaults
           docker push olavim/outliner-$SERVICE:$CIRCLE_SHA1
     - run:
         name: Deploy $SERVICE
-        command: ssh root@olavim.io docker service update --image olavim/outliner-$SERVICE:$CIRCLE_SHA1 outliner_$SERVICE
+        command: |
+          ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+          ssh root@$SSH_HOST docker service update --image olavim/outliner-$SERVICE:$CIRCLE_SHA1 outliner_$SERVICE
 
 version: 2.1
 executors:
