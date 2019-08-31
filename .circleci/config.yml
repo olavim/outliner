@@ -1,57 +1,74 @@
-version: 2
+build_defaults: &build_defaults
+  steps:
+    - checkout
+    - setup_remote_docker:
+        docker_layer_caching: true
+    - run:
+        name: Build Docker image
+        command: docker build -t olavim/outliner-$SERVICE:$CIRCLE_SHA1 --build-arg service=$SERVICE .
+    - run:
+        name: Publish Docker image to Docker Hub
+        command: |
+          echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
+          docker push olavim/outliner-$SERVICE:$CIRCLE_SHA1
+deploy_defaults: &deploy_defaults
+  steps:
+    - attach_workspace:
+        at: /tmp/workspace
+    - setup_remote_docker:
+        docker_layer_caching: true
+    - add_ssh_keys:
+        fingerprints:
+          - ca:4c:01:61:55:a1:ea:fc:7d:62:c5:44:ed:3c:ac:f1
+    - run:
+        name: Deploy service
+        command: |
+          ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+          ssh root@$SSH_HOST docker service update --image olavim/outliner-$SERVICE:$CIRCLE_SHA1 outliner_$SERVICE
+
+version: 2.1
+executors:
+  client-docker-publisher:
+    environment:
+      SERVICE: client
+    docker:
+      - image: circleci/buildpack-deps:stretch
+  server-docker-publisher:
+    environment:
+      SERVICE: server
+    docker:
+      - image: circleci/buildpack-deps:stretch
+
 jobs:
-  build-deps:
-    docker:
-      - image: circleci/node:8
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - dependency-cache-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - dependency-cache-
-      - run:
-          name: Install dependencies
-          command: yarn install
-      - save_cache:
-          paths:
-            - node_modules
-          key: dependency-cache-{{ checksum "package.json" }}
-      - run:
-          name: Transpile sources
-          command: yarn run build
-      - persist_to_workspace:
-          root: dist
-          paths:
-            - client
-  deploy-gh-pages:
-    docker:
-      - image: circleci/node:8
-    steps:
-      - checkout
-      - attach_workspace:
-          at: dist
-      - run:
-          name: Install and configure dependencies
-          command: |
-            sudo npm install -g --silent gh-pages@2.0.1
-            git config user.email "tilastokeskus@gmail.com"
-            git config user.name "ci-build"
-      - add_ssh_keys:
-          fingerprints:
-            - "1c:2c:a5:02:39:28:5c:ea:7d:b5:2c:55:20:df:6f:11"
-      - run:
-          name: Deploy to gh-pages branch
-          command: gh-pages --message "[skip ci] Updates" --dist dist/client
+  build-client:
+    executor: client-docker-publisher
+    <<: *build_defaults
+  build-server:
+    executor: server-docker-publisher
+    <<: *build_defaults
+  deploy-client:
+    executor: client-docker-publisher
+    <<: *deploy_defaults
+  deploy-server:
+    executor: server-docker-publisher
+    <<: *deploy_defaults
 
 workflows:
   version: 2
   build-n-deploy:
     jobs:
-      - build-deps
-      - deploy-gh-pages:
-          requires:
-            - build-deps
+      - build-client:
           filters:
             branches:
               only: master
+      - build-server:
+          filters:
+            branches:
+              only: master
+      - deploy-client:
+          requires:
+            - build-client
+      - deploy-server:
+          requires:
+            - build-server
+

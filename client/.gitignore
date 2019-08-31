@@ -8,11 +8,11 @@ coverage
 
 # production
 dist
-.awcache
+/.awcache
 
 # misc
 .DS_Store
-.env*
+stats.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="theme-color" content="#000000">
+		<title>Colorbox Outliner</title>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				background-color: #fafafa;
+			}
+
+			html {
+				font-size: 62.5%;
+			}
+
+			html, body, #root {
+				height: 100%;
+			}
+
+			html * {
+				outline: none;
+				font-family: Montserrat, Arial, sans-serif;
+			}
+
+			a {
+				text-decoration: none;
+			}
+
+			table {
+				page-break-inside: auto
+			}
+			tr {
+				page-break-inside: avoid;
+				page-break-after: auto;
+			}
+
+			.outline {
+				color: #000000;
+				font-weight: 500;
+				border-radius: 0.3rem;
+				text-transform: none;
+				padding: 0 1.6rem;
+				min-height: 3rem;
+				background: linear-gradient(to top,rgba(255,255,255,.9),rgba(255,255,255,0));
+				background-color: #f2f6fa;
+				font-size: 1.1rem;
+				border: 1px solid rgba(0,0,0,0.08);
+				cursor: pointer;
+				align-items: center;
+			}
+
+			.outline:hover {
+				background: linear-gradient(to top,rgba(255,255,255,0),rgba(255,255,255,.9));
+				background-color: #f2f6fa;
+			}
+
+			@media only print {
+				body {
+					background-color: unset;
+				}
+
+				button {
+					display: none !important;
+				}
+
+				div {
+					page-break-inside: avoid;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<noscript>
+			You need to enable JavaScript to run this app.
+		</noscript>
+		<div id="root"></div>
+		<script src="/env.js"></script>
+	</body>
+</html>
