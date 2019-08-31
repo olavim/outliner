@@ -19,6 +19,9 @@ deploy_defaults: &deploy_defaults
         at: /tmp/workspace
     - setup_remote_docker:
         docker_layer_caching: true
+    - add_ssh_keys:
+        fingerprints:
+          - ca:4c:01:61:55:a1:ea:fc:7d:62:c5:44:ed:3c:ac:f1
     - run:
         name: Load archived $SERVICE Docker image
         command: docker load -i /tmp/workspace/image.tar
