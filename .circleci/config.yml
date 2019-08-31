@@ -4,15 +4,13 @@ build_defaults: &build_defaults
     - setup_remote_docker:
         docker_layer_caching: true
     - run:
-        name: Build $SERVICE Docker image
+        name: Build Docker image
         command: docker build -t olavim/outliner-$SERVICE:$CIRCLE_SHA1 -f docker/$SERVICE.Dockerfile .
     - run:
-        name: Archive $SERVICE Docker image
-        command: docker save -o image.tar olavim/outliner-$SERVICE
-    - persist_to_workspace:
-        root: .
-        paths:
-          - ./image.tar
+        name: Publish Docker image to Docker Hub
+        command: |
+          echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
+          docker push olavim/outliner-$SERVICE:$CIRCLE_SHA1
 deploy_defaults: &deploy_defaults
   steps:
     - attach_workspace:
@@ -23,15 +21,7 @@ deploy_defaults: &deploy_defaults
         fingerprints:
           - ca:4c:01:61:55:a1:ea:fc:7d:62:c5:44:ed:3c:ac:f1
     - run:
-        name: Load archived $SERVICE Docker image
-        command: docker load -i /tmp/workspace/image.tar
-    - run:
-        name: Publish $SERVICE Docker image to Docker Hub
-        command: |
-          echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
-          docker push olavim/outliner-$SERVICE:$CIRCLE_SHA1
-    - run:
-        name: Deploy $SERVICE
+        name: Deploy service
         command: |
           ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
           ssh root@$SSH_HOST docker service update --image olavim/outliner-$SERVICE:$CIRCLE_SHA1 outliner_$SERVICE
