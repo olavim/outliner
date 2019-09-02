@@ -9,10 +9,8 @@ import IndentIncIcon from '@material-ui/icons/KeyboardArrowRight';
 import UpIcon from '@material-ui/icons/ArrowUpward';
 import DownIcon from '@material-ui/icons/ArrowDownward';
 import DeleteIcon from '@material-ui/icons/Close';
-import AddIcon from '@material-ui/icons/Add';
 import ColorIcon from '@material-ui/icons/ColorLens';
 import MenuIcon from '@material-ui/icons/Menu';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import {
 	DragSource,
 	DropTarget,
@@ -27,7 +25,8 @@ import {BlockData} from './BlockList';
 import Checkbox from './Checkbox';
 
 const theme = {
-	handleBreakpoint: '700px',
+	handleWidthBreakpoint: '760px',
+	handleHeightBreakpoint: '600px',
 	actionsBreakpoint: '760px',
 	actions: {
 		height: {
@@ -151,7 +150,10 @@ const styles = createStyles({
 		'@media (hover: none)': {
 			opacity: 0.5
 		},
-		[`@media (max-width: ${theme.handleBreakpoint})`]: {
+		[`@media (max-width: ${theme.handleWidthBreakpoint})`]: {
+			width: '4rem'
+		},
+		[`@media (max-height: ${theme.handleHeightBreakpoint})`]: {
 			width: '4rem'
 		}
 	},
@@ -175,7 +177,7 @@ const styles = createStyles({
 		'@media (hover: none)': {
 			opacity: 0.5
 		},
-		[`@media (max-width: ${theme.handleBreakpoint})`]: {
+		[`@media (max-width: ${theme.handleWidthBreakpoint})`]: {
 			right: 0,
 			width: '4rem'
 		}
@@ -186,7 +188,7 @@ const styles = createStyles({
 		right: '-2.4rem',
 		paddingLeft: '0.4rem',
 		height: '100%',
-		[`@media (max-width: ${theme.handleBreakpoint})`]: {
+		[`@media (max-width: ${theme.handleWidthBreakpoint})`]: {
 			display: 'none'
 		}
 	},
@@ -239,6 +241,7 @@ const styles = createStyles({
 		zIndex: 50,
 		boxSizing: 'border-box',
 		transition: 'all 0.3s',
+		position: 'relative',
 		'& > button': {
 			color: 'rgba(0,0,0,0.73)',
 			fontSize: '1rem',
@@ -265,48 +268,30 @@ const styles = createStyles({
 		}
 	},
 	actionsTop: {
-		'& button:first-child': {
+		'& button:nth-child(2)': {
 			marginRight: 'auto'
 		},
 		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			top: '5rem'
 		},
-		'@media (max-height: 500px) and (orientation:landscape)': {
+		[`@media (max-height: 500px) and (orientation:landscape)`]: {
 			display: 'none'
 		}
 	},
 	actionsBottom: {
+		'& button:nth-child(2)': {
+			marginRight: 'auto'
+		},
+		'& button:nth-child(3)': {
+			position: 'absolute',
+			left: '50%',
+			transform: 'translateX(-50%)'
+		},
 		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 			bottom: 0
 		},
-		'@media (max-height: 500px) and (orientation:landscape)': {
+		[`@media (max-height: 500px) and (orientation:landscape)`]: {
 			display: 'none'
-		}
-	},
-	actionsLeft: {
-		display: 'none',
-		width: 0,
-		flexDirection: 'column',
-		padding: 0,
-		'& > button:not(:last-child)': {
-			marginRight: 0
-		},
-		'& > button:not($focusTaker)': {
-			'@media (max-height: 240px) and (orientation:landscape)': {
-				display: 'none'
-			}
-		},
-		'& > $focusTaker': {
-			display: 'none',
-			'@media (max-height: 240px) and (orientation:landscape)': {
-				display: 'flex'
-			}
-		},
-		'@media (max-height: 500px) and (orientation:landscape)': {
-			display: 'flex',
-			left: 0,
-			top: '5rem',
-			height: 'calc(100% - 5rem)'
 		}
 	},
 	actionsEnter: {
@@ -350,73 +335,11 @@ const styles = createStyles({
 			padding: '0 1rem'
 		}
 	},
-	actionsLeftEnter: {
-		width: 0,
-		padding: 0
-	},
-	actionsLeftActive: {
-		width: '6rem',
-		padding: '1rem 1rem'
-	},
-	actionsLeftEnterDone: {
-		width: '6rem',
-		padding: '1rem 1rem'
-	},
-	actionsLeftExit: {
-		width: '6rem',
-		padding: '1rem 1rem'
-	},
-	actionsLeftExitActive: {
-		width: 0,
-		padding: 0
-	},
 	checkbox: {
 		position: 'absolute',
 		top: 0,
 		right: 0,
 		margin: '0.6rem'
-	},
-	addButton: {
-		margin: 0,
-		height: 0,
-		overflow: 'hidden',
-		fontSize: '1.1rem',
-		fontWeight: 600,
-		borderRadius: '0.4rem',
-		color: 'rgba(0,0,0,0.5)',
-		cursor: 'pointer',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		transition: 'all 0.3s',
-		'&:hover': {
-			color: 'rgba(0,0,0,0.38)'
-		},
-		'& svg': {
-			color: 'inherit',
-			marginRight: '0.6rem',
-			fontSize: '1.6rem'
-		}
-	},
-	addButtonEnter: {
-		margin: 0,
-		height: 0
-	},
-	addButtonActive: {
-		margin: '0.6rem',
-		height: theme.actions.height.primary
-	},
-	addButtonEnterDone: {
-		margin: '0.6rem',
-		height: theme.actions.height.primary
-	},
-	addButtonExit: {
-		margin: '0.6rem',
-		height: theme.actions.height.primary
-	},
-	addButtonExitActive: {
-		margin: 0,
-		height: 0
 	}
 });
 
@@ -504,7 +427,9 @@ const cardTarget = {
 	}
 };
 
-class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & BlockSourceCollectedProps & BlockTargetCollectedProps> {
+type Props = OwnProps & WithStyles<typeof styles> & BlockSourceCollectedProps & BlockTargetCollectedProps;
+
+class Block extends React.PureComponent<Props> {
 	public titleRef = React.createRef<any>();
 	public bodyRef = React.createRef<any>();
 
@@ -586,22 +511,14 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 		onChange(block.id, 'export', !block.export);
 	}
 
-	public render() {
-		const {
-			block,
-			classes,
-			onClick,
-			onChangeColor,
-			focus,
-			connectDragSource,
-			connectDropTarget,
-			connectDragPreview,
-			isDragging,
-			index
-		} = this.props;
+	public getActions = () => {
+		const {block, onChangeColor} = this.props;
 
-		const actionsTop = [
+		return [
 			{label: 'Move Up', icon: UpIcon, fn: this.handleMoveUp, disabled: false},
+			{label: 'Move Down', icon: DownIcon, fn: this.handleMoveDown, disabled: false},
+			{label: '+ Above', fn: this.handleAddBefore, disabled: false},
+			{label: '+ Below', fn: this.handleAddAfter, disabled: false},
 			{
 				label: block.showTitle ? 'Remove Title' : 'Add Title',
 				fn: this.handleToggleTitle,
@@ -611,22 +528,29 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 				label: block.showBody ? 'Remove Body' : 'Add Body',
 				fn: this.handleToggleBody,
 				disabled: block.showBody && !block.showTitle
-			}
-		];
-
-		const actionsBottom = [
-			{label: 'Move Down', icon: DownIcon, fn: this.handleMoveDown, disabled: false},
+			},
 			{label: 'Color', icon: ColorIcon, fn: onChangeColor, disabled: false},
 			{label: 'Delete', icon: DeleteIcon, fn: this.handleDelete, disabled: false}
 		];
+	}
 
-		// Landscape mode actions
-		const actionsLeft = [
-			actionsTop[0], actionsBottom[0],
-			actionsTop[1], actionsTop[2],
-			actionsBottom[1],
-			actionsBottom[2]
-		];
+	public render() {
+		const {
+			block,
+			classes,
+			onClick,
+			focus,
+			connectDragSource,
+			connectDropTarget,
+			connectDragPreview,
+			isDragging,
+			index
+		} = this.props;
+
+		const actions = this.getActions();
+
+		const actionsTop = [actions[0], actions[2], actions[4], actions[5]];
+		const actionsBottom = [actions[1], actions[3], actions[6], actions[7]];
 
 		const tabIndex = index * 2 + 1;
 
@@ -636,22 +560,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 			enterDone: classes.actionsEnterDone,
 			exit: classes.actionsExit,
 			exitActive: classes.actionsExitActive
-		};
-
-		const actionsLeftTransitionClassNames = {
-			enter: classes.actionsLeftEnter,
-			enterActive: classes.actionsLeftActive,
-			enterDone: classes.actionsLeftEnterDone,
-			exit: classes.actionsLeftExit,
-			exitActive: classes.actionsLeftExitActive
-		};
-
-		const addButtonTransitionClassNames = {
-			enter: classes.addButtonEnter,
-			enterActive: classes.addButtonActive,
-			enterDone: classes.addButtonEnterDone,
-			exit: classes.addButtonExit,
-			exitActive: classes.addButtonExitActive
 		};
 
 		let elem = (
@@ -671,42 +579,12 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 				</div>
 				<CSSTransition
 					in={focus}
-					key={`${block.id}-addbtn-top`}
-					classNames={addButtonTransitionClassNames}
-					timeout={0}
-				>
-					<div className={classes.addButton} onClick={this.handleAddBefore}>
-						<AddIcon/>
-						Add Block
-					</div>
-				</CSSTransition>
-				<CSSTransition
-					in={focus}
 					key={`${block.id}-top`}
 					classNames={actionsTransitionClassNames}
 					timeout={0}
 				>
 					<div className={cls(classes.actions, classes.actionsTop)}>
 						{actionsTop.map(a => a.icon ? (
-							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
-								<a.icon/>
-							</IconButton>
-						) : (
-							<button key={a.label} onClick={a.fn} disabled={a.disabled}>{a.label}</button>
-						))}
-					</div>
-				</CSSTransition>
-				<CSSTransition
-					in={focus}
-					key={`${block.id}-left`}
-					classNames={actionsLeftTransitionClassNames}
-					timeout={0}
-				>
-					<div className={cls(classes.actions, classes.actionsLeft)}>
-						<IconButton className={classes.focusTaker}>
-							<MoreVertIcon/>
-						</IconButton>
-						{actionsLeft.map(a => a.icon ? (
 							<IconButton key={a.label} onClick={a.fn} disabled={a.disabled}>
 								<a.icon/>
 							</IconButton>
@@ -789,17 +667,6 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 						))}
 					</div>
 				</CSSTransition>
-				<CSSTransition
-					in={focus}
-					key={`${block.id}-addbtn-bottom`}
-					classNames={addButtonTransitionClassNames}
-					timeout={0}
-				>
-					<div className={classes.addButton} onClick={this.handleAddAfter}>
-						<AddIcon/>
-						Add Block
-					</div>
-				</CSSTransition>
 				<div className={classes.indentRight}>
 					<button onClick={this.handleIncreaseIndent}>
 						<IndentIncIcon/>
@@ -817,7 +684,7 @@ class Block extends React.PureComponent<OwnProps & WithStyles<typeof styles> & B
 
 const StyledBlock = withStyles(styles)(Block);
 
-const dropTarget = DropTarget<OwnProps, BlockTargetCollectedProps>(
+const dropTarget = DropTarget<OwnProps & {innerRef: React.RefObject<any> | null}, BlockTargetCollectedProps>(
 	'block',
 	cardTarget,
 	connect => ({
@@ -825,7 +692,7 @@ const dropTarget = DropTarget<OwnProps, BlockTargetCollectedProps>(
 	})
 );
 
-const dragSource = DragSource<OwnProps, BlockSourceCollectedProps>(
+const dragSource = DragSource<OwnProps & {innerRef: React.RefObject<any> | null}, BlockSourceCollectedProps>(
 	'block',
 	cardSource,
 	(connect, monitor) => ({

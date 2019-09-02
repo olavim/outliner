@@ -29,7 +29,6 @@ const styles = createStyles({
 			},
 			'@media (max-height: 500px) and (orientation:landscape)': {
 				paddingTop: 'inherit',
-				marginLeft: '6rem',
 				width: 'calc(100% - 12rem)'
 			}
 		}
@@ -129,6 +128,7 @@ export interface BlockData {
 interface Props extends WithStyles<typeof styles> {
 	blocks: BlockData[];
 	onChange: (blocks: BlockData[]) => any;
+	onFocusBlock: (ref: React.RefObject<any>) => void;
 }
 
 interface State {
@@ -141,6 +141,8 @@ class BlockList extends React.Component<Props, State> {
 		focusedBlock: -1,
 		showColorPicker: null
 	};
+
+	public focusedBlockRef = React.createRef<any>();
 
 	public getBlock = memoize(
 		(block: BlockData, index: number, focused: boolean) => (
@@ -156,6 +158,7 @@ class BlockList extends React.Component<Props, State> {
 				onClick={this.handleFocusBlock(block.id)}
 				onChangeColor={this.handleOpenColorPicker}
 				moveBlock={this.handleMoveBlock}
+				innerRef={focused ? this.focusedBlockRef : null}
 			/>
 		),
 		{normalizer: (args: any) => args[2] ? Date.now() : JSON.stringify(args)}
@@ -169,8 +172,8 @@ class BlockList extends React.Component<Props, State> {
 		window.removeEventListener('click', this.handleDocumentClick);
 	}
 
-	public handleDocumentClick = () => {
-		this.setState({focusedBlock: -1});
+	public handleDocumentClick = (evt: any) => {
+		this.handleFocusBlock(-1)(evt);
 	}
 
 	public handleAddAt = (index: number, parentBlock: BlockData | null = null) => {
@@ -242,7 +245,9 @@ class BlockList extends React.Component<Props, State> {
 
 	public handleFocusBlock = (id: any) => (evt: React.MouseEvent) => {
 		evt.stopPropagation();
-		this.setState({focusedBlock: id});
+		this.setState({focusedBlock: id}, () => {
+			this.props.onFocusBlock(this.focusedBlockRef);
+		});
 	}
 
 	public handleOpenColorPicker = (evt: React.MouseEvent) => {

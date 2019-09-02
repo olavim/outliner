@@ -22,6 +22,7 @@ import WebFont from 'webfontloader';
 import FileSaver from 'file-saver';
 import MenuIcon from '@material-ui/icons/Menu';
 import FileIcon from '@material-ui/icons/InsertDriveFile';
+import FileTreeIcon from '@material-ui/icons/FolderOpen';
 import DownloadIcon from '@material-ui/icons/GetApp';
 import githubIcon from './github-32px.png';
 import BlockList, {BlockData} from './BlockList';
@@ -42,8 +43,7 @@ const styles = createStyles({
 		display: 'flex',
 		flexDirection: 'column',
 		textAlign: 'center',
-		flex: '1 1 auto',
-		width: '100%'
+		flex: '1 1 auto'
 	},
 	appBar: {
 		display: 'flex',
@@ -57,9 +57,18 @@ const styles = createStyles({
 		'& .outline': {
 			marginRight: '1rem',
 			minHeight: '2.6rem'
+		},
+		[`@media (max-height: 500px) and (orientation:landscape)`]: {
+			padding: '0 1rem'
 		}
 	},
 	menuButton: {
+		padding: '0.6rem',
+		'@media (min-width: 960px)': {
+			display: 'none'
+		}
+	},
+	fileTreeButton: {
 		padding: '0.6rem',
 		'@media (min-width: 960px)': {
 			display: 'none'
@@ -135,6 +144,33 @@ const styles = createStyles({
 				marginRight: '0.8rem'
 			}
 		}
+	},
+	blockActionContainer: {
+		margin: '0 1rem',
+		padding: '0',
+		display: 'none',
+		flex: '1 1 auto',
+		borderLeft: '1px solid rgba(0, 0, 0, 0.11)',
+		borderRight: '1px solid rgba(0, 0, 0, 0.11)',
+		justifyContent: 'space-around',
+		[`@media (max-height: 500px) and (orientation:landscape)`]: {
+			display: 'flex'
+		}
+	},
+	blockAction: {
+		backgroundColor: 'transparent',
+		fontSize: '1rem',
+		border: 'none',
+		fontWeight: 700,
+		color: 'rgba(0,0,0,0.73)',
+		flex: '0 1 0',
+		padding: '9px 0.2rem',
+		'&:disabled': {
+			color: 'rgba(0,0,0,0.47)'
+		},
+		'& svg': {
+			fontSize: '1.8rem'
+		}
 	}
 });
 
@@ -167,6 +203,7 @@ interface State {
 	showNewDialog: boolean;
 	showConfirmDialog: boolean;
 	downloadData: {blob: Blob; filename: string} | null;
+	appBarActions: any[];
 }
 
 const trimNewLines = (str: string) => {
@@ -176,6 +213,7 @@ const trimNewLines = (str: string) => {
 type AppProps = WithMobileDialog & WithStyles<typeof styles> & WithAuthProps;
 
 class App extends React.Component<AppProps, State> {
+	public listContainerRef = React.createRef<any>();
 	public listRef = React.createRef<any>();
 	public api: AxiosInstance;
 
@@ -191,7 +229,8 @@ class App extends React.Component<AppProps, State> {
 		showRenameDialog: false,
 		showNewDialog: false,
 		showConfirmDialog: false,
-		downloadData: null
+		downloadData: null,
+		appBarActions: []
 	};
 
 	constructor(props: AppProps) {
@@ -237,7 +276,7 @@ class App extends React.Component<AppProps, State> {
 		if (!prevState.fontsLoaded && this.state.fontsLoaded) {
 			setTimeout(() => {
 				window.requestAnimationFrame(() => {
-					const elem = findDOMNode(this.listRef.current) as HTMLElement;
+					const elem = findDOMNode(this.listContainerRef.current) as HTMLElement;
 					if (elem) {
 						elem.scrollTo(0, 0);
 					}
@@ -479,6 +518,10 @@ class App extends React.Component<AppProps, State> {
 		this.props.auth.logout({returnTo: window.location.origin});
 	}
 
+	public handleFocusBlock = (ref: React.RefObject<any>) => {
+		this.setState({appBarActions: ref.current ? ref.current.getActions() : []});
+	}
+
 	public render() {
 		const {classes, fullScreen, auth} = this.props;
 		const {
@@ -491,7 +534,8 @@ class App extends React.Component<AppProps, State> {
 			availableOutlines,
 			showNewDialog,
 			nameStr,
-			downloadData
+			downloadData,
+			appBarActions
 		} = this.state;
 
 		if (!fontsLoaded || loading || auth.loading) {
@@ -542,16 +586,34 @@ class App extends React.Component<AppProps, State> {
 						<IconButton onClick={this.handleToggleDrawer(true)} className={classes.menuButton}>
 							<MenuIcon/>
 						</IconButton>
+						{auth.isAuthenticated && (
+							<IconButton onClick={this.handleToggleFileTree(true)} className={classes.fileTreeButton}>
+								<FileTreeIcon/>
+							</IconButton>
+						)}
+						<div className={classes.blockActionContainer}>
+							{appBarActions.map((a: any) => (
+								a.icon ? (
+									<IconButton key={a.label} onClick={a.fn} disabled={a.disabled} className={classes.blockAction}>
+										<a.icon/>
+									</IconButton>
+								) : (
+									<button key={a.label} onClick={a.fn} disabled={a.disabled} className={classes.blockAction}>
+										{a.label}
+									</button>
+								)
+							))}
+						</div>
 						{auth.isAuthenticated ? (
 							<Button
-								style={{marginLeft: 'auto', padding: '1.2rem', fontSize: '1.2rem'}}
+								style={{marginLeft: 'auto', padding: '1.2rem', fontSize: '1.2rem', whiteSpace: 'nowrap'}}
 								onClick={this.handleLogout}
 							>
 								Log out
 							</Button>
 						) : (
 							<Button
-								style={{marginLeft: 'auto', padding: '1.2rem', fontSize: '1.2rem'}}
+								style={{marginLeft: 'auto', padding: '1.2rem', fontSize: '1.2rem', whiteSpace: 'nowrap'}}
 								onClick={auth.loginWithRedirect}
 							>
 								Log in
@@ -566,11 +628,12 @@ class App extends React.Component<AppProps, State> {
 							<img src={githubIcon} style={{height: '2.4rem'}}/>
 						</IconButton>
 					</div>
-					<div className={classes.content} ref={this.listRef}>
+					<div className={classes.content} ref={this.listContainerRef}>
 						{outline ? (
 							<BlockList
 								blocks={outline.data}
 								onChange={this.handleBlocksChange}
+								onFocusBlock={this.handleFocusBlock}
 							/>
 						) : (
 							<div className={classes.noDocumentContainer}>

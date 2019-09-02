@@ -24,9 +24,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import FileIcon from '@material-ui/icons/InsertDriveFile';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import ArrowRightIcon from '@material-ui/icons/ChevronRight';
 import withAuth, {WithAuthProps} from '@/hocs/with-auth';
-import isMobile from '@/lib/is-mobile';
 import {ListOutline, GetOutline} from '@/App';
 
 const styles = createStyles({
@@ -52,33 +50,6 @@ const styles = createStyles({
 		fontSize: '1.3rem',
 		fontWeight: 600,
 		color: '#2196f3'
-	},
-	fileTreeHandleContainer: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		width: '0.7rem',
-		height: '100%',
-		backgroundColor: '#475a6f',
-		display: 'flex',
-		alignItems: 'center'
-	},
-	fileTreeHandle: {
-		width: '0.7rem',
-		height: '5rem',
-		backgroundColor: '#778a9f',
-		cursor: 'pointer',
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		overflow: 'hidden',
-		'& svg': {
-			width: '1.4rem',
-			color: '#ffffff'
-		},
-		'&:hover': {
-			backgroundColor: '#6296d0'
-		}
 	},
 	fileTreeContainer: {
 		flex: '1 1 auto',
@@ -294,15 +265,6 @@ class FileTreeDrawer extends React.Component<Props> {
 		return (
 			<>
 				<Hidden mdUp implementation="css">
-					<div className={classes.fileTreeHandleContainer}>
-						<div
-							className={classes.fileTreeHandle}
-							onClick={onOpen}
-							style={{zIndex: isMobile.any() ? 1000 : 1200}}
-						>
-							<ArrowRightIcon/>
-						</div>
-					</div>
 					<SwipeableDrawer
 						anchor="left"
 						open={open}
