@@ -2,13 +2,11 @@ import * as React from 'react';
 import DragLayer from 'react-dnd/lib/DragLayer';
 import {DragLayerMonitor} from 'react-dnd';
 import {createStyles, WithStyles, withStyles} from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
 import {BlockData} from './BlockList';
 
 function collect(monitor: DragLayerMonitor) {
-	const item = monitor.getItem();
 	return {
-		item,
+		item: monitor.getItem(),
 		currentOffset: monitor.getSourceClientOffset(),
 		isDragging: monitor.isDragging()
 	};
@@ -34,15 +32,18 @@ const styles = createStyles({
 	root: {
 		position: 'absolute',
 		top: 0,
-		opacity: 0.7,
-		border: '1px solid #000000',
+		border: '1px solid rgba(0,0,0,0.2)',
+		boxShadow: '0 0 0.3rem 0 rgba(0,0,0,0.13)',
 		overflow: 'hidden',
-		borderRadius: '0.4rem'
+		borderRadius: '0.4rem',
+		backgroundColor: '#fafafa',
+		cursor: 'grabbing'
 	},
 	title: {
 		minHeight: '1.5rem',
 		paddingRight: '2rem',
 		overflow: 'hidden',
+		opacity: 0.8,
 		'& pre': {
 			padding: '0.6rem',
 			whiteSpace: 'normal',
@@ -56,6 +57,7 @@ const styles = createStyles({
 		minHeight: '1.5rem',
 		overflow: 'hidden',
 		paddingRight: '2rem',
+		opacity: 0.8,
 		'& pre': {
 			padding: '0.6rem',
 			whiteSpace: 'normal',
@@ -63,23 +65,6 @@ const styles = createStyles({
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px'
 		}
-	},
-	handle: {
-		backgroundColor: '#888',
-		position: 'absolute',
-		top: 0,
-		right: 0,
-		width: '2rem',
-		height: '100%',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center'
-	},
-	handleIcon: {
-		width: '1.2rem',
-		height: '1.2rem',
-		color: '#000',
-		opacity: 0.4
 	}
 });
 
@@ -99,7 +84,7 @@ const BlockPreview = withStyles(styles)(({item, isDragging, currentOffset, class
 
 	const block = item.block as BlockData;
 	const windowWidth = window.innerWidth;
-	let blockWidth = windowWidth < 700 ?	(windowWidth - 120) / 10 : 58;
+	let blockWidth = windowWidth < 700 ? (windowWidth - 120) / 10 : 58;
 	blockWidth = blockWidth - block.indent * 4;
 	blockWidth = Math.round(blockWidth * 10) / 10;
 
@@ -109,7 +94,7 @@ const BlockPreview = withStyles(styles)(({item, isDragging, currentOffset, class
 			style={{
 				...getItemStyles(currentOffset),
 				width: `${blockWidth - 0.1}rem`,
-				left: `-${blockWidth - 2}rem`
+				left: `${block.indent * 40}px`
 			}}
 		>
 			{block.showTitle && (
@@ -128,9 +113,6 @@ const BlockPreview = withStyles(styles)(({item, isDragging, currentOffset, class
 					<pre>{block.body}</pre>
 				</div>
 			)}
-			<div className={classes.handle}>
-				<MenuIcon className={classes.handleIcon}/>
-			</div>
 		</div>
 	);
 });

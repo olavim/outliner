@@ -10,7 +10,6 @@ import UpIcon from '@material-ui/icons/ArrowUpward';
 import DownIcon from '@material-ui/icons/ArrowDownward';
 import DeleteIcon from '@material-ui/icons/Close';
 import ColorIcon from '@material-ui/icons/ColorLens';
-import MenuIcon from '@material-ui/icons/Menu';
 import {
 	DragSource,
 	DropTarget,
@@ -43,6 +42,7 @@ const styles = createStyles({
 		marginTop: '0.6rem',
 		display: 'flex',
 		flexDirection: 'column',
+		cursor: 'pointer',
 		'& button': {
 			display: 'flex',
 			alignItems: 'center',
@@ -76,6 +76,9 @@ const styles = createStyles({
 			[`@media (max-width: ${theme.actionsBreakpoint})`]: {
 				boxShadow: '0 0 2rem 0 rgba(0,67,255,0.43)'
 			}
+		},
+		'$root:not($focus) &:hover': {
+			opacity: 0.8
 		}
 	},
 	title: {
@@ -97,6 +100,9 @@ const styles = createStyles({
 		display: 'flex',
 		textAlign: 'left',
 		paddingRight: '2rem',
+		'$focus &': {
+			cursor: 'text'
+		},
 		'& pre': {
 			fontFamily: `'Roboto Mono', 'Courier New', Courier, monospace`,
 			fontSize: '11px',
@@ -120,21 +126,15 @@ const styles = createStyles({
 		},
 		'pre&': {
 			margin: 0,
-			whiteSpace: 'pre-wrap',
-			cursor: 'pointer'
-		},
-		'pre&:active': {
-			cursor: 'text'
+			whiteSpace: 'pre-wrap'
 		},
 		'$focus pre&': {
 			display: 'none'
 		}
 	},
-	indentLeft: {
+	indent: {
 		position: 'absolute',
 		top: 0,
-		left: 0,
-		transform: 'translateX(-100%)',
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -156,76 +156,6 @@ const styles = createStyles({
 		[`@media (max-height: ${theme.handleHeightBreakpoint})`]: {
 			width: '4rem'
 		}
-	},
-	indentRight: {
-		position: 'absolute',
-		top: 0,
-		right: '-3rem',
-		transform: 'translateX(100%)',
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		width: '2rem',
-		height: '100%',
-		opacity: 0,
-		'$focus &': {
-			opacity: 0.5
-		},
-		'$root:hover &': {
-			opacity: 0.5
-		},
-		'@media (hover: none)': {
-			opacity: 0.5
-		},
-		[`@media (max-width: ${theme.handleWidthBreakpoint})`]: {
-			right: 0,
-			width: '4rem'
-		}
-	},
-	handleWrapper: {
-		position: 'absolute',
-		top: 0,
-		right: '-2.4rem',
-		paddingLeft: '0.4rem',
-		height: '100%',
-		[`@media (max-width: ${theme.handleWidthBreakpoint})`]: {
-			display: 'none'
-		}
-	},
-	handle: {
-		backgroundColor: '#888',
-		width: '2rem',
-		height: '100%',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		cursor: 'grab',
-		zIndex: 60,
-		opacity: 0,
-		boxShadow: '0 0 1rem 0 rgba(0,0,0,0.28)',
-		borderRadius: '0.4rem',
-		'$focus &': {
-			opacity: 1
-		},
-		'$root:hover &': {
-			opacity: 1
-		},
-		'@media (hover: none)': {
-			opacity: 1
-		},
-		'&:active': {
-			cursor: 'move'
-		}
-	},
-	handleIcon: {
-		width: '1.2rem',
-		height: '1.2rem',
-		color: '#000',
-		opacity: 0.4
-	},
-	focusTaker: {
-		marginTop: 'auto',
-		marginBottom: 'auto'
 	},
 	actions: {
 		height: 0,
@@ -429,9 +359,17 @@ const cardTarget = {
 
 type Props = OwnProps & WithStyles<typeof styles> & BlockSourceCollectedProps & BlockTargetCollectedProps;
 
-class Block extends React.PureComponent<Props> {
+class Block extends React.PureComponent<Props, {prepareClick: boolean}> {
+	public state = {prepareClick: false};
+
 	public titleRef = React.createRef<any>();
 	public bodyRef = React.createRef<any>();
+
+	public componentDidUpdate(prevProps: Props) {
+		if (!prevProps.isDragging && this.props.isDragging) {
+			this.setState({prepareClick: false});
+		}
+	}
 
 	public handleDecreaseIndent = () => {
 		const {onChange, block} = this.props;
@@ -511,6 +449,17 @@ class Block extends React.PureComponent<Props> {
 		onChange(block.id, 'export', !block.export);
 	}
 
+	public handleMouseDown = () => {
+		this.setState({prepareClick: true});
+	}
+
+	public handleClick = (evt: any) => {
+		if (this.state.prepareClick) {
+			this.props.onClick(evt);
+			this.setState({prepareClick: false});
+		}
+	}
+
 	public getActions = () => {
 		const {block, onChangeColor} = this.props;
 
@@ -538,7 +487,6 @@ class Block extends React.PureComponent<Props> {
 		const {
 			block,
 			classes,
-			onClick,
 			focus,
 			connectDragSource,
 			connectDropTarget,
@@ -568,11 +516,13 @@ class Block extends React.PureComponent<Props> {
 				className={cls(classes.root, {[classes.focus]: focus})}
 				style={{
 					paddingLeft: `${block.indent * 4}rem`,
-					opacity: isDragging ? 0 : 1
+					opacity: isDragging ? 0 : 1,
+					cursor: isDragging ? 'grabbing' : 'pointer'
 				}}
-				onClick={onClick}
+				onMouseDown={this.handleMouseDown}
+				onClick={this.handleClick}
 			>
-				<div className={classes.indentLeft}>
+				<div className={classes.indent} style={{left: 0, transform: 'translateX(-100%)'}}>
 					<button onClick={this.handleDecreaseIndent}>
 						<IndentDecIcon/>
 					</button>
@@ -643,13 +593,6 @@ class Block extends React.PureComponent<Props> {
 							</div>
 						)}
 					</div>
-					<div className={classes.handleWrapper}>
-						{connectDragSource(
-							<div className={classes.handle}>
-								<MenuIcon className={classes.handleIcon}/>
-							</div>
-						)}
-					</div>
 				</div>
 				<CSSTransition
 					in={focus}
@@ -667,7 +610,7 @@ class Block extends React.PureComponent<Props> {
 						))}
 					</div>
 				</CSSTransition>
-				<div className={classes.indentRight}>
+				<div className={classes.indent} style={{right: 0, transform: 'translateX(100%)'}}>
 					<button onClick={this.handleIncreaseIndent}>
 						<IndentIncIcon/>
 					</button>
@@ -675,6 +618,9 @@ class Block extends React.PureComponent<Props> {
 			</div>
 		);
 
+		if (!focus) {
+			elem = connectDragSource(elem);
+		}
 		elem = connectDropTarget(elem);
 		elem = connectDragPreview(elem);
 
