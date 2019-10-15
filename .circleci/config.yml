@@ -1,8 +1,7 @@
 build_defaults: &build_defaults
   steps:
     - checkout
-    - setup_remote_docker:
-        docker_layer_caching: true
+    - setup_remote_docker
     - run:
         name: Build Docker image
         command: docker build -t olavim/outliner-$SERVICE:$CIRCLE_SHA1 --build-arg service=$SERVICE .
@@ -13,10 +12,9 @@ build_defaults: &build_defaults
           docker push olavim/outliner-$SERVICE:$CIRCLE_SHA1
 deploy_defaults: &deploy_defaults
   steps:
+    - setup_remote_docker
     - attach_workspace:
         at: /tmp/workspace
-    - setup_remote_docker:
-        docker_layer_caching: true
     - add_ssh_keys:
         fingerprints:
           - 81:1a:d9:8f:04:58:7f:f4:67:09:60:f4:4c:3b:b4:9e
