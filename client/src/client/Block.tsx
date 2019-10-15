@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {findDOMNode} from 'react-dom';
 import cls from 'classnames';
-import {WithStyles, createStyles, withStyles, IconButton} from '@material-ui/core';
+import {WithStyles, createStyles, withStyles, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, DialogContentText} from '@material-ui/core';
 import TextareaAutosize from 'react-autosize-textarea';
 import {CSSTransition} from 'react-transition-group';
 import IndentDecIcon from '@material-ui/icons/KeyboardArrowLeft';
@@ -270,10 +270,26 @@ const styles = createStyles({
 		top: 0,
 		right: 0,
 		margin: '0.6rem'
+	},
+	dialogTitle: {
+		fontSize: '1.6rem',
+		fontWeight: 600,
+		color: 'rgba(0,0,0,0.87)'
+	},
+	dialogText: {
+		fontSize: '1.6rem',
+		fontWeight: 500,
+		fontFamily: 'Montserrat, Arial, sans-serif'
+	},
+	dialogButton: {
+		fontSize: '1.3rem',
+		fontWeight: 600,
+		color: '#2196f3'
 	}
 });
 
 interface OwnProps {
+	fullScreen?: boolean;
 	block: BlockData;
 	index: number;
 	moveBlock: (hoverIndex: number, dragIndex: number) => any;
@@ -359,8 +375,15 @@ const cardTarget = {
 
 type Props = OwnProps & WithStyles<typeof styles> & BlockSourceCollectedProps & BlockTargetCollectedProps;
 
-class Block extends React.PureComponent<Props, {prepareClick: boolean, wWidth: number, wHeight: number}> {
-	public state = {prepareClick: false, wWidth: 0, wHeight: 0};
+interface State {
+	prepareClick: boolean;
+	wWidth: number;
+	wHeight: number;
+	showDeleteDialog: boolean;
+}
+
+class Block extends React.PureComponent<Props, State> {
+	public state: State = {prepareClick: false, wWidth: 0, wHeight: 0, showDeleteDialog: false};
 
 	public titleRef = React.createRef<any>();
 	public bodyRef = React.createRef<any>();
@@ -447,6 +470,10 @@ class Block extends React.PureComponent<Props, {prepareClick: boolean, wWidth: n
 		this.props.moveBlock(this.props.index + 1, this.props.index);
 	}
 
+	public handleToggleDeleteDialog = (show: boolean) => () => {
+		this.setState({showDeleteDialog: show})
+	}
+
 	public handleDelete = (evt: React.MouseEvent) => {
 		evt.stopPropagation();
 		this.props.onDelete(this.props.block.id);
@@ -492,7 +519,7 @@ class Block extends React.PureComponent<Props, {prepareClick: boolean, wWidth: n
 				disabled: block.showBody && !block.showTitle
 			},
 			{label: 'Color', icon: ColorIcon, fn: onChangeColor, disabled: false},
-			{label: 'Delete', icon: DeleteIcon, fn: this.handleDelete, disabled: false}
+			{label: 'Delete', icon: DeleteIcon, fn: this.handleToggleDeleteDialog(true), disabled: false}
 		];
 	}
 
@@ -505,7 +532,8 @@ class Block extends React.PureComponent<Props, {prepareClick: boolean, wWidth: n
 			connectDropTarget,
 			connectDragPreview,
 			isDragging,
-			index
+			index,
+			fullScreen
 		} = this.props;
 
 		const actions = this.getActions();
@@ -640,6 +668,31 @@ class Block extends React.PureComponent<Props, {prepareClick: boolean, wWidth: n
 						<IndentIncIcon/>
 					</button>
 				</div>
+				<Dialog
+					fullScreen={fullScreen}
+					open={this.state.showDeleteDialog}
+					onClose={this.handleToggleDeleteDialog(false)}
+					fullWidth
+				>
+					<DialogTitle disableTypography className={classes.dialogTitle}>{'Confirm delete'}</DialogTitle>
+					<DialogContent>
+						<DialogContentText className={classes.dialogText}>
+							This action cannot be reversed. Area you sure you want to delete this block?
+						</DialogContentText>
+					</DialogContent>
+					<DialogActions>
+						<Button onClick={this.handleToggleDeleteDialog(false)} color="primary" className={classes.dialogButton}>
+							Cancel
+						</Button>
+						<Button
+							onClick={this.handleDelete}
+							color="primary"
+							className={classes.dialogButton}
+						>
+							Delete
+						</Button>
+					</DialogActions>
+				</Dialog>
 			</div>
 		);
 

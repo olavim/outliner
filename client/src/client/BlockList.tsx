@@ -126,6 +126,7 @@ export interface BlockData {
 }
 
 interface Props extends WithStyles<typeof styles> {
+	fullScreen?: boolean;
 	blocks: BlockData[];
 	onChange: (blocks: BlockData[]) => any;
 	onFocusBlock: (ref: React.RefObject<any>) => void;
@@ -145,12 +146,13 @@ class BlockList extends React.Component<Props, State> {
 	public focusedBlockRef = React.createRef<any>();
 
 	public getBlock = memoize(
-		(block: BlockData, index: number, focused: boolean) => (
+		(block: BlockData, index: number, focused: boolean, fullScreen?: boolean) => (
 			<Block
 				key={block.id}
 				index={index}
-				block={block}
+				fullScreen={fullScreen}
 				onChange={this.handleChangeBlock}
+				block={block}
 				onAddBefore={this.handleAddBefore}
 				onAddAfter={this.handleAddAfter}
 				onDelete={this.handleDelete}
@@ -288,7 +290,7 @@ class BlockList extends React.Component<Props, State> {
 	}
 
 	public render() {
-		const {classes, blocks} = this.props;
+		const {classes, blocks, fullScreen} = this.props;
 		const focusedBlock = blocks.find(b => b.id === this.state.focusedBlock);
 		const exportAllChecked = blocks.every(b => b.export);
 
@@ -304,7 +306,7 @@ class BlockList extends React.Component<Props, State> {
 				</div>
 				<div className={classes.root}>
 					{blocks.map((block, index) =>
-						this.getBlock(block, index, block.id === this.state.focusedBlock)
+						this.getBlock(block, index, block.id === this.state.focusedBlock, fullScreen)
 					)}
 					<div className={classes.listActions}>
 						<button className="outline" onClick={this.handleAddEnd}>

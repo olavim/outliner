@@ -631,6 +631,7 @@ class App extends React.Component<AppProps, State> {
 					<div className={classes.content} ref={this.listContainerRef}>
 						{outline ? (
 							<BlockList
+								fullScreen={fullScreen}
 								blocks={outline.data}
 								onChange={this.handleBlocksChange}
 								onFocusBlock={this.handleFocusBlock}
