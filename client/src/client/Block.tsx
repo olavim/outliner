@@ -24,9 +24,9 @@ import {BlockData} from './BlockList';
 import Checkbox from './Checkbox';
 
 const theme = {
-	handleWidthBreakpoint: '760px',
-	handleHeightBreakpoint: '600px',
-	actionsBreakpoint: '760px',
+	handleWidthBreakpoint: 760,
+	handleHeightBreakpoint: 600,
+	actionsBreakpoint: 760,
 	actions: {
 		height: {
 			primary: '3.4rem',
@@ -73,7 +73,7 @@ const styles = createStyles({
 		borderRadius: '0.4rem',
 		overflow: 'hidden',
 		'$focus &': {
-			[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+			[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 				boxShadow: '0 0 2rem 0 rgba(0,67,255,0.43)'
 			}
 		},
@@ -150,10 +150,10 @@ const styles = createStyles({
 		'@media (hover: none)': {
 			opacity: 0.5
 		},
-		[`@media (max-width: ${theme.handleWidthBreakpoint})`]: {
+		[`@media (max-width: ${theme.handleWidthBreakpoint}px)`]: {
 			width: '4rem'
 		},
-		[`@media (max-height: ${theme.handleHeightBreakpoint})`]: {
+		[`@media (max-height: ${theme.handleHeightBreakpoint}px)`]: {
 			width: '4rem'
 		}
 	},
@@ -187,7 +187,7 @@ const styles = createStyles({
 		'& svg': {
 			fontSize: '1.8rem'
 		},
-		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+		[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 			zIndex: 70,
 			position: 'fixed',
 			left: 0,
@@ -201,7 +201,7 @@ const styles = createStyles({
 		'& button:nth-child(2)': {
 			marginRight: 'auto'
 		},
-		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+		[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 			top: '5rem'
 		},
 		[`@media (max-height: 500px) and (orientation:landscape)`]: {
@@ -217,7 +217,7 @@ const styles = createStyles({
 			left: '50%',
 			transform: 'translateX(-50%)'
 		},
-		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+		[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 			bottom: 0
 		},
 		[`@media (max-height: 500px) and (orientation:landscape)`]: {
@@ -227,14 +227,14 @@ const styles = createStyles({
 	actionsEnter: {
 		margin: 0,
 		height: 0,
-		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+		[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 			padding: '0 1rem'
 		}
 	},
 	actionsActive: {
 		margin: '0.6rem 0',
 		height: theme.actions.height.primary,
-		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+		[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 			margin: 0,
 			padding: '0.6rem 1rem',
 			height: theme.actions.height.responsive
@@ -243,7 +243,7 @@ const styles = createStyles({
 	actionsEnterDone: {
 		margin: '0.6rem 0',
 		height: theme.actions.height.primary,
-		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+		[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 			margin: 0,
 			padding: '0.6rem 1rem',
 			height: theme.actions.height.responsive
@@ -252,7 +252,7 @@ const styles = createStyles({
 	actionsExit: {
 		margin: '0.6rem 0',
 		height: theme.actions.height.primary,
-		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+		[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 			margin: 0,
 			padding: '0.6rem 1rem',
 			height: theme.actions.height.responsive
@@ -261,7 +261,7 @@ const styles = createStyles({
 	actionsExitActive: {
 		margin: 0,
 		height: 0,
-		[`@media (max-width: ${theme.actionsBreakpoint})`]: {
+		[`@media (max-width: ${theme.actionsBreakpoint}px)`]: {
 			padding: '0 1rem'
 		}
 	},
@@ -359,11 +359,24 @@ const cardTarget = {
 
 type Props = OwnProps & WithStyles<typeof styles> & BlockSourceCollectedProps & BlockTargetCollectedProps;
 
-class Block extends React.PureComponent<Props, {prepareClick: boolean}> {
-	public state = {prepareClick: false};
+class Block extends React.PureComponent<Props, {prepareClick: boolean, wWidth: number, wHeight: number}> {
+	public state = {prepareClick: false, wWidth: 0, wHeight: 0};
 
 	public titleRef = React.createRef<any>();
 	public bodyRef = React.createRef<any>();
+
+	public componentDidMount() {
+		window.addEventListener('resize', this.updateDimensions);
+		this.updateDimensions();
+	}
+
+	public componentWillUnmount() {
+		window.removeEventListener('resize', this.updateDimensions);
+	}
+
+	public updateDimensions = () => {
+		this.setState({wWidth: window.innerWidth, wHeight: window.innerHeight});
+	}
 
 	public componentDidUpdate(prevProps: Props) {
 		if (!prevProps.isDragging && this.props.isDragging) {
@@ -510,6 +523,66 @@ class Block extends React.PureComponent<Props, {prepareClick: boolean}> {
 			exitActive: classes.actionsExitActive
 		};
 
+		let contentElem = (
+			<div className={classes.content}>
+				<Checkbox
+					checked={block.export}
+					onClick={this.handleClickExportCheckbox}
+					classNames={{root: classes.checkbox}}
+				/>
+				{block.showTitle && (
+					<div
+						className={classes.title}
+						style={{backgroundColor: block.color}}
+					>
+						{focus && (
+							<TextareaAutosize
+								className={classes.textarea}
+								tabIndex={tabIndex}
+								ref={this.titleRef}
+								value={block.title}
+								onChange={this.getInputHandler('title')}
+								spellCheck={false}
+								autoFocus
+							/>
+						)}
+						<pre className={classes.textarea}>
+							{block.title}
+						</pre>
+					</div>
+				)}
+				{block.showBody && (
+					<div
+						className={classes.text}
+						style={{backgroundColor: hex2rgba(`${block.color}66`)}}
+					>
+						{focus && (
+							<TextareaAutosize
+								className={classes.textarea}
+								tabIndex={tabIndex + (block.showTitle ? 1 : 0)}
+								ref={this.bodyRef}
+								value={block.body}
+								onChange={this.getInputHandler('body')}
+								spellCheck={false}
+								autoFocus
+							/>
+						)}
+						<pre className={classes.textarea}>
+							{block.body}
+						</pre>
+					</div>
+				)}
+			</div>
+		);
+
+		if (
+			!focus &&
+			this.state.wWidth > theme.handleWidthBreakpoint &&
+			this.state.wHeight > theme.handleHeightBreakpoint
+		) {
+			contentElem = connectDragSource(contentElem);
+		}
+
 		let elem = (
 			<div
 				key={block.id}
@@ -544,55 +617,7 @@ class Block extends React.PureComponent<Props, {prepareClick: boolean}> {
 					</div>
 				</CSSTransition>
 				<div className={classes.outerContent}>
-					<div className={classes.content}>
-						<Checkbox
-							checked={block.export}
-							onClick={this.handleClickExportCheckbox}
-							classNames={{root: classes.checkbox}}
-						/>
-						{block.showTitle && (
-							<div
-								className={classes.title}
-								style={{backgroundColor: block.color}}
-							>
-								{focus && (
-									<TextareaAutosize
-										className={classes.textarea}
-										tabIndex={tabIndex}
-										ref={this.titleRef}
-										value={block.title}
-										onChange={this.getInputHandler('title')}
-										spellCheck={false}
-										autoFocus
-									/>
-								)}
-								<pre className={classes.textarea}>
-									{block.title}
-								</pre>
-							</div>
-						)}
-						{block.showBody && (
-							<div
-								className={classes.text}
-								style={{backgroundColor: hex2rgba(`${block.color}66`)}}
-							>
-								{focus && (
-									<TextareaAutosize
-										className={classes.textarea}
-										tabIndex={tabIndex + (block.showTitle ? 1 : 0)}
-										ref={this.bodyRef}
-										value={block.body}
-										onChange={this.getInputHandler('body')}
-										spellCheck={false}
-										autoFocus
-									/>
-								)}
-								<pre className={classes.textarea}>
-									{block.body}
-								</pre>
-							</div>
-						)}
-					</div>
+					{contentElem}
 				</div>
 				<CSSTransition
 					in={focus}
@@ -618,9 +643,6 @@ class Block extends React.PureComponent<Props, {prepareClick: boolean}> {
 			</div>
 		);
 
-		if (!focus) {
-			elem = connectDragSource(elem);
-		}
 		elem = connectDropTarget(elem);
 		elem = connectDragPreview(elem);
 

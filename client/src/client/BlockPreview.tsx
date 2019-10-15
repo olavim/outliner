@@ -93,8 +93,7 @@ const BlockPreview = withStyles(styles)(({item, isDragging, currentOffset, class
 			className={classes.root}
 			style={{
 				...getItemStyles(currentOffset),
-				width: `${blockWidth - 0.1}rem`,
-				left: `${block.indent * 40}px`
+				width: `${blockWidth - 0.1}rem`
 			}}
 		>
 			{block.showTitle && (
