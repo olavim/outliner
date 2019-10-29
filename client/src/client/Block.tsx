@@ -22,6 +22,7 @@ import {XYCoord} from 'dnd-core';
 import hex2rgba from 'hex-to-rgba';
 import {BlockData} from './BlockList';
 import Checkbox from './Checkbox';
+import isMobile from '@/lib/is-mobile';
 
 const theme = {
 	handleWidthBreakpoint: 760,
@@ -603,11 +604,7 @@ class Block extends React.PureComponent<Props, State> {
 			</div>
 		);
 
-		if (
-			!focus &&
-			this.state.wWidth > theme.handleWidthBreakpoint &&
-			this.state.wHeight > theme.handleHeightBreakpoint
-		) {
+		if (!focus && !isMobile.any()) {
 			contentElem = connectDragSource(contentElem);
 		}
 
