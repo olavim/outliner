@@ -266,9 +266,14 @@ export default class PDF {
 
 	public export = (blocks: BlockData[]): Promise<Blob> => {
 		return new Promise(resolve => {
-			const {margin, fontSize} = this.options;
+			const {margin, fontSize, pageWidth, pageHeight} = this.options;
 
-			this.doc = new PDFDocument({size: 'a4', margin, bufferPages: true});
+			this.doc = new PDFDocument({
+				size: [pageWidth, pageHeight],
+				margin,
+				bufferPages: true
+			});
+
 			this.stream = this.doc.pipe(blobStream());
 			this.page = 0;
 

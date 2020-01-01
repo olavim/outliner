@@ -331,12 +331,12 @@ class App extends React.Component<AppProps, State> {
 		}
 	}
 
-	public handleExportPDF = () => {
+	public handleExportPDF = (width: number, height: number) => {
 		this.setState({exporting: true}, () => {
 			const ppi = 72;
 			const pdf = new PDF({
-				pageWidth: 8.3 * ppi,
-				pageHeight: 11.7 * ppi,
+				pageWidth: width * ppi,
+				pageHeight: height * ppi,
 				indentWidth: 40,
 				margin: 0.5 * ppi,
 				blockMargin: 0.04 * ppi,
