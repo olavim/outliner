@@ -15,11 +15,10 @@ import {
 	DialogContentText,
 	DialogActions,
 	Button,
-	FormControl,
-	OutlinedInput,
 	TextField
 } from '@material-ui/core';
 import withAuth, {WithAuthProps} from '@/hocs/with-auth';
+import NumberField from '@/NumberField';
 
 enum UNIT {
 	inch = 'inch',
@@ -153,7 +152,7 @@ const styles = createStyles({
 		cursor: 'pointer'
 	},
 	formControl: {
-		padding: '0.4rem',
+		margin: '0.4rem',
 		fontSize: '1.2rem',
 		boxSizing: 'border-box'
 	},
@@ -163,6 +162,9 @@ const styles = createStyles({
 		'& option': {
 			fontSize: '1.2rem'
 		}
+	},
+	textInputLabelShrink: {
+		transform: 'translate(14px, -5px) scale(0.75) !important'
 	}
 });
 
@@ -188,14 +190,6 @@ interface State {
 		unit: keyof typeof UNIT
 	};
 	unit: keyof typeof UNIT;
-	pad: {
-		width: number;
-		height: number;
-	};
-	trailingDot: {
-		width: boolean;
-		height: boolean;
-	}
 }
 
 type Props = OwnProps & WithStyles<typeof styles> & WithAuthProps;
@@ -206,15 +200,7 @@ class MenuDrawer extends React.Component<Props> {
 		showPDFDialog: false,
 		pageSize: 'letter',
 		pageDimensions: PAGE_DIMENSIONS.letter,
-		unit: 'inch',
-		pad: {
-			width: 0,
-			height: 0
-		},
-		trailingDot: {
-			width: false,
-			height: false
-		}
+		unit: 'inch'
 	};
 
 	public handleOpenConfirmDialog = () => {
@@ -284,38 +270,20 @@ class MenuDrawer extends React.Component<Props> {
 		}
 
 		this.setState((state: State) => {
-			const trailingDot = {...state.trailingDot};
-			const pad = {...state.pad};
 			const pageDimensions = {...state.pageDimensions};
-
-			let requiredPadding = 0;
-			let hasTrailingDot = false;
-
-			if (rawValue.indexOf('.') !== -1) {
-				if (rawValue.endsWith('.')) {
-					hasTrailingDot = true;
-				} else {
-					const decimals = rawValue.slice(rawValue.indexOf('.'));
-					const match = decimals.match(/^$|0+$/);
-					requiredPadding = match ? Math.max(1, match[0].length) : 0;
-				}
-			}
-
-			pad[dimension] = requiredPadding;
-			pageDimensions[dimension] = parseFloat(rawValue);
-			trailingDot[dimension] = hasTrailingDot;
 
 			if (state.unit !== state.pageDimensions.unit) {
 				const unitRate = UNIT_RATE[state.pageDimensions.unit][state.unit];
 				pageDimensions.width = parseFloat((pageDimensions.width * unitRate).toFixed(2));
 				pageDimensions.height = parseFloat((pageDimensions.height * unitRate).toFixed(2));
+				pageDimensions.unit = state.unit;
 			}
+
+			pageDimensions[dimension] = parseFloat(rawValue);
 
 			return {
 				pageSize: 'custom',
-				pageDimensions,
-				pad,
-				trailingDot
+				pageDimensions
 			};
 		});
 	}
@@ -333,7 +301,7 @@ class MenuDrawer extends React.Component<Props> {
 			onExportOutline,
 			onExportText
 		} = this.props;
-		const {showConfirmDialog, showPDFDialog, pageSize, pageDimensions, unit, pad, trailingDot} = this.state;
+		const {showConfirmDialog, showPDFDialog, pageSize, pageDimensions, unit} = this.state;
 
 		const dim: any = {
 			width: pageDimensions.width * UNIT_RATE[pageDimensions.unit][unit],
@@ -341,19 +309,8 @@ class MenuDrawer extends React.Component<Props> {
 		};
 
 		if (unit !== pageDimensions.unit) {
-			dim.width = dim.width.toFixed(2);
-			dim.height = dim.height.toFixed(2);
-		} else {
-			const wStr = String(dim.width);
-			const hStr = String(dim.height);
-			const wDecimals = dim.width % 1 === 0 ? 0 : wStr.slice(wStr.indexOf('.')).length - 1;
-			const hDecimals = dim.height % 1 === 0 ? 0 : hStr.slice(hStr.indexOf('.')).length - 1;
-
-			dim.width = dim.width.toFixed(wDecimals + pad.width);
-			dim.height = dim.height.toFixed(hDecimals + pad.height);
-
-			dim.width += trailingDot.width ? '.' : '';
-			dim.height += trailingDot.height ? '.' : '';
+			dim.width = parseFloat(dim.width.toFixed(2));
+			dim.height = parseFloat(dim.height.toFixed(2));
 		}
 
 		const drawer = (
@@ -422,20 +379,25 @@ class MenuDrawer extends React.Component<Props> {
 					onClose={this.handleClosePDFDialog}
 				>
 					<DialogTitle disableTypography className={classes.dialogTitle}>
-						Page size
+						Export PDF
 					</DialogTitle>
 					<DialogContent>
-						<div>
+						<div style={{display: 'flex', marginBottom: '0.4rem'}}>
 							<TextField
 								className={`${classes.textInput} ${classes.formControl}`}
 								value={pageSize}
 								onChange={this.handleChangePageSize}
+								label="Page size"
 								fullWidth
 								variant="outlined"
 								select
 								SelectProps={{
 									native: true,
 									className: classes.textInput
+								}}
+								InputLabelProps={{
+									className: classes.textInput,
+									classes: {shrink: classes.textInputLabelShrink}
 								}}
 							>
 								<optgroup>
@@ -459,26 +421,32 @@ class MenuDrawer extends React.Component<Props> {
 							</TextField>
 						</div>
 						<div>
-							<FormControl variant="outlined" className={classes.formControl}>
-								<OutlinedInput
-									className={classes.textInput}
-									value={dim.width}
-									onChange={this.handleDimensionChange('width')}
-									placeholder="Width"
-									labelWidth={0}
-								/>
-							</FormControl>
-							<FormControl variant="outlined" className={classes.formControl}>
-								<OutlinedInput
-									className={classes.textInput}
-									value={dim.height}
-									onChange={this.handleDimensionChange('height')}
-									placeholder="Height"
-									labelWidth={0}
-								/>
-							</FormControl>
+							<NumberField
+								className={classes.formControl}
+								variant="outlined"
+								value={dim.width}
+								onChange={this.handleDimensionChange('width')}
+								label="Width"
+								InputProps={{className: classes.textInput}}
+								InputLabelProps={{
+									className: classes.textInput,
+									classes: {shrink: classes.textInputLabelShrink}
+								}}
+							/>
+							<NumberField
+								className={classes.formControl}
+								variant="outlined"
+								value={dim.height}
+								onChange={this.handleDimensionChange('height')}
+								label="Height"
+								InputProps={{className: classes.textInput}}
+								InputLabelProps={{
+									className: classes.textInput,
+									classes: {shrink: classes.textInputLabelShrink}
+								}}
+							/>
 							<TextField
-								className={`${classes.textInput} ${classes.formControl}`}
+								className={classes.formControl}
 								value={unit}
 								onChange={this.handleChangeUnit}
 								variant="outlined"
