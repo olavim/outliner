@@ -191,14 +191,16 @@ interface State {
 
 type Props = OwnProps & WithStyles<typeof styles> & WithAuthProps;
 
+const usLang = window.navigator.language === 'en-US';
+
 class MenuDrawer extends React.Component<Props> {
 	public state: State = {
 		showConfirmDialog: false,
 		showPDFDialog: false,
-		pageSize: 'letter',
-		pageDimensions: PAGE_DIMENSIONS.letter,
-		margin: 0.5,
-		unit: 'inch'
+		pageSize: usLang ? 'letter' : 'a4',
+		pageDimensions: usLang ? PAGE_DIMENSIONS.letter : PAGE_DIMENSIONS.a4,
+		margin: usLang ? 0.5 : 12.7,
+		unit: usLang ? 'inch' : 'mm'
 	};
 
 	public handleOpenConfirmDialog = () => {
