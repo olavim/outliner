@@ -92,12 +92,12 @@ export default class PDF {
 
 			// Remove height we used in previous page
 			height -= pageHeight - y - margin;
-			y = 0;
+			y = margin;
 
-			// If remaining path doesn't fit in current page (overflow at least 1 pixel)
-			if (y + height + margin - pageHeight >= 1) {
+			// If remaining path doesn't fit in current page
+			if (height + (2 * margin) > pageHeight) {
 				// Line from top left to bottom left
-				path = this.doc.moveTo(x, y).lineTo(x, pageHeight);
+				path = this.doc.moveTo(x, 0).lineTo(x, pageHeight);
 
 				if (closePath) {
 					path = path.lineTo(x + width, pageHeight);
@@ -107,13 +107,11 @@ export default class PDF {
 				}
 
 				// Line from bottom right to top right
-				path = path.lineTo(x + width, y);
+				path = path.lineTo(x + width, 0);
 			} else {
 				// Line to bottom right
-				path = this.doc.moveTo(x + width, y).lineTo(x + width, y + margin + height - bottomRight);
+				path = this.doc.moveTo(x + width, 0).lineTo(x + width, margin + height - bottomRight);
 			}
-
-			y = margin;
 		}
 
 		path = path
@@ -132,19 +130,29 @@ export default class PDF {
 
 	private text = (str: string, x: number, y: number, textOpts: any) => {
 		const {margin, pageHeight} = this.options;
+		const textHeight = this.doc.heightOfString(str, textOpts);
 		const lineHeight = this.doc.currentLineHeight();
+
+		let lines = Math.round(textHeight / lineHeight);
+		let firstPage = true;
 
 		this.doc.fillOpacity(1)
 			._text(str, x, y, textOpts, (line: string, opts: any) => {
-				this.doc.fillOpacity(1).fill(opts.fill)._fragment(line, x, y, opts);
+				const lastPage = y + (lines * lineHeight) + margin <= pageHeight;
+				const fragYPos = firstPage || lastPage ? y : y - lineHeight;
 
+				this.doc.fillOpacity(1).fill(opts.fill)._fragment(line, x, fragYPos, opts);
+
+				lines--;
 				y += lineHeight;
+
 				const overflowHeight = y + margin - pageHeight;
 
-				// If text overflows by at least 1 pixel
-				if (overflowHeight >= 1) {
+				// Start new page if text would overflow
+				if (overflowHeight > 0) {
 					this.nextPage();
-					y = margin - overflowHeight;
+					y = margin + overflowHeight;
+					firstPage = false;
 				}
 			});
 
@@ -154,15 +162,16 @@ export default class PDF {
 	private addContent = (blockHeight: number) => {
 		const {pageHeight, margin, blockMargin} = this.options;
 		const maxPageContentHeight = pageHeight - (2 * margin);
+		let pageContentHeight = this.pageContentHeight;
 		let contentStart = margin + this.pageContentHeight + blockMargin;
 		let totalBlockHeight = blockHeight + (2 * blockMargin);
 
-		if (this.pageContentHeight === 0) {
+		if (pageContentHeight === 0) {
 			totalBlockHeight -= blockMargin;
 			contentStart -= blockMargin;
 		}
 
-		this.pageContentHeight += totalBlockHeight;
+		pageContentHeight += totalBlockHeight;
 
 		// If we need to split content, recalculate height of remaining page content on new page
 		if (totalBlockHeight > maxPageContentHeight) {
@@ -170,16 +179,19 @@ export default class PDF {
 			while (newHeight > maxPageContentHeight) {
 				newHeight -= maxPageContentHeight;
 			}
-			this.pageContentHeight = newHeight;
+			pageContentHeight = newHeight;
 		}
 
 		// Add block on new page if it would overflow
-		if (this.pageContentHeight > maxPageContentHeight) {
+		if (pageContentHeight > maxPageContentHeight) {
 			this.nextPage();
+
 			// Do not add top margin for first block of page
-			this.pageContentHeight = blockHeight + blockMargin;
+			pageContentHeight = blockHeight + blockMargin;
 			contentStart = margin;
 		}
+
+		this.pageContentHeight = pageContentHeight;
 
 		return contentStart;
 	}
