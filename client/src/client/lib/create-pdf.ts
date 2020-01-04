@@ -1,5 +1,5 @@
 import {BlockData} from '@/BlockList';
-import PDFDocument from 'pdfkit-browserify';
+import PDFDocument from '@/lib/vendor/pdfkit.standalone';
 import blobStream from 'blob-stream';
 import RobotoMono from '../fonts/RobotoMono-Regular.ttf';
 import RobotoMonoMedium from '../fonts/RobotoMono-Medium.ttf';
