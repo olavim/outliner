@@ -176,7 +176,7 @@ interface OwnProps {
 	onNew: () => void;
 	onImport: (evt: React.ChangeEvent<HTMLInputElement>) => void;
 	onExportOutline: () => void;
-	onExportPDF: (width: number, height: number) => void;
+	onExportPDF: (width: number, height: number, margin: number) => void;
 	onExportText: () => void;
 }
 
@@ -184,11 +184,8 @@ interface State {
 	showConfirmDialog: boolean;
 	showPDFDialog: boolean;
 	pageSize: keyof typeof PAGE_DIMENSIONS | 'custom';
-	pageDimensions: {
-		width: number,
-		height: number,
-		unit: keyof typeof UNIT
-	};
+	pageDimensions: PageDimension;
+	margin: number;
 	unit: keyof typeof UNIT;
 }
 
@@ -200,6 +197,7 @@ class MenuDrawer extends React.Component<Props> {
 		showPDFDialog: false,
 		pageSize: 'letter',
 		pageDimensions: PAGE_DIMENSIONS.letter,
+		margin: 0.5,
 		unit: 'inch'
 	};
 
@@ -220,11 +218,12 @@ class MenuDrawer extends React.Component<Props> {
 	}
 
 	public handleExportPDF = () => {
-		const {pageDimensions} = this.state;
+		const {pageDimensions, margin, unit} = this.state;
 		const unitRate = UNIT_RATE[pageDimensions.unit]['inch'];
-		const pxWidth = pageDimensions.width * unitRate;
-		const pxHeight = pageDimensions.height * unitRate;
-		this.props.onExportPDF(pxWidth, pxHeight);
+		const inWidth = pageDimensions.width * unitRate;
+		const inHeight = pageDimensions.height * unitRate;
+		const inMargin = margin * UNIT_RATE[unit]['inch'];
+		this.props.onExportPDF(inWidth, inHeight, inMargin);
 	}
 
 	public handleChangePageSize = (evt: React.ChangeEvent<HTMLSelectElement>) => {
@@ -257,9 +256,16 @@ class MenuDrawer extends React.Component<Props> {
 
 			return {
 				pageDimensions,
+				margin: parseFloat((state.margin * UNIT_RATE[state.unit][unit]).toFixed(2)),
 				unit
 			}
 		});
+	}
+
+	public handleChangeMargin = (evt: React.ChangeEvent<HTMLSelectElement>) => {
+		const value = evt.target.value as keyof typeof UNIT;
+		const margin = parseFloat(value);
+		this.setState({margin});
 	}
 
 	public handleDimensionChange = (dimension: 'width' | 'height') => (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,7 +282,7 @@ class MenuDrawer extends React.Component<Props> {
 				const unitRate = UNIT_RATE[state.pageDimensions.unit][state.unit];
 				pageDimensions.width = parseFloat((pageDimensions.width * unitRate).toFixed(2));
 				pageDimensions.height = parseFloat((pageDimensions.height * unitRate).toFixed(2));
-				pageDimensions.unit = state.unit;
+				pageDimensions.unit = state.unit as UNIT;
 			}
 
 			pageDimensions[dimension] = parseFloat(rawValue);
@@ -301,7 +307,7 @@ class MenuDrawer extends React.Component<Props> {
 			onExportOutline,
 			onExportText
 		} = this.props;
-		const {showConfirmDialog, showPDFDialog, pageSize, pageDimensions, unit} = this.state;
+		const {showConfirmDialog, showPDFDialog, pageSize, pageDimensions, margin, unit} = this.state;
 
 		const dim: any = {
 			width: pageDimensions.width * UNIT_RATE[pageDimensions.unit][unit],
@@ -420,13 +426,36 @@ class MenuDrawer extends React.Component<Props> {
 								<optgroup />
 							</TextField>
 						</div>
-						<div>
+						<div style={{display: 'flex', marginBottom: '0.4rem'}}>
+							<TextField
+								className={classes.formControl}
+								value={unit}
+								onChange={this.handleChangeUnit}
+								label="Unit"
+								fullWidth
+								variant="outlined"
+								select
+								SelectProps={{
+									native: true,
+									className: classes.textInput
+								}}
+								InputLabelProps={{
+									className: classes.textInput,
+									classes: {shrink: classes.textInputLabelShrink}
+								}}
+							>
+								<option value="inch">Inches</option>
+								<option value="mm">Millimeters</option>
+							</TextField>
+						</div>
+						<div style={{display: 'flex', marginBottom: '0.4rem'}}>
 							<NumberField
 								className={classes.formControl}
 								variant="outlined"
 								value={dim.width}
 								onChange={this.handleDimensionChange('width')}
 								label="Width"
+								fullWidth
 								InputProps={{className: classes.textInput}}
 								InputLabelProps={{
 									className: classes.textInput,
@@ -439,26 +468,28 @@ class MenuDrawer extends React.Component<Props> {
 								value={dim.height}
 								onChange={this.handleDimensionChange('height')}
 								label="Height"
+								fullWidth
 								InputProps={{className: classes.textInput}}
 								InputLabelProps={{
 									className: classes.textInput,
 									classes: {shrink: classes.textInputLabelShrink}
 								}}
 							/>
-							<TextField
+						</div>
+						<div style={{display: 'flex'}}>
+							<NumberField
 								className={classes.formControl}
-								value={unit}
-								onChange={this.handleChangeUnit}
 								variant="outlined"
-								select
-								SelectProps={{
-									native: true,
-									className: classes.textInput
+								value={margin}
+								onChange={this.handleChangeMargin}
+								label="Margin"
+								fullWidth
+								InputProps={{className: classes.textInput}}
+								InputLabelProps={{
+									className: classes.textInput,
+									classes: {shrink: classes.textInputLabelShrink}
 								}}
-							>
-								<option value="inch">inch</option>
-								<option value="mm">mm</option>
-							</TextField>
+							/>
 						</div>
 					</DialogContent>
 					<DialogActions>
