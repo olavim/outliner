@@ -6,7 +6,15 @@ A simple outlining web app.
 - A block can have a title and/or a body
 - Indent each block as you see fit
 - Choose a color for each block
-- Export to PDF
+- Export to PDF and text
+
+<p align="center">
+  <img src="images/outliner-desktop.png">
+</p>
+
+<p align="center">
+  <img src="images/outliner-mobile.png">
+</p>
 
 ### Development
 
