@@ -23,7 +23,7 @@ deploy_defaults: &deploy_defaults
         name: Deploy service
         command: |
           ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-          ssh $SSH_USER@$SSH_HOST ~/up.sh outliner
+          ssh $SSH_USER@$SSH_HOST "~/up.sh outliner"
 
 version: 2.1
 executors:
