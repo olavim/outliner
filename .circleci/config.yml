@@ -4,11 +4,12 @@ build_defaults: &build_defaults
     - setup_remote_docker
     - run:
         name: Build Docker image
-        command: docker build -t olavim/outliner-$SERVICE:$CIRCLE_SHA1 --build-arg service=$SERVICE .
+        command: docker build -t olavim/outliner-$SERVICE:$CIRCLE_SHA1 -t olavim/outliner-$SERVICE:latest --build-arg service=$SERVICE .
     - run:
         name: Publish Docker image to Docker Hub
         command: |
           echo "$DOCKER_PASS" | docker login -u $DOCKER_USER --password-stdin
+          docker push olavim/outliner-$SERVICE:latest
           docker push olavim/outliner-$SERVICE:$CIRCLE_SHA1
 deploy_defaults: &deploy_defaults
   steps:
@@ -22,7 +23,7 @@ deploy_defaults: &deploy_defaults
         name: Deploy service
         command: |
           ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-          ssh $SSH_USER@$SSH_HOST docker service update --image olavim/outliner-$SERVICE:$CIRCLE_SHA1 outliner_$SERVICE
+          ssh $SSH_USER@$SSH_HOST ~/up.sh outliner
 
 version: 2.1
 executors:
